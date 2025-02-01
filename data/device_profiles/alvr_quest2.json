@@ -1,0 +1,15 @@
+{
+    "input_profile": "oculus_touch",
+
+    "hmd": {
+        "properties": "alvr_quest2_hmd"
+    },
+    "controller_left": {
+        "properties": "alvr_quest2_controller_left",
+        "render_model": "oculus_quest2_controller_left"
+    },
+    "controller_right": {
+        "properties": "alvr_quest2_controller_right",
+        "render_model": "oculus_quest2_controller_right"
+    }
+}
