@@ -1,5 +1,6 @@
 #include "backend.h"
 
+#include "log/log.h"
 #include "log/abort.h"
 
 #include "config/config.h"
@@ -218,6 +219,20 @@ void Backend::loop()
                         break;
                 }
             }
+            else if (event.type == XR_TYPE_EVENT_DATA_REFERENCE_SPACE_CHANGE_PENDING)
+            {
+                XrReferenceSpaceType referenceSpaceType = (*reinterpret_cast<XrEventDataReferenceSpaceChangePending*>(&event)).referenceSpaceType;
+                XrTime changeTime = (*reinterpret_cast<XrEventDataReferenceSpaceChangePending*>(&event)).changeTime;
+                switch (referenceSpaceType)
+                {
+                    case XR_REFERENCE_SPACE_TYPE_LOCAL:
+                        localReferenceSpaceChangeTime = changeTime;
+                        break;
+                    case XR_REFERENCE_SPACE_TYPE_LOCAL_FLOOR:
+                        localFloorReferenceSpaceChangeTime = changeTime;
+                        break;
+                }
+            }
         }
         if (exit)
         {
@@ -249,13 +264,177 @@ void Backend::requestExit()
 
 //
 
+void Backend::queueResetSeatedZeroPose(bool fromSystemMenu)
+{
+    if (fromSystemMenu)
+    {
+        this->needSeatedZeroPoseResetFromSystemMenu = true;
+    }
+    else
+    {
+        this->needSeatedZeroPoseReset = true;
+    }
+}
+
+void Backend::queueResetStandingZeroPose(bool fromSystemMenu)
+{
+    if (fromSystemMenu)
+    {
+        this->needStandingZeroPoseResetFromSystemMenu = true;
+    }
+    else
+    {
+        this->needStandingZeroPoseReset = true;
+    }
+}
+
+//
+
 static inline int calculateRefreshRateFromPredictedDisplayDuration(XrDuration duration)
 {
     return (int) std::lround(1000000000.0 / (double) duration);
 }
 
+static inline float extractYaw(const XrQuaternionf& orientation)
+{
+    XrQuaternionf q = {
+        .x = 1.0f,
+        .y = 0.0f,
+        .z = 0.0f,
+        .w = 0.0f
+    };
+
+    q = {
+        .x = - q.w * orientation.x + q.x * orientation.w - q.y * orientation.z + q.z * orientation.y,
+        .y = - q.w * orientation.y + q.y * orientation.w - q.z * orientation.x + q.x * orientation.z,
+        .z = - q.w * orientation.z + q.z * orientation.w - q.x * orientation.y + q.y * orientation.x,
+        .w = + q.w * orientation.w + q.x * orientation.x + q.y * orientation.y + q.z * orientation.z
+    };
+
+    q = {
+        .x = orientation.w * q.x + orientation.x * q.w + orientation.y * q.z - orientation.z * q.y,
+        .y = orientation.w * q.y + orientation.y * q.w + orientation.z * q.x - orientation.x * q.z,
+        .z = orientation.w * q.z + orientation.z * q.w + orientation.x * q.y - orientation.y * q.x,
+        .w = orientation.w * q.w - orientation.x * q.x - orientation.y * q.y - orientation.z * q.z
+    };
+
+    return std::atan2(q.z, q.x);
+}
+
+static inline OpenXR::PoseAndVelocity offsetPose(OpenXR::PoseAndVelocity pose, const Backend::ZeroPose& zeroPose)
+{
+    if (pose.poseValid)
+    {
+        pose.pose.position.x -= zeroPose.position.x;
+        pose.pose.position.y -= zeroPose.position.y;
+        pose.pose.position.z -= zeroPose.position.z;
+        float x2 = pose.pose.position.x * std::cos(zeroPose.yaw) + pose.pose.position.z * std::sin(zeroPose.yaw);
+        float z2 = pose.pose.position.z * std::cos(zeroPose.yaw) - pose.pose.position.x * std::sin(zeroPose.yaw);
+        pose.pose.position.x = x2;
+        pose.pose.position.z = z2;
+
+        float w = std::cos(zeroPose.yaw / 2.0f);
+        float y = std::sin(zeroPose.yaw / 2.0f);
+        float w1 = w * pose.pose.orientation.w - y * pose.pose.orientation.y;
+        float x1 = w * pose.pose.orientation.x + y * pose.pose.orientation.z;
+        float y1 = w * pose.pose.orientation.y + y * pose.pose.orientation.w;
+        float z1 = w * pose.pose.orientation.z - y * pose.pose.orientation.x;
+        pose.pose.orientation.w = w1;
+        pose.pose.orientation.x = x1;
+        pose.pose.orientation.y = y1;
+        pose.pose.orientation.z = z1;
+    }
+
+    if (pose.linearVelocityValid)
+    {
+        float x = pose.linearVelocity.x * std::cos(zeroPose.yaw) + pose.linearVelocity.z * std::sin(zeroPose.yaw);
+        float z = pose.linearVelocity.z * std::cos(zeroPose.yaw) - pose.linearVelocity.x * std::sin(zeroPose.yaw);
+        pose.linearVelocity.x = x;
+        pose.linearVelocity.z = z;
+    }
+
+    return pose;
+}
+
 void Backend::step(XrTime displayTime, XrDuration displayDuration)
 {
+    if (this->localReferenceSpaceChangeTime != 0 && displayTime >= this->localReferenceSpaceChangeTime)
+    {
+        this->needSeatedZeroPoseResetFromSystemMenu = true;
+        this->localReferenceSpaceChangeTime = 0;
+    }
+    if (this->localFloorReferenceSpaceChangeTime != 0 && displayTime >= this->localFloorReferenceSpaceChangeTime)
+    {
+        this->needStandingZeroPoseResetFromSystemMenu = true;
+        this->localFloorReferenceSpaceChangeTime = 0;
+    }
+
+    if (this->needSeatedZeroPoseReset || this->needSeatedZeroPoseResetFromSystemMenu || !this->seatedZeroPoseInitialised)
+    {
+        OpenXR::Pose pose = this->viewSpace->locate(*this->localSpace, displayTime);
+        if (pose.poseValid)
+        {
+            this->seatedZeroPose.position = pose.pose.position;
+            this->seatedZeroPose.yaw = extractYaw(pose.pose.orientation);
+            TRACE_F("Reset seated zero pose %f %f %f %f", this->seatedZeroPose.position.x, this->seatedZeroPose.position.y, this->seatedZeroPose.position.z, this->seatedZeroPose.yaw);
+
+            bool emitEvent = this->needSeatedZeroPoseReset || this->needSeatedZeroPoseResetFromSystemMenu;
+            bool fromSystemMenu = this->needSeatedZeroPoseResetFromSystemMenu;
+            this->needSeatedZeroPoseReset = false;
+            this->needSeatedZeroPoseResetFromSystemMenu = false;
+            this->seatedZeroPoseInitialised = true;
+
+            if (emitEvent)
+            {
+                openvr::Event_0_9_15 event {
+                    .type = openvr::EventType::SEATED_ZERO_POSE_RESET,
+                    .trackedDeviceIndex = 0,
+                    .ageSeconds = 0.0f,
+                    .data {
+                        .zeroPoseReset {
+                            .resetBySystemMenu = fromSystemMenu
+                        }
+                    }
+                };
+                eventQueue.putEvent(event);
+            }
+        }
+    }
+    if (this->needStandingZeroPoseReset || this->needStandingZeroPoseResetFromSystemMenu || !this->standingZeroPoseInitialised)
+    {
+        OpenXR::Pose pose = this->viewSpace->locate(*this->localFloorSpace, displayTime);
+        if (pose.poseValid)
+        {
+            this->standingZeroPose.position = pose.pose.position;
+            this->standingZeroPose.position.y = 0.0f;
+            this->standingZeroPose.yaw = extractYaw(pose.pose.orientation);
+            TRACE_F("Reset standing zero pose %f %f %f %f", this->standingZeroPose.position.x, this->standingZeroPose.position.y, this->standingZeroPose.position.z, this->standingZeroPose.yaw);
+
+            bool emitEvent = this->needStandingZeroPoseReset || this->needStandingZeroPoseResetFromSystemMenu;
+            bool fromSystemMenu = this->needStandingZeroPoseResetFromSystemMenu;
+            this->needStandingZeroPoseReset = false;
+            this->needStandingZeroPoseResetFromSystemMenu = false;
+            this->standingZeroPoseInitialised = true;
+
+            if (emitEvent)
+            {
+                openvr::Event_0_9_15 event {
+                    .type = openvr::EventType::STANDING_ZERO_POSE_RESET,
+                    .trackedDeviceIndex = 0,
+                    .ageSeconds = 0.0f,
+                    .data {
+                        .zeroPoseReset {
+                            .resetBySystemMenu = fromSystemMenu
+                        }
+                    }
+                };
+                eventQueue.putEvent(event);
+            }
+        }
+    }
+
+    //
+
     this->session->syncActions({this->actionSet});
 
     InputState* openXRInputStates = new InputState[this->openXRInputs.size()];
@@ -277,10 +456,10 @@ void Backend::step(XrTime displayTime, XrDuration displayDuration)
                 state.data.vec2 = action->getStateVector(*this->session, "");
                 break;
             case InputType::POSE:
-                state.data.pose.local = this->actionSpaces[i]->locateWithVelocity(*this->localSpace, displayTime);
-                state.data.pose.localFloor = this->actionSpaces[i]->locateWithVelocity(*this->localFloorSpace, displayTime);
-                state.data.pose.localNextFrame = this->actionSpaces[i]->locateWithVelocity(*this->localSpace, displayTime + displayDuration);
-                state.data.pose.localFloorNextFrame = this->actionSpaces[i]->locateWithVelocity(*this->localFloorSpace, displayTime + displayDuration);
+                state.data.pose.local = offsetPose(this->actionSpaces[i]->locateWithVelocity(*this->localSpace, displayTime), this->seatedZeroPose);
+                state.data.pose.localFloor = offsetPose(this->actionSpaces[i]->locateWithVelocity(*this->localFloorSpace, displayTime), this->standingZeroPose);
+                state.data.pose.localNextFrame = offsetPose(this->actionSpaces[i]->locateWithVelocity(*this->localSpace, displayTime + displayDuration), this->seatedZeroPose);
+                state.data.pose.localFloorNextFrame = offsetPose(this->actionSpaces[i]->locateWithVelocity(*this->localFloorSpace, displayTime + displayDuration), this->standingZeroPose);
                 break;
         }
     }
@@ -293,6 +472,8 @@ void Backend::step(XrTime displayTime, XrDuration displayDuration)
         openVRInputStates.push_back(this->inputProfile->getOpenVRInputState(i, openXRInputStates));
     }
 
+    //
+
     this->frameStates.lock();
 
     this->frameStates.postFrame(FrameState {
@@ -304,10 +485,10 @@ void Backend::step(XrTime displayTime, XrDuration displayDuration)
         .renderViews = this->session->locateViews(displayTime, *this->localSpace),
 
         .head = PoseSet {
-            .local = this->viewSpace->locateWithVelocity(*this->localSpace, displayTime),
-            .localFloor = this->viewSpace->locateWithVelocity(*this->localFloorSpace, displayTime),
-            .localNextFrame = this->viewSpace->locateWithVelocity(*this->localSpace, displayTime + displayDuration),
-            .localFloorNextFrame = this->viewSpace->locateWithVelocity(*this->localFloorSpace, displayTime + displayDuration)
+            .local = offsetPose(this->viewSpace->locateWithVelocity(*this->localSpace, displayTime), this->seatedZeroPose),
+            .localFloor = offsetPose(this->viewSpace->locateWithVelocity(*this->localFloorSpace, displayTime), this->standingZeroPose),
+            .localNextFrame = offsetPose(this->viewSpace->locateWithVelocity(*this->localSpace, displayTime + displayDuration), this->seatedZeroPose),
+            .localFloorNextFrame = offsetPose(this->viewSpace->locateWithVelocity(*this->localFloorSpace, displayTime + displayDuration), this->standingZeroPose)
         },
         .inputStates = openVRInputStates,
         .controllerPoses = {
@@ -325,6 +506,8 @@ void Backend::step(XrTime displayTime, XrDuration displayDuration)
     this->refreshRate = calculateRefreshRateFromPredictedDisplayDuration(displayDuration);
 
     this->frameStates.unlock();
+
+    //
 
     HapticQueue::HapticEvent hapticEvent;
     while (this->hapticQueue->pollHapticEvent(&hapticEvent))

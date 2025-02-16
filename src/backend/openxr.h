@@ -57,6 +57,12 @@ namespace OpenXR
         View right;
     };
 
+    struct Pose
+    {
+        bool poseValid;
+        XrPosef pose;
+    };
+
     struct PoseAndVelocity
     {
         bool poseValid;
@@ -158,7 +164,7 @@ namespace OpenXR
             Space(const Session& session, const Action& action, const std::string& subactionPath, const XrPosef& pose);
             ~Space();
 
-            XrPosef locate(const Space& base, XrTime time) const;
+            Pose locate(const Space& base, XrTime time) const;
             PoseAndVelocity locateWithVelocity(const Space& base, XrTime time) const;
 
             XrSpace handle;

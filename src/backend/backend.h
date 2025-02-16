@@ -41,6 +41,9 @@ namespace vapor
 
             EventQueue eventQueue;
 
+            void queueResetSeatedZeroPose(bool fromSystemMenu);
+            void queueResetStandingZeroPose(bool fromSystemMenu);
+
         private:
             OpenXR::Instance* instance;
             OpenXR::Session* session;
@@ -55,6 +58,23 @@ namespace vapor
             OpenXR::Space* viewSpace;
             OpenXR::Space* localSpace;
             OpenXR::Space* localFloorSpace;
+            XrTime localReferenceSpaceChangeTime = 0;
+            XrTime localFloorReferenceSpaceChangeTime = 0;
+        public: // f*ck C++
+            struct ZeroPose
+            {
+                XrVector3f position;
+                float yaw;
+            };
+        private:
+            ZeroPose seatedZeroPose;
+            ZeroPose standingZeroPose;
+            volatile bool needSeatedZeroPoseReset = false;
+            volatile bool needStandingZeroPoseReset = false;
+            volatile bool needSeatedZeroPoseResetFromSystemMenu = false;
+            volatile bool needStandingZeroPoseResetFromSystemMenu = false;
+            bool seatedZeroPoseInitialised = false;
+            bool standingZeroPoseInitialised = false;
 
             std::vector<OpenXRInputDescription> openXRInputs;
             OpenXR::ActionSet* actionSet;

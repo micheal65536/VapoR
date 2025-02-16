@@ -475,14 +475,17 @@ Space::~Space()
     ABORT_ON_OPENXR_ERROR(xrDestroySpace(this->handle));
 }
 
-XrPosef Space::locate(const Space& base, XrTime time) const
+Pose Space::locate(const Space& base, XrTime time) const
 {
     XrSpaceLocation location {
         .type = XR_TYPE_SPACE_LOCATION,
         .next = nullptr
     };
     ABORT_ON_OPENXR_ERROR(xrLocateSpace(this->handle, base.handle, time, &location));
-    return location.pose;
+    return (Pose) {
+        .poseValid = ((location.locationFlags & XR_SPACE_LOCATION_POSITION_VALID_BIT) != 0) && ((location.locationFlags & XR_SPACE_LOCATION_ORIENTATION_VALID_BIT) != 0),
+        .pose = location.pose
+    };
 }
 
 PoseAndVelocity Space::locateWithVelocity(const Space& base, XrTime time) const

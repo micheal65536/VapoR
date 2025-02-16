@@ -90,7 +90,8 @@ void SystemImpl::getDeviceToAbsoluteTrackingPose(TrackingUniverseOrigin origin, 
 
 void SystemImpl::resetSeatedZeroPose()
 {
-    STUB();
+    TRACE();
+    this->clientCore.backend->queueResetSeatedZeroPose(false);
 }
 
 Matrix34 SystemImpl::getSeatedZeroPoseToStandingAbsoluteTrackingPose()

@@ -55,7 +55,15 @@ void ChaperoneImpl::forceBoundsVisible(bool force)
 
 void ChaperoneImpl::resetZeroPose(TrackingUniverseOrigin origin)
 {
-    STUB();
+    TRACE_F("%d", origin);
+    if (origin == TrackingUniverseOrigin::ORIGIN_SEATED)
+    {
+        this->clientCore.backend->queueResetSeatedZeroPose(false);
+    }
+    else if (origin == TrackingUniverseOrigin::ORIGIN_STANDING)
+    {
+        this->clientCore.backend->queueResetStandingZeroPose(false);
+    }
 }
 
 //
