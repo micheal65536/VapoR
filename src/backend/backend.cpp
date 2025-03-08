@@ -353,6 +353,14 @@ static inline OpenXR::PoseAndVelocity offsetPose(OpenXR::PoseAndVelocity pose, c
         pose.linearVelocity.z = z;
     }
 
+    if (pose.angularVelocityValid)
+    {
+        float x = pose.angularVelocity.x * std::cos(zeroPose.yaw) + pose.angularVelocity.z * std::sin(zeroPose.yaw);
+        float z = pose.angularVelocity.z * std::cos(zeroPose.yaw) - pose.angularVelocity.x * std::sin(zeroPose.yaw);
+        pose.angularVelocity.x = x;
+        pose.angularVelocity.z = z;
+    }
+
     return pose;
 }
 
