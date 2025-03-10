@@ -6,6 +6,7 @@ namespace openvr
     {
         enum Device
         {
+            INVALID = 0,
             HAND_LEFT = 1,
             HAND_RIGHT = 2,
             ELBOW_LEFT = 3,

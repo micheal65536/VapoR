@@ -12,5 +12,7 @@ target_sources(vrclient PRIVATE
     extended_display.cpp
     #fake.cpp
     input/action_manager.cpp
+    input/binding.cpp
+    input/path_handle_registry.cpp
     render/image_capture_helper.cpp
 )

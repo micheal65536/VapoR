@@ -4,7 +4,7 @@ VapoR is an implementation of an OpenVR runtime on top of OpenXR. It allows play
 
 Linux only. Supports OpenGL and Vulkan clients.
 
-**Very work-in-progress.**
+**Very work-in-progress. Testers welcome for: a) Quest headsets to improve game coverage/compatiblity b) other headsets to contribute device profiles and improve coverage**
 
 # Building
 
@@ -26,6 +26,8 @@ VapoR looks for a config file named `config.json` in the VapoR data directory an
 
 VapoR loads device profiles, property sets, and render models from the VapoR data directory.
 
+For games that use action set input, VapoR will try to load a custom input binding from the file `vapor_binding.json` in the current working directory, if it exists and matches the configured input profile. If this binding cannot be loaded then it will fall back to the game's provided default binding.
+
 ## Config options
 
 The following config options currently exist:
@@ -44,10 +46,13 @@ VapoR includes various "fixes" that can be manually set for specific games if ne
 * Submitting frames
 * Getting device poses
 * Legacy input
+* Action set input
+  - Some advanced source modes such as toggle button or button long-press are not yet implemented (you will need to use a binding without these source modes)
+  - Trackpads most likely don't work as I don't have any controllers with trackpads to test with (testers welcome!)
 * Render models (missing textures)
 * Oculus Quest 2 and Quest 3 device profiles (from ALVR)
 * Derail Valley works (except loading screen)
-* **No action set input support yet, this will be added next with Vivecraft**
+* Vivecraft works (accessing all functions requires using a custom input binding that doesn't make use of unimplemented input source modes)
 
 **Phase 1:**
 * Make Derail Valley work
@@ -58,6 +63,7 @@ VapoR includes various "fixes" that can be manually set for specific games if ne
 * Find games that make use of OpenVR edge cases or parts of the API (e.g. overlays, chaperone) that OpenComposite struggles with and make them work
 * Investigate issues that require manual "fixes" (e.g. inverted image) and make them not require manual fixing anymore
 * Improve performance hot spots in code if necessary
+* Dashboard for configuring input bindings, recentering, and other relevant options while in-game
 
 **Phase 3:**
 * Test with and support as many games and headsets/controllers as possible

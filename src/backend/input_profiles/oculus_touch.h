@@ -18,9 +18,9 @@ namespace vapor
                 virtual const OpenVRInputDescription* getOpenVRInputs();
                 virtual LegacyInputDescription getOpenVRLegacyInputDescription();
 
-                virtual InputState getOpenVRInputState(int inputIndex, const InputState* openXRInputStates);
-                virtual InputState getOpenVRControllerPose(int controllerIndex, const InputState* openXRInputStates);
-                virtual LegacyInputState getOpenVRLegacyInputState(int controllerIndex, const InputState* openXRInputStates);
+                virtual OpenVRInputState getOpenVRInputState(int inputIndex, const OpenXRInputState* openXRInputStates);
+                virtual OpenVRInputState getOpenVRControllerPose(int controllerIndex, const OpenVRInputState* openVRInputStates);
+                virtual LegacyInputState getOpenVRLegacyInputState(int controllerIndex, const OpenXRInputState* openXRInputStates);
 
                 virtual int getOpenXRHapticActionIndex(int openVRInputIndex);
                 virtual int getOpenXRHapticActionIndexForLegacyInput(int controllerIndex);

@@ -3,6 +3,8 @@
 #include "input.h"
 #include "legacy_input.h"
 
+#include <string>
+
 namespace vapor
 {
     class InputProfile
@@ -17,9 +19,9 @@ namespace vapor
             virtual const OpenVRInputDescription* getOpenVRInputs() = 0;
             virtual LegacyInputDescription getOpenVRLegacyInputDescription() = 0;
 
-            virtual InputState getOpenVRInputState(int inputIndex, const InputState* openXRInputStates) = 0;
-            virtual InputState getOpenVRControllerPose(int controllerIndex, const InputState* openXRInputStates) = 0;
-            virtual LegacyInputState getOpenVRLegacyInputState(int controllerIndex, const InputState* openXRInputStates) = 0;
+            virtual OpenVRInputState getOpenVRInputState(int inputIndex, const OpenXRInputState* openXRInputStates) = 0;
+            virtual OpenVRInputState getOpenVRControllerPose(int controllerIndex, const OpenVRInputState* openVRInputStates) = 0;
+            virtual LegacyInputState getOpenVRLegacyInputState(int controllerIndex, const OpenXRInputState* openXRInputStates) = 0;
 
             virtual int getOpenXRHapticActionIndex(int openVRInputIndex) = 0;
             virtual int getOpenXRHapticActionIndexForLegacyInput(int controllerIndex) = 0;

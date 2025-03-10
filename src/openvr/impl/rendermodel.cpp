@@ -2,7 +2,8 @@
 #include "log/log.h"
 #include "log/stub.h"
 
-#include "input/input_devices.h"
+#include "input/input_source_utils.h"
+#include "input/path_handle_registry.h"
 #include "utils/legacy_input.h"
 
 #include <cstring>
@@ -205,12 +206,14 @@ bool RenderModelsImpl::getComponentStateForDevicePath(const char* modelName, con
     TRACE_F("%s %s %d", modelName, componentName, inputDeviceHandle);
 
     int controllerIndex;
-    switch (inputDeviceHandle)
+    switch (input::getDeviceFromInputSourcePath(input::pathHandleRegistry.getPath(inputDeviceHandle), false))
     {
         case input::Device::HAND_LEFT:
             controllerIndex = 0;
+            break;
         case input::Device::HAND_RIGHT:
             controllerIndex = 1;
+            break;
         default:
             return false;
     }

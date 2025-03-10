@@ -20,7 +20,7 @@ namespace vapor
         OpenXR::ViewPair renderViews;
 
         PoseSet head;
-        std::vector<InputState> inputStates;
+        std::vector<OpenVRInputState> inputStates;
         PoseSet controllerPoses[2];
         LegacyInputState legacyInputStates[2];
     };
@@ -34,6 +34,8 @@ namespace vapor
             void postFrame(FrameState frame);
 
             FrameState getFrame(int indexAgo);
+            long getFrameTime(int indexAgo);
+
             long getFrameCounter();
             void waitForNextFrame();
 

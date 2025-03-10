@@ -577,6 +577,11 @@ Action::~Action()
 
 bool Action::getStateBool(const Session& session, const std::string& subactionPath) const
 {
+    return this->getStateBool(session, subactionPath, nullptr);
+}
+
+bool Action::getStateBool(const Session& session, const std::string& subactionPath, XrTime* lastChangeTime) const
+{
     XrActionStateGetInfo actionStateGetInfo {
         .type = XR_TYPE_ACTION_STATE_GET_INFO,
         .next = nullptr,
@@ -588,10 +593,19 @@ bool Action::getStateBool(const Session& session, const std::string& subactionPa
         .next = nullptr
     };
     ABORT_ON_OPENXR_ERROR(xrGetActionStateBoolean(session.handle, &actionStateGetInfo, &actionState));
+    if (lastChangeTime != nullptr)
+    {
+        *lastChangeTime = actionState.lastChangeTime;
+    }
     return actionState.currentState != 0;
 }
 
 float Action::getStateFloat(const Session& session, const std::string& subactionPath) const
+{
+    return this->getStateFloat(session, subactionPath, nullptr);
+}
+
+float Action::getStateFloat(const Session& session, const std::string& subactionPath, XrTime* lastChangeTime) const
 {
     XrActionStateGetInfo actionStateGetInfo {
         .type = XR_TYPE_ACTION_STATE_GET_INFO,
@@ -604,10 +618,19 @@ float Action::getStateFloat(const Session& session, const std::string& subaction
         .next = nullptr
     };
     ABORT_ON_OPENXR_ERROR(xrGetActionStateFloat(session.handle, &actionStateGetInfo, &actionState));
+    if (lastChangeTime != nullptr)
+    {
+        *lastChangeTime = actionState.lastChangeTime;
+    }
     return actionState.currentState;
 }
 
 XrVector2f Action::getStateVector(const Session& session, const std::string& subactionPath) const
+{
+    return this->getStateVector(session, subactionPath, nullptr);
+}
+
+XrVector2f Action::getStateVector(const Session& session, const std::string& subactionPath, XrTime* lastChangeTime) const
 {
     XrActionStateGetInfo actionStateGetInfo {
         .type = XR_TYPE_ACTION_STATE_GET_INFO,
@@ -620,6 +643,10 @@ XrVector2f Action::getStateVector(const Session& session, const std::string& sub
         .next = nullptr
     };
     ABORT_ON_OPENXR_ERROR(xrGetActionStateVector2f(session.handle, &actionStateGetInfo, &actionState));
+    if (lastChangeTime != nullptr)
+    {
+        *lastChangeTime = actionState.lastChangeTime;
+    }
     return actionState.currentState;
 }
 

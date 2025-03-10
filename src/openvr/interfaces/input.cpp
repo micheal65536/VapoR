@@ -538,94 +538,94 @@ InputError Input_010::triggerHapticVibrationAction(uint64_t action, float startS
     return openvr::inputImpl->triggerHapticVibrationAction(action, startSecondsFromNow, durationSeconds, frequency, amplitude, restrictToDevice);
 }
 
-InputError Input_003::getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* originDevices, uint32_t originDevicesCount)
+InputError Input_003::getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* origins, uint32_t originsCount)
 {
-    return openvr::inputImpl->getActionOrigins(actionSet, action, originDevices, originDevicesCount);
+    return openvr::inputImpl->getActionOrigins(actionSet, action, origins, originsCount);
 }
 
-InputError Input_004::getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* originDevices, uint32_t originDevicesCount)
+InputError Input_004::getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* origins, uint32_t originsCount)
 {
-    return openvr::inputImpl->getActionOrigins(actionSet, action, originDevices, originDevicesCount);
+    return openvr::inputImpl->getActionOrigins(actionSet, action, origins, originsCount);
 }
 
-InputError Input_005::getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* originDevices, uint32_t originDevicesCount)
+InputError Input_005::getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* origins, uint32_t originsCount)
 {
-    return openvr::inputImpl->getActionOrigins(actionSet, action, originDevices, originDevicesCount);
+    return openvr::inputImpl->getActionOrigins(actionSet, action, origins, originsCount);
 }
 
-InputError Input_006::getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* originDevices, uint32_t originDevicesCount)
+InputError Input_006::getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* origins, uint32_t originsCount)
 {
-    return openvr::inputImpl->getActionOrigins(actionSet, action, originDevices, originDevicesCount);
+    return openvr::inputImpl->getActionOrigins(actionSet, action, origins, originsCount);
 }
 
-InputError Input_007::getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* originDevices, uint32_t originDevicesCount)
+InputError Input_007::getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* origins, uint32_t originsCount)
 {
-    return openvr::inputImpl->getActionOrigins(actionSet, action, originDevices, originDevicesCount);
+    return openvr::inputImpl->getActionOrigins(actionSet, action, origins, originsCount);
 }
 
-InputError Input_010::getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* originDevices, uint32_t originDevicesCount)
+InputError Input_010::getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* origins, uint32_t originsCount)
 {
-    return openvr::inputImpl->getActionOrigins(actionSet, action, originDevices, originDevicesCount);
+    return openvr::inputImpl->getActionOrigins(actionSet, action, origins, originsCount);
 }
 
-InputError Input_003::getOriginLocalizedName(uint64_t originDevice, char* name, uint32_t bufferSize)
+InputError Input_003::getOriginLocalizedName(uint64_t origin, char* name, uint32_t bufferSize)
 {
-    return openvr::inputImpl->getOriginLocalizedName(originDevice, name, bufferSize, InputOriginStringSections::INPUT_ORIGIN_STRING_SECTIONS_ALL);
+    return openvr::inputImpl->getOriginLocalizedName(origin, name, bufferSize, InputOriginStringSections::INPUT_ORIGIN_STRING_SECTIONS_ALL);
 }
 
-InputError Input_004::getOriginLocalizedName(uint64_t originDevice, char* name, uint32_t bufferSize)
+InputError Input_004::getOriginLocalizedName(uint64_t origin, char* name, uint32_t bufferSize)
 {
-    return openvr::inputImpl->getOriginLocalizedName(originDevice, name, bufferSize, InputOriginStringSections::INPUT_ORIGIN_STRING_SECTIONS_ALL);
+    return openvr::inputImpl->getOriginLocalizedName(origin, name, bufferSize, InputOriginStringSections::INPUT_ORIGIN_STRING_SECTIONS_ALL);
 }
 
-InputError  Input_005::getOriginLocalizedName(uint64_t originDevice, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude)
+InputError  Input_005::getOriginLocalizedName(uint64_t origin, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude)
 {
-    return openvr::inputImpl->getOriginLocalizedName(originDevice, name, bufferSize, stringSectionsToInclude);
+    return openvr::inputImpl->getOriginLocalizedName(origin, name, bufferSize, stringSectionsToInclude);
 }
 
-InputError Input_006::getOriginLocalizedName(uint64_t originDevice, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude)
+InputError Input_006::getOriginLocalizedName(uint64_t origin, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude)
 {
-    return openvr::inputImpl->getOriginLocalizedName(originDevice, name, bufferSize, stringSectionsToInclude);
+    return openvr::inputImpl->getOriginLocalizedName(origin, name, bufferSize, stringSectionsToInclude);
 }
 
-InputError Input_007::getOriginLocalizedName(uint64_t originDevice, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude)
+InputError Input_007::getOriginLocalizedName(uint64_t origin, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude)
 {
-    return openvr::inputImpl->getOriginLocalizedName(originDevice, name, bufferSize, stringSectionsToInclude);
+    return openvr::inputImpl->getOriginLocalizedName(origin, name, bufferSize, stringSectionsToInclude);
 }
 
-InputError Input_010::getOriginLocalizedName(uint64_t originDevice, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude)
+InputError Input_010::getOriginLocalizedName(uint64_t origin, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude)
 {
-    return openvr::inputImpl->getOriginLocalizedName(originDevice, name, bufferSize, stringSectionsToInclude);
+    return openvr::inputImpl->getOriginLocalizedName(origin, name, bufferSize, stringSectionsToInclude);
 }
 
-InputError Input_003::getOriginTrackedDeviceInfo(uint64_t originDevice, InputOriginInfo* info, uint32_t infoBufferSize)
+InputError Input_003::getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInfo* info, uint32_t infoBufferSize)
 {
-    return openvr::inputImpl->getOriginTrackedDeviceInfo(originDevice, info, infoBufferSize);
+    return openvr::inputImpl->getOriginTrackedDeviceInfo(origin, info, infoBufferSize);
 }
 
-InputError Input_004::getOriginTrackedDeviceInfo(uint64_t originDevice, InputOriginInfo* info, uint32_t infoBufferSize)
+InputError Input_004::getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInfo* info, uint32_t infoBufferSize)
 {
-    return openvr::inputImpl->getOriginTrackedDeviceInfo(originDevice, info, infoBufferSize);
+    return openvr::inputImpl->getOriginTrackedDeviceInfo(origin, info, infoBufferSize);
 }
 
-InputError Input_005::getOriginTrackedDeviceInfo(uint64_t originDevice, InputOriginInfo* info, uint32_t infoBufferSize)
+InputError Input_005::getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInfo* info, uint32_t infoBufferSize)
 {
-    return openvr::inputImpl->getOriginTrackedDeviceInfo(originDevice, info, infoBufferSize);
+    return openvr::inputImpl->getOriginTrackedDeviceInfo(origin, info, infoBufferSize);
 }
 
-InputError Input_006::getOriginTrackedDeviceInfo(uint64_t originDevice, InputOriginInfo* info, uint32_t infoBufferSize)
+InputError Input_006::getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInfo* info, uint32_t infoBufferSize)
 {
-    return openvr::inputImpl->getOriginTrackedDeviceInfo(originDevice, info, infoBufferSize);
+    return openvr::inputImpl->getOriginTrackedDeviceInfo(origin, info, infoBufferSize);
 }
 
-InputError Input_007::getOriginTrackedDeviceInfo(uint64_t originDevice, InputOriginInfo* info, uint32_t infoBufferSize)
+InputError Input_007::getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInfo* info, uint32_t infoBufferSize)
 {
-    return openvr::inputImpl->getOriginTrackedDeviceInfo(originDevice, info, infoBufferSize);
+    return openvr::inputImpl->getOriginTrackedDeviceInfo(origin, info, infoBufferSize);
 }
 
-InputError Input_010::getOriginTrackedDeviceInfo(uint64_t originDevice, InputOriginInfo* info, uint32_t infoBufferSize)
+InputError Input_010::getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInfo* info, uint32_t infoBufferSize)
 {
-    return openvr::inputImpl->getOriginTrackedDeviceInfo(originDevice, info, infoBufferSize);
+    return openvr::inputImpl->getOriginTrackedDeviceInfo(origin, info, infoBufferSize);
 }
 
 InputError Input_007::getActionBindingInfo(uint64_t action, InputBindingInfo* bindings, uint32_t bindingInfoSize, uint32_t bindingsBufferCount, uint32_t* returnedBindingsCount)
@@ -668,34 +668,34 @@ InputError Input_010::showActionOrigins(uint64_t actionSet, uint64_t action)
     return openvr::inputImpl->showActionOrigins(actionSet, action);
 }
 
-InputError Input_003::showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originDeviceToHighlight)
+InputError Input_003::showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originToHighlight)
 {
-    return openvr::inputImpl->showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originDeviceToHighlight);
+    return openvr::inputImpl->showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originToHighlight);
 }
 
-InputError Input_004::showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originDeviceToHighlight)
+InputError Input_004::showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originToHighlight)
 {
-    return openvr::inputImpl->showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originDeviceToHighlight);
+    return openvr::inputImpl->showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originToHighlight);
 }
 
-InputError Input_005::showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originDeviceToHighlight)
+InputError Input_005::showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originToHighlight)
 {
-    return openvr::inputImpl->showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originDeviceToHighlight);
+    return openvr::inputImpl->showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originToHighlight);
 }
 
-InputError Input_006::showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originDeviceToHighlight)
+InputError Input_006::showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originToHighlight)
 {
-    return openvr::inputImpl->showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originDeviceToHighlight);
+    return openvr::inputImpl->showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originToHighlight);
 }
 
-InputError Input_007::showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originDeviceToHighlight)
+InputError Input_007::showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originToHighlight)
 {
-    return openvr::inputImpl->showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originDeviceToHighlight);
+    return openvr::inputImpl->showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originToHighlight);
 }
 
-InputError Input_010::showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originDeviceToHighlight)
+InputError Input_010::showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originToHighlight)
 {
-    return openvr::inputImpl->showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originDeviceToHighlight);
+    return openvr::inputImpl->showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originToHighlight);
 }
 
 InputError Input_010::getComponentStateForBinding(const char* renderModelName, const char* componentName, const InputBindingInfo* bindings, uint32_t bindingInfoSize, uint32_t bindingsCount, RenderModelComponentState* componentState)

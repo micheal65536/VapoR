@@ -4,8 +4,14 @@
 
 #include "input/action_manager.h"
 #include "input/input_devices.h"
+#include "input/input_source_utils.h"
+#include "input/path_handle_registry.h"
+#include "backend/input_profile.h"
+#include "utils/time.h"
+#include "utils/pose.h"
 
 #include <cstring>
+#include <cmath>
 
 using namespace openvr;
 
@@ -20,12 +26,20 @@ InputError InputImpl::setActionManifestPath(const char* path)
     if (!actionManager->populateFromJSON(path))
     {
         LOG("Failed to read actions from %s", path);
-        return InputError::INPUT_ERROR_MISMATCHED_ACTION_MANIFEST; // TODO: better error code for this
+        return InputError::INPUT_ERROR_IPC_ERROR;
     }
     else
     {
         LOG("Read actions from %s", path);
-        actionManager->loadDefaultBindingForControllerProfile(this->clientCore.backend->inputProfile->getOpenVRProfileName(), this->clientCore.backend->inputProfile);
+        if (actionManager->loadBinding("vapor_binding.json", this->clientCore.backend->inputProfile))
+        {
+            LOG("Loaded custom binding");
+        }
+        else
+        {
+            LOG("Failed to load custom binding, trying default binding");
+            actionManager->loadDefaultBindingForControllerProfile(this->clientCore.backend->inputProfile);
+        }
         this->clientCore.actionManager = actionManager;
         return InputError::INPUT_ERROR_NONE;
     }
@@ -34,113 +48,229 @@ InputError InputImpl::setActionManifestPath(const char* path)
 InputError InputImpl::getActionSetHandle(const char* actionSetName, uint64_t* handle)
 {
     TRACE_F("%s", actionSetName);
-    if (this->clientCore.actionManager == nullptr)
-    {
-        return InputError::INPUT_ERROR_NAME_NOT_FOUND;
-    }
-    *handle = (uint64_t) this->clientCore.actionManager->findActionSet(actionSetName);
-    return *handle != 0 ? InputError::INPUT_ERROR_NONE : InputError::INPUT_ERROR_NAME_NOT_FOUND;
+    *handle = input::pathHandleRegistry.getHandle(actionSetName);
+    return InputError::INPUT_ERROR_NONE;
 }
 
 InputError InputImpl::getActionHandle(const char* actionName, uint64_t* handle)
 {
     TRACE_F("%s", actionName);
-    if (this->clientCore.actionManager == nullptr)
-    {
-        return InputError::INPUT_ERROR_NAME_NOT_FOUND;
-    }
-    *handle = (uint64_t) this->clientCore.actionManager->findAction(actionName);
-    return *handle != 0 ? InputError::INPUT_ERROR_NONE : InputError::INPUT_ERROR_NAME_NOT_FOUND;
+    *handle = input::pathHandleRegistry.getHandle(actionName);
+    return InputError::INPUT_ERROR_NONE;
 }
 
 InputError InputImpl::getInputSourceHandle(const char* inputSourcePath, uint64_t* handle)
 {
     TRACE_F("%s", inputSourcePath);
-    if (std::string(inputSourcePath) == "/user/hand/left")
-    {
-        *handle = input::Device::HAND_LEFT;
-        return InputError::INPUT_ERROR_NONE;
-    }
-    else if (std::string(inputSourcePath) == "/user/hand/right")
-    {
-        *handle = input::Device::HAND_RIGHT;
-        return InputError::INPUT_ERROR_NONE;
-    }
-    else if (std::string(inputSourcePath) == "/user/elbow/left")
-    {
-        *handle = input::Device::ELBOW_LEFT;
-        return InputError::INPUT_ERROR_NONE;
-    }
-    else if (std::string(inputSourcePath) == "/user/elbow/right")
-    {
-        *handle = input::Device::ELBOW_RIGHT;
-        return InputError::INPUT_ERROR_NONE;
-    }
-    else if (std::string(inputSourcePath) == "/user/foot/left")
-    {
-        *handle = input::Device::FOOT_LEFT;
-        return InputError::INPUT_ERROR_NONE;
-    }
-    else if (std::string(inputSourcePath) == "/user/foot/right")
-    {
-        *handle = input::Device::FOOT_RIGHT;
-        return InputError::INPUT_ERROR_NONE;
-    }
-    else if (std::string(inputSourcePath) == "/user/knee/left")
-    {
-        *handle = input::Device::KNEE_LEFT;
-        return InputError::INPUT_ERROR_NONE;
-    }
-    else if (std::string(inputSourcePath) == "/user/knee/right")
-    {
-        *handle = input::Device::KNEE_RIGHT;
-        return InputError::INPUT_ERROR_NONE;
-    }
-    else if (std::string(inputSourcePath) == "/user/waist")
-    {
-        *handle = input::Device::WAIST;
-        return InputError::INPUT_ERROR_NONE;
-    }
-    else if (std::string(inputSourcePath) == "/user/camera")
-    {
-        *handle = input::Device::CAMERA;
-        return InputError::INPUT_ERROR_NONE;
-    }
-    else
-    {
-        LOG("Unhandled input source path %s", inputSourcePath);
-        *handle = 0;
-        return InputError::INPUT_ERROR_NAME_NOT_FOUND;
-    }
+    *handle = input::pathHandleRegistry.getHandle(inputSourcePath);
+    return InputError::INPUT_ERROR_NONE;
 }
 
 InputError InputImpl::updateActionState(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount)
 {
-    input::ActionManager::update(actionSets, actionSetSize, actionSetsCount, this->clientCore.backend->frameStates.getFrame(0).inputStates.data());
-    return InputError::INPUT_ERROR_NONE;
+    if (this->clientCore.actionManager != nullptr)
+    {
+        this->clientCore.actionManager->update(actionSets, actionSetSize, actionSetsCount, this->clientCore.backend->frameStates.getFrame(0).inputStates.data());
+        return InputError::INPUT_ERROR_NONE;
+    }
+    else
+    {
+        return InputError::INPUT_ERROR_NO_ACTIVE_ACTION_SET;
+    }
 }
 
 InputError InputImpl::getDigitalActionData(uint64_t action, InputDigitalActionData* actionData, uint32_t actionDataSize, uint64_t restrictToDevice)
 {
-    STUB();
+    TRACE_F("%d %d", action, restrictToDevice);
+
+    const input::Action* action_ = this->clientCore.actionManager != nullptr ? this->clientCore.actionManager->findAction(input::pathHandleRegistry.getPath(action)) : nullptr;
+    if (action_ == nullptr)
+    {
+        return InputError::INPUT_ERROR_INVALID_HANDLE;
+    }
+    if (action_->type != input::InputType::DIGITAL)
+    {
+        return InputError::INPUT_ERROR_WRONG_TYPE;
+    }
+    input::Device device = restrictToDevice != 0 ? input::getDeviceFromInputSourcePath(input::pathHandleRegistry.getPath(restrictToDevice), false) : input::Device::INVALID;
+
+    const input::InputState* inputState = nullptr;
+    const input::InputState* inputStatePrevious = nullptr;
+    for (const input::Action::Source& source: action_->sources)
+    {
+        if (restrictToDevice == 0 || source.device == device)
+        {
+            if (source.active)
+            {
+                if (inputState == nullptr || (source.inputState.data.digital && !inputState->data.digital) || (source.inputState.data.digital == inputState->data.digital && source.inputState.changeTime > inputState->changeTime))
+                {
+                    inputState = &source.inputState;
+                }
+            }
+            if (source.activePrevious)
+            {
+                if (inputStatePrevious == nullptr || (source.inputStatePrevious.data.digital && !inputStatePrevious->data.digital) || (source.inputStatePrevious.data.digital == inputStatePrevious->data.digital && source.inputStatePrevious.changeTime > inputStatePrevious->changeTime))
+                {
+                    inputStatePrevious = &source.inputStatePrevious;
+                }
+            }
+        }
+    }
+
+    bool state = inputState != nullptr ? inputState->data.digital : false;
+    bool previousState = inputStatePrevious != nullptr ? inputStatePrevious->data.digital : false;
+    *actionData = {
+        .active = inputState != nullptr,
+        .currentOrigin = inputState != nullptr ? inputState->inputSourceHandle : 0,
+        .state = state,
+        .changed = state != previousState,
+        .updateTime = inputState != nullptr ? -utils::convertXrTimeToSecondsAgo(inputState->changeTime, this->clientCore.backend->frameStates.getFrameTime(0)) : 0.0f
+    };
     return InputError::INPUT_ERROR_NONE;
 }
 
 InputError InputImpl::getAnalogActionData(uint64_t action, InputAnalogActionData* actionData, uint32_t actionDataSize, uint64_t restrictToDevice)
 {
-    STUB();
+    TRACE_F("%d %d", action, restrictToDevice);
+
+    const input::Action* action_ = this->clientCore.actionManager != nullptr ? this->clientCore.actionManager->findAction(input::pathHandleRegistry.getPath(action)) : nullptr;
+    if (action_ == nullptr)
+    {
+        return InputError::INPUT_ERROR_INVALID_HANDLE;
+    }
+    if (action_->type != input::InputType::ANALOG)
+    {
+        return InputError::INPUT_ERROR_WRONG_TYPE;
+    }
+    input::Device device = restrictToDevice != 0 ? input::getDeviceFromInputSourcePath(input::pathHandleRegistry.getPath(restrictToDevice), false) : input::Device::INVALID;
+
+    const input::InputState* inputState = nullptr;
+    const input::InputState* inputStatePrevious = nullptr;
+    for (const input::Action::Source& source: action_->sources)
+    {
+        if (restrictToDevice == 0 || source.device == device)
+        {
+            if (source.active)
+            {
+                if (inputState == nullptr || (source.inputState.data.analog > inputState->data.analog))
+                {
+                    inputState = &source.inputState;
+                }
+            }
+            if (source.activePrevious)
+            {
+                if (inputStatePrevious == nullptr || (source.inputStatePrevious.data.analog > inputStatePrevious->data.analog))
+                {
+                    inputStatePrevious = &source.inputStatePrevious;
+                }
+            }
+        }
+    }
+
+    input::InputState::Analog value = inputState != nullptr ? inputState->data.analog : (input::InputState::Analog) {0.0f, 0.0f, 0.0f};
+    input::InputState::Analog previousValue = inputStatePrevious != nullptr ? inputStatePrevious->data.analog : (input::InputState::Analog) {0.0f, 0.0f, 0.0f};
+    *actionData = {
+        .active = inputState != nullptr,
+        .currentOrigin = inputState != nullptr ? inputState->inputSourceHandle : 0,
+        .x = value.x,
+        .y = value.y,
+        .z = value.z,
+        .dx = value.x - previousValue.x,
+        .dy = value.y - previousValue.y,
+        .dz = value.z - previousValue.z,
+        .updateTime = inputState != nullptr ? -utils::convertXrTimeToSecondsAgo(inputState->changeTime, this->clientCore.backend->frameStates.getFrameTime(0)) : 0.0f
+    };
     return InputError::INPUT_ERROR_NONE;
 }
 
 InputError InputImpl::getPoseActionDataRelativeToNow(uint64_t action, TrackingUniverseOrigin origin, float secondsFromNow, InputPoseActionData* actionData, uint32_t actionDataSize, uint64_t restrictToDevice)
 {
-    STUB();
+    // TODO: support secondsFromNow
+
+    TRACE_F("%d %d %f %d", action, restrictToDevice, secondsFromNow, actionDataSize);
+    STUB_F("secondsFromNow not supported %f", secondsFromNow);
+
+    const input::Action* action_ = this->clientCore.actionManager != nullptr ? this->clientCore.actionManager->findAction(input::pathHandleRegistry.getPath(action)) : nullptr;
+    if (action_ == nullptr)
+    {
+        return InputError::INPUT_ERROR_INVALID_HANDLE;
+    }
+    if (action_->type != input::InputType::POSE)
+    {
+        return InputError::INPUT_ERROR_WRONG_TYPE;
+    }
+    input::Device device = restrictToDevice != 0 ? input::getDeviceFromInputSourcePath(input::pathHandleRegistry.getPath(restrictToDevice), false) : input::Device::INVALID;
+
+    const vapor::PoseSet* poseSet = nullptr;
+    uint64_t inputSourceHandle;
+    for (const input::Action::PoseSource& poseSource: action_->poseSources)
+    {
+        if (restrictToDevice == 0 || poseSource.device == device)
+        {
+            if (poseSource.active)
+            {
+                if (poseSet == nullptr)
+                {
+                    poseSet = &poseSource.pose;
+                    inputSourceHandle = poseSource.inputSourceHandle;
+                    break;
+                }
+            }
+        }
+    }
+
+    *actionData = {
+        .active = poseSet != nullptr,
+        .currentOrigin = poseSet != nullptr ? inputSourceHandle : 0
+    };
+    if (poseSet != nullptr)
+    {
+        utils::selectTrackedDevicePose(*poseSet, origin, false, &actionData->pose);
+    }
     return InputError::INPUT_ERROR_NONE;
 }
 
 InputError InputImpl::getPoseActionDataForNextFrame(uint64_t action, TrackingUniverseOrigin origin, InputPoseActionData* actionData, uint32_t actionDataSize, uint64_t restrictToDevice)
 {
-    STUB();
+    TRACE_F("%d %d %d", action, restrictToDevice, actionDataSize);
+
+    const input::Action* action_ = this->clientCore.actionManager != nullptr ? this->clientCore.actionManager->findAction(input::pathHandleRegistry.getPath(action)) : nullptr;
+    if (action_ == nullptr)
+    {
+        return InputError::INPUT_ERROR_INVALID_HANDLE;
+    }
+    if (action_->type != input::InputType::POSE)
+    {
+        return InputError::INPUT_ERROR_WRONG_TYPE;
+    }
+    input::Device device = restrictToDevice != 0 ? input::getDeviceFromInputSourcePath(input::pathHandleRegistry.getPath(restrictToDevice), false) : input::Device::INVALID;
+
+    const vapor::PoseSet* poseSet = nullptr;
+    uint64_t inputSourceHandle;
+    for (const input::Action::PoseSource& poseSource: action_->poseSources)
+    {
+        if (restrictToDevice == 0 || poseSource.device == device)
+        {
+            if (poseSource.active)
+            {
+                if (poseSet == nullptr)
+                {
+                    poseSet = &poseSource.pose;
+                    inputSourceHandle = poseSource.inputSourceHandle;
+                    break;
+                }
+            }
+        }
+    }
+
+    *actionData = {
+        .active = poseSet != nullptr,
+        .currentOrigin = poseSet != nullptr ? inputSourceHandle : 0
+    };
+    if (poseSet != nullptr)
+    {
+        utils::selectTrackedDevicePose(*poseSet, origin, false, &actionData->pose);
+    }
     return InputError::INPUT_ERROR_NONE;
 }
 
@@ -153,11 +283,14 @@ InputError InputImpl::getSkeletalActionData(uint64_t action, InputSkeletalAction
 InputError InputImpl::getDominantHand(TrackedControllerRole* dominantHand)
 {
     STUB();
+    *dominantHand = TrackedControllerRole::CONTROLLER_ROLE_RIGHT_HAND;
+    return InputError::INPUT_ERROR_NONE;
 }
 
 InputError InputImpl::setDominantHand(TrackedControllerRole dominantHand)
 {
-    STUB();
+    STUB_F("%d", dominantHand);
+    return InputError::INPUT_ERROR_NONE;
 }
 
 InputError InputImpl::getBoneCount(uint64_t action, uint32_t* boneCount)
@@ -207,37 +340,171 @@ InputError InputImpl::decompressSkeletalBoneData(const void* data, uint32_t size
 
 InputError InputImpl::triggerHapticVibrationAction(uint64_t action, float startSecondsFromNow, float durationSeconds, float frequency, float amplitude, uint64_t restrictToDevice)
 {
-    STUB();
-}
-
-InputError InputImpl::getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* originDevices, uint32_t originDevicesCount)
-{
-    STUB();
-}
-
-InputError InputImpl::getOriginLocalizedName(uint64_t originDevice, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude)
-{
-    STUB();
-}
-
-InputError InputImpl::getOriginTrackedDeviceInfo(uint64_t originDevice, InputOriginInfo* info, uint32_t infoBufferSize)
-{
-    InputOriginInfo infoLocal;
-    infoLocal.deviceHandle = originDevice;
-    switch (originDevice)
+    TRACE_F("%d %d %f %f %f %f", action, restrictToDevice, startSecondsFromNow, durationSeconds, frequency, amplitude);
+    if (startSecondsFromNow != 0.0f)
     {
-        case input::Device::HAND_LEFT:
-            infoLocal.trackedDeviceIndex = 1;
-            break;
-        case input::Device::HAND_RIGHT:
-            infoLocal.trackedDeviceIndex = 2;
-            break;
-        default:
-            infoLocal.trackedDeviceIndex = 0xFFFFFFFF;
-            break;
+        STUB_F("startSecondsFromNow %f not supported", startSecondsFromNow);
     }
+
+    const input::Action* action_ = this->clientCore.actionManager != nullptr ? this->clientCore.actionManager->findAction(input::pathHandleRegistry.getPath(action)) : nullptr;
+    if (action_ == nullptr)
+    {
+        return InputError::INPUT_ERROR_INVALID_HANDLE;
+    }
+    if (action_->type != input::InputType::HAPTIC)
+    {
+        return InputError::INPUT_ERROR_WRONG_TYPE;
+    }
+    input::Device device = restrictToDevice != 0 ? input::getDeviceFromInputSourcePath(input::pathHandleRegistry.getPath(restrictToDevice), false) : input::Device::INVALID;
+
+    for (const input::Action::HapticOutput& hapticOutput: action_->hapticOutputs)
+    {
+        if (restrictToDevice == 0 || hapticOutput.device == device)
+        {
+            int durationUs = (int) std::lround((double) durationSeconds * 1000000.0);
+            this->clientCore.backend->hapticQueue->queueHapticEvent(hapticOutput.openVRInputIndex, durationSeconds, frequency, amplitude);
+        }
+    }
+
+    return InputError::INPUT_ERROR_NONE;
+}
+
+InputError InputImpl::getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* origins, uint32_t originsCount)
+{
+    TRACE_F("%d %d %d", actionSet, action, originsCount);
+
+    // CHECK: actionSet parameter seems to be ignored/unused?
+
+    const input::Action* action_ = this->clientCore.actionManager != nullptr ? this->clientCore.actionManager->findAction(input::pathHandleRegistry.getPath(action)) : nullptr;
+    if (action_ == nullptr)
+    {
+        return InputError::INPUT_ERROR_INVALID_HANDLE;
+    }
+
+    int activeSourcesCount = 0;
+    for (const input::Action::Source& source: action_->sources)
+    {
+        if (source.active)
+        {
+            activeSourcesCount++;
+        }
+    }
+    for (const input::Action::PoseSource& poseSource: action_->poseSources)
+    {
+        if (poseSource.active)
+        {
+            activeSourcesCount++;
+        }
+    }
+
+    if (originsCount < activeSourcesCount)
+    {
+        return InputError::INPUT_ERROR_BUFFER_TOO_SMALL;
+    }
+    int index = 0;
+    for (const input::Action::Source& source: action_->sources)
+    {
+        if (source.active)
+        {
+            origins[index++] = source.inputState.inputSourceHandle;
+        }
+    }
+    for (const input::Action::PoseSource& poseSource: action_->poseSources)
+    {
+        if (poseSource.active)
+        {
+            origins[index++] = poseSource.inputSourceHandle;
+        }
+    }
+    while (index < activeSourcesCount)
+    {
+        origins[index++] = 0;
+    }
+    return InputError::INPUT_ERROR_NONE;
+}
+
+InputError InputImpl::getOriginLocalizedName(uint64_t origin, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude)
+{
+    STUB();
+    if (name != nullptr)
+    {
+        name[0] = '\0';
+    }
+    return InputError::INPUT_ERROR_NONE;
+}
+
+InputError InputImpl::getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInfo* info, uint32_t infoBufferSize)
+{
+    std::string fullPath = input::pathHandleRegistry.getPath(origin);
+    if (fullPath == "")
+    {
+        return InputError::INPUT_ERROR_INVALID_HANDLE;
+    }
+
+    InputOriginInfo infoLocal;
     STUB_F("renderModelComponentName missing");
     infoLocal.renderModelComponentName[0] = '\0'; // TODO
+
+    input::Device device = input::getDeviceFromInputSourcePath(fullPath, false);
+    if (device != input::Device::INVALID)
+    {
+        infoLocal.deviceHandle = origin;
+        switch (device)
+        {
+            case input::Device::HAND_LEFT:
+                infoLocal.trackedDeviceIndex = 1;
+                break;
+            case input::Device::HAND_RIGHT:
+                infoLocal.trackedDeviceIndex = 2;
+                break;
+            default:
+                infoLocal.trackedDeviceIndex = 0xFFFFFFFF;
+                break;
+        }
+    }
+    else
+    {
+        device = input::getDeviceFromInputSourcePath(fullPath, true);
+        if (device == input::Device::INVALID)
+        {
+            return InputError::INPUT_ERROR_INVALID_HANDLE;
+        }
+        infoLocal.deviceHandle = input::pathHandleRegistry.getHandle(input::getDeviceInputSourcePath(device));
+        switch (device)
+        {
+            case input::Device::HAND_LEFT:
+                infoLocal.trackedDeviceIndex = 1;
+                break;
+            case input::Device::HAND_RIGHT:
+                infoLocal.trackedDeviceIndex = 2;
+                break;
+            default:
+                infoLocal.trackedDeviceIndex = 0xFFFFFFFF;
+                break;
+        }
+
+        bool valid = false;
+        vapor::InputProfile* inputProfile = this->clientCore.backend->inputProfile;
+        for (int i = 0; i < inputProfile->getOpenVRInputsCount(); i++)
+        {
+            const vapor::OpenVRInputDescription& inputDescription = inputProfile->getOpenVRInputs()[i];
+            if (fullPath == inputDescription.path)
+            {
+                valid = true;
+                break;
+            }
+            else if (fullPath == input::getSuffixedInputSourcePath(inputDescription.path, inputDescription.subpath))
+            {
+                valid = true;
+                break;
+            }
+        }
+        if (!valid)
+        {
+            return InputError::INPUT_ERROR_INVALID_HANDLE;
+        }
+    }
+
     std::memcpy(info, &infoLocal, infoBufferSize < sizeof(InputOriginInfo) ? infoBufferSize : sizeof(InputOriginInfo));
     return InputError::INPUT_ERROR_NONE;
 }
@@ -254,7 +521,7 @@ InputError InputImpl::showActionOrigins(uint64_t actionSet, uint64_t action)
     STUB();
 }
 
-InputError InputImpl::showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originDeviceToHighlight)
+InputError InputImpl::showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originToHighlight)
 {
     STUB();
 }
@@ -266,6 +533,7 @@ InputError InputImpl::getComponentStateForBinding(const char* renderModelName, c
 
 bool InputImpl::isUsingLegacyInput()
 {
+    // CHECK: are we supposed to disable legacy input state and events after action set input has been configured?
     return this->clientCore.actionManager == nullptr;
 }
 

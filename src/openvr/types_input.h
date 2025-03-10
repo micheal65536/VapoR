@@ -238,7 +238,7 @@ namespace openvr
     struct InputDigitalActionData
     {
         bool active;
-        uint64_t currentOriginDevice;
+        uint64_t currentOrigin;
         bool state;
         bool changed;
         float updateTime;
@@ -247,7 +247,7 @@ namespace openvr
     struct InputAnalogActionData
     {
         bool active;
-        uint64_t currentOriginDevice;
+        uint64_t currentOrigin;
         float x;
         float y;
         float z;
@@ -260,7 +260,7 @@ namespace openvr
     struct InputPoseActionData
     {
         bool active;
-        uint64_t currentOriginDevice;
+        uint64_t currentOrigin;
         TrackedDevicePose pose;
     };
 

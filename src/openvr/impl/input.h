@@ -43,12 +43,12 @@ namespace openvr
 
             InputError triggerHapticVibrationAction(uint64_t action, float startSecondsFromNow, float durationSeconds, float frequency, float amplitude, uint64_t restrictToDevice);
 
-            InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* originDevices, uint32_t originDevicesCount);
-            InputError getOriginLocalizedName(uint64_t originDevice, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude);
-            InputError getOriginTrackedDeviceInfo(uint64_t originDevice, InputOriginInfo* info, uint32_t infoBufferSize);
+            InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* origins, uint32_t originsCount);
+            InputError getOriginLocalizedName(uint64_t origin, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude);
+            InputError getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInfo* info, uint32_t infoBufferSize);
             InputError getActionBindingInfo(uint64_t action, InputBindingInfo* bindings, uint32_t bindingInfoSize, uint32_t bindingsBufferCount, uint32_t* returnedBindingsCount);
             InputError showActionOrigins(uint64_t actionSet, uint64_t action);
-            InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originDeviceToHighlight);
+            InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originToHighlight);
             InputError getComponentStateForBinding(const char* renderModelName, const char* componentName, const InputBindingInfo* bindings, uint32_t bindingInfoSize, uint32_t bindingsCount, RenderModelComponentState* componentState);
 
             bool isUsingLegacyInput();

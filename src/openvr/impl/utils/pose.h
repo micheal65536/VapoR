@@ -4,6 +4,8 @@
 
 #include "backend/input.h"
 
+#include "matrix.h"
+
 namespace openvr
 {
     namespace utils
@@ -65,14 +67,15 @@ namespace openvr
             poseToMatrix(pose.pose, &trackedDevicePose->deviceToAbsolute);
         }
 
-        inline void makeEmptyTrackedDevicePose(TrackedDevicePose* trackedDevicePose)
+        inline void applyOffset(TrackedDevicePose* trackedDevicePose, const float (&offsetMatrix)[3][4])
         {
-            // CHECK: should we empty out the other fields (velocity/pose) here?
-            *trackedDevicePose = {
-                .trackingResult = TrackedDevicePose::TrackingResult::TRACKING_UNINITIALIZED,
-                .poseIsValid = false,
-                .deviceIsConnected = false
-            };
+            if (offsetMatrix == (float[3][4]) {{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 0.0f}})
+            {
+                return;
+            }
+            multiplyMatrix(offsetMatrix, trackedDevicePose->deviceToAbsolute.m);
+            multiplyMatrixVector(offsetMatrix, trackedDevicePose->velocity.v, 0.0f);
+            multiplyMatrixVector(offsetMatrix, trackedDevicePose->angularVelocity.v, 0.0f);
         }
 
         inline void selectTrackedDevicePose(const vapor::PoseSet& poseSet, TrackingUniverseOrigin origin, bool nextFrame, TrackedDevicePose* trackedDevicePoseOut)
@@ -87,6 +90,7 @@ namespace openvr
                 pose = origin == TrackingUniverseOrigin::ORIGIN_SEATED ? &poseSet.local : &poseSet.localFloor;
             }
             makeTrackedDevicePose(trackedDevicePoseOut, *pose);
+            applyOffset(trackedDevicePoseOut, poseSet.offsetMatrix);
         }
     }
 }

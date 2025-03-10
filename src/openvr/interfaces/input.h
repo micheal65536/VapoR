@@ -25,11 +25,11 @@ namespace openvr
 
         static InputError triggerHapticVibrationAction(uint64_t action, float startSecondsFromNow, float durationSeconds, float frequency, float amplitude);
 
-        static InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* originDevices, uint32_t originDevicesCount);
-        static InputError getOriginLocalizedName(uint64_t originDevice, char* name, uint32_t bufferSize);
-        static InputError getOriginTrackedDeviceInfo(uint64_t originDevice, InputOriginInfo* info, uint32_t infoBufferSize);
+        static InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* origins, uint32_t originsCount);
+        static InputError getOriginLocalizedName(uint64_t origin, char* name, uint32_t bufferSize);
+        static InputError getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInfo* info, uint32_t infoBufferSize);
         static InputError showActionOrigins(uint64_t actionSet, uint64_t action);
-        static InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originDeviceToHighlight);
+        static InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originToHighlight);
 
         void* setActionManifestPath_ = (void*) setActionManifestPath;
         void* getActionSetHandle_ = (void*) getActionSetHandle;
@@ -65,11 +65,11 @@ namespace openvr
             virtual InputError getSkeletalActionDataCompressed(uint64_t action, SkeletalTransformSpace transformSpace, float secondsFromNow, void* data, uint32_t bufferSize, uint32_t* requiredBufferSize) { return Input_003::getSkeletalActionDataCompressed(action, transformSpace, secondsFromNow, data, bufferSize, requiredBufferSize); }
             virtual InputError decompressSkeletalActionData(const void* data, uint32_t size, SkeletalTransformSpace transformSpace, BoneTransform* transforms, uint32_t transformsCount) { return Input_003::decompressSkeletalActionData(data, size, transformSpace, transforms, transformsCount); }
             virtual InputError triggerHapticVibrationAction(uint64_t action, float startSecondsFromNow, float durationSeconds, float frequency, float amplitude) { return Input_003::triggerHapticVibrationAction(action, startSecondsFromNow, durationSeconds, frequency, amplitude); }
-            virtual InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* originDevices, uint32_t originDevicesCount) { return Input_003::getActionOrigins(actionSet, action, originDevices, originDevicesCount); }
-            virtual InputError getOriginLocalizedName(uint64_t originDevice, char* name, uint32_t bufferSize) { return Input_003::getOriginLocalizedName(originDevice, name, bufferSize); }
-            virtual InputError getOriginTrackedDeviceInfo(uint64_t originDevice, InputOriginInfo* info, uint32_t infoBufferSize) { return Input_003::getOriginTrackedDeviceInfo(originDevice, info, infoBufferSize); }
+            virtual InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* origins, uint32_t originsCount) { return Input_003::getActionOrigins(actionSet, action, origins, originsCount); }
+            virtual InputError getOriginLocalizedName(uint64_t origin, char* name, uint32_t bufferSize) { return Input_003::getOriginLocalizedName(origin, name, bufferSize); }
+            virtual InputError getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInfo* info, uint32_t infoBufferSize) { return Input_003::getOriginTrackedDeviceInfo(origin, info, infoBufferSize); }
             virtual InputError showActionOrigins(uint64_t actionSet, uint64_t action) { return Input_003::showActionOrigins(actionSet, action); }
-            virtual InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originDeviceToHighlight) { return Input_003::showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originDeviceToHighlight); }
+            virtual InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originToHighlight) { return Input_003::showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originToHighlight); }
     };
 
     //
@@ -94,11 +94,11 @@ namespace openvr
 
         static InputError triggerHapticVibrationAction(uint64_t action, float startSecondsFromNow, float durationSeconds, float frequency, float amplitude, uint64_t restrictToDevice);
 
-        static InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* originDevices, uint32_t originDevicesCount);
-        static InputError getOriginLocalizedName(uint64_t originDevice, char* name, uint32_t bufferSize);
-        static InputError getOriginTrackedDeviceInfo(uint64_t originDevice, InputOriginInfo* info, uint32_t infoBufferSize);
+        static InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* origins, uint32_t originsCount);
+        static InputError getOriginLocalizedName(uint64_t origin, char* name, uint32_t bufferSize);
+        static InputError getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInfo* info, uint32_t infoBufferSize);
         static InputError showActionOrigins(uint64_t actionSet, uint64_t action);
-        static InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originDeviceToHighlight);
+        static InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originToHighlight);
 
         void* setActionManifestPath_ = (void*) setActionManifestPath;
         void* getActionSetHandle_ = (void*) getActionSetHandle;
@@ -136,11 +136,11 @@ namespace openvr
             virtual InputError getSkeletalBoneDataCompressed(uint64_t action, SkeletalTransformSpace transformSpace, SkeletalMotionRange motionRange, void* data, uint32_t bufferSize, uint32_t* requiredBufferSize, uint64_t restrictToDevice) { return Input_004::getSkeletalBoneDataCompressed(action, transformSpace, motionRange, data, bufferSize, requiredBufferSize, restrictToDevice); }
             virtual InputError decompressSkeletalBoneData(const void* data, uint32_t size, SkeletalTransformSpace transformSpace, BoneTransform* transforms, uint32_t transformsCount) { return Input_004::decompressSkeletalBoneData(data, size, transformSpace, transforms, transformsCount); }
             virtual InputError triggerHapticVibrationAction(uint64_t action, float startSecondsFromNow, float durationSeconds, float frequency, float amplitude, uint64_t restrictToDevice) { return Input_004::triggerHapticVibrationAction(action, startSecondsFromNow, durationSeconds, frequency, amplitude, restrictToDevice); }
-            virtual InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* originDevices, uint32_t originDevicesCount) { return Input_004::getActionOrigins(actionSet, action, originDevices, originDevicesCount); }
-            virtual InputError getOriginLocalizedName(uint64_t originDevice, char* name, uint32_t bufferSize) { return Input_004::getOriginLocalizedName(originDevice, name, bufferSize); }
-            virtual InputError getOriginTrackedDeviceInfo(uint64_t originDevice, InputOriginInfo* info, uint32_t infoBufferSize) { return Input_004::getOriginTrackedDeviceInfo(originDevice, info, infoBufferSize); }
+            virtual InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* origins, uint32_t originsCount) { return Input_004::getActionOrigins(actionSet, action, origins, originsCount); }
+            virtual InputError getOriginLocalizedName(uint64_t origin, char* name, uint32_t bufferSize) { return Input_004::getOriginLocalizedName(origin, name, bufferSize); }
+            virtual InputError getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInfo* info, uint32_t infoBufferSize) { return Input_004::getOriginTrackedDeviceInfo(origin, info, infoBufferSize); }
             virtual InputError showActionOrigins(uint64_t actionSet, uint64_t action) { return Input_004::showActionOrigins(actionSet, action); }
-            virtual InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originDeviceToHighlight) { return Input_004::showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originDeviceToHighlight); }
+            virtual InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originToHighlight) { return Input_004::showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originToHighlight); }
     };
 
     //
@@ -172,11 +172,11 @@ namespace openvr
 
         static InputError triggerHapticVibrationAction(uint64_t action, float startSecondsFromNow, float durationSeconds, float frequency, float amplitude, uint64_t restrictToDevice);
 
-        static InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* originDevices, uint32_t originDevicesCount);
-        static InputError getOriginLocalizedName(uint64_t originDevice, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude);
-        static InputError getOriginTrackedDeviceInfo(uint64_t originDevice, InputOriginInfo* info, uint32_t infoBufferSize);
+        static InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* origins, uint32_t originsCount);
+        static InputError getOriginLocalizedName(uint64_t origin, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude);
+        static InputError getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInfo* info, uint32_t infoBufferSize);
         static InputError showActionOrigins(uint64_t actionSet, uint64_t action);
-        static InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originDeviceToHighlight);
+        static InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originToHighlight);
 
         static bool isUsingLegacyInput();
 
@@ -229,11 +229,11 @@ namespace openvr
             virtual InputError getSkeletalBoneDataCompressed(uint64_t action, SkeletalMotionRange motionRange, void* data, uint32_t bufferSize, uint32_t* requiredBufferSize) { return Input_005::getSkeletalBoneDataCompressed(action, motionRange, data, bufferSize, requiredBufferSize); }
             virtual InputError decompressSkeletalBoneData(const void* data, uint32_t size, SkeletalTransformSpace transformSpace, BoneTransform* transforms, uint32_t transformsCount) { return Input_005::decompressSkeletalBoneData(data, size, transformSpace, transforms, transformsCount); }
             virtual InputError triggerHapticVibrationAction(uint64_t action, float startSecondsFromNow, float durationSeconds, float frequency, float amplitude, uint64_t restrictToDevice) { return Input_005::triggerHapticVibrationAction(action, startSecondsFromNow, durationSeconds, frequency, amplitude, restrictToDevice); }
-            virtual InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* originDevices, uint32_t originDevicesCount) { return Input_005::getActionOrigins(actionSet, action, originDevices, originDevicesCount); }
-            virtual InputError getOriginLocalizedName(uint64_t originDevice, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude) { return Input_005::getOriginLocalizedName(originDevice, name, bufferSize, stringSectionsToInclude); }
-            virtual InputError getOriginTrackedDeviceInfo(uint64_t originDevice, InputOriginInfo* info, uint32_t infoBufferSize) { return Input_005::getOriginTrackedDeviceInfo(originDevice, info, infoBufferSize); }
+            virtual InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* origins, uint32_t originsCount) { return Input_005::getActionOrigins(actionSet, action, origins, originsCount); }
+            virtual InputError getOriginLocalizedName(uint64_t origin, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude) { return Input_005::getOriginLocalizedName(origin, name, bufferSize, stringSectionsToInclude); }
+            virtual InputError getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInfo* info, uint32_t infoBufferSize) { return Input_005::getOriginTrackedDeviceInfo(origin, info, infoBufferSize); }
             virtual InputError showActionOrigins(uint64_t actionSet, uint64_t action) { return Input_005::showActionOrigins(actionSet, action); }
-            virtual InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originDeviceToHighlight) { return Input_005::showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originDeviceToHighlight); }
+            virtual InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originToHighlight) { return Input_005::showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originToHighlight); }
             virtual bool isUsingLegacyInput() { return Input_005::isUsingLegacyInput(); }
     };
 
@@ -267,11 +267,11 @@ namespace openvr
 
         static InputError triggerHapticVibrationAction(uint64_t action, float startSecondsFromNow, float durationSeconds, float frequency, float amplitude, uint64_t restrictToDevice);
 
-        static InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* originDevices, uint32_t originDevicesCount);
-        static InputError getOriginLocalizedName(uint64_t originDevice, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude);
-        static InputError getOriginTrackedDeviceInfo(uint64_t originDevice, InputOriginInfo* info, uint32_t infoBufferSize);
+        static InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* origins, uint32_t originsCount);
+        static InputError getOriginLocalizedName(uint64_t origin, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude);
+        static InputError getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInfo* info, uint32_t infoBufferSize);
         static InputError showActionOrigins(uint64_t actionSet, uint64_t action);
-        static InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originDeviceToHighlight);
+        static InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originToHighlight);
 
         static bool isUsingLegacyInput();
 
@@ -326,11 +326,11 @@ namespace openvr
             virtual InputError getSkeletalBoneDataCompressed(uint64_t action, SkeletalMotionRange motionRange, void* data, uint32_t bufferSize, uint32_t* requiredBufferSize) { return Input_006::getSkeletalBoneDataCompressed(action, motionRange, data, bufferSize, requiredBufferSize); }
             virtual InputError decompressSkeletalBoneData(const void* data, uint32_t size, SkeletalTransformSpace transformSpace, BoneTransform* transforms, uint32_t transformsCount) { return Input_006::decompressSkeletalBoneData(data, size, transformSpace, transforms, transformsCount); }
             virtual InputError triggerHapticVibrationAction(uint64_t action, float startSecondsFromNow, float durationSeconds, float frequency, float amplitude, uint64_t restrictToDevice) { return Input_006::triggerHapticVibrationAction(action, startSecondsFromNow, durationSeconds, frequency, amplitude, restrictToDevice); }
-            virtual InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* originDevices, uint32_t originDevicesCount) { return Input_006::getActionOrigins(actionSet, action, originDevices, originDevicesCount); }
-            virtual InputError getOriginLocalizedName(uint64_t originDevice, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude) { return Input_006::getOriginLocalizedName(originDevice, name, bufferSize, stringSectionsToInclude); }
-            virtual InputError getOriginTrackedDeviceInfo(uint64_t originDevice, InputOriginInfo* info, uint32_t infoBufferSize) { return Input_006::getOriginTrackedDeviceInfo(originDevice, info, infoBufferSize); }
+            virtual InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* origins, uint32_t originsCount) { return Input_006::getActionOrigins(actionSet, action, origins, originsCount); }
+            virtual InputError getOriginLocalizedName(uint64_t origin, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude) { return Input_006::getOriginLocalizedName(origin, name, bufferSize, stringSectionsToInclude); }
+            virtual InputError getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInfo* info, uint32_t infoBufferSize) { return Input_006::getOriginTrackedDeviceInfo(origin, info, infoBufferSize); }
             virtual InputError showActionOrigins(uint64_t actionSet, uint64_t action) { return Input_006::showActionOrigins(actionSet, action); }
-            virtual InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originDeviceToHighlight) { return Input_006::showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originDeviceToHighlight); }
+            virtual InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originToHighlight) { return Input_006::showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originToHighlight); }
             virtual bool isUsingLegacyInput() { return Input_006::isUsingLegacyInput(); }
     };
 
@@ -364,12 +364,12 @@ namespace openvr
 
         static InputError triggerHapticVibrationAction(uint64_t action, float startSecondsFromNow, float durationSeconds, float frequency, float amplitude, uint64_t restrictToDevice);
 
-        static InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* originDevices, uint32_t originDevicesCount);
-        static InputError getOriginLocalizedName(uint64_t originDevice, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude);
-        static InputError getOriginTrackedDeviceInfo(uint64_t originDevice, InputOriginInfo* info, uint32_t infoBufferSize);
+        static InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* origins, uint32_t originsCount);
+        static InputError getOriginLocalizedName(uint64_t origin, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude);
+        static InputError getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInfo* info, uint32_t infoBufferSize);
         static InputError getActionBindingInfo(uint64_t action, InputBindingInfo* bindings, uint32_t bindingInfoSize, uint32_t bindingsBufferCount, uint32_t* returnedBindingsCount);
         static InputError showActionOrigins(uint64_t actionSet, uint64_t action);
-        static InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originDeviceToHighlight);
+        static InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originToHighlight);
 
         static bool isUsingLegacyInput();
 
@@ -428,12 +428,12 @@ namespace openvr
             virtual InputError getSkeletalBoneDataCompressed(uint64_t action, SkeletalMotionRange motionRange, void* data, uint32_t bufferSize, uint32_t* requiredBufferSize) { return Input_007::getSkeletalBoneDataCompressed(action, motionRange, data, bufferSize, requiredBufferSize); }
             virtual InputError decompressSkeletalBoneData(const void* data, uint32_t size, SkeletalTransformSpace transformSpace, BoneTransform* transforms, uint32_t transformsCount) { return Input_007::decompressSkeletalBoneData(data, size, transformSpace, transforms, transformsCount); }
             virtual InputError triggerHapticVibrationAction(uint64_t action, float startSecondsFromNow, float durationSeconds, float frequency, float amplitude, uint64_t restrictToDevice) { return Input_007::triggerHapticVibrationAction(action, startSecondsFromNow, durationSeconds, frequency, amplitude, restrictToDevice); }
-            virtual InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* originDevices, uint32_t originDevicesCount) { return Input_007::getActionOrigins(actionSet, action, originDevices, originDevicesCount); }
-            virtual InputError getOriginLocalizedName(uint64_t originDevice, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude) { return Input_007::getOriginLocalizedName(originDevice, name, bufferSize, stringSectionsToInclude); }
-            virtual InputError getOriginTrackedDeviceInfo(uint64_t originDevice, InputOriginInfo* info, uint32_t infoBufferSize) { return Input_007::getOriginTrackedDeviceInfo(originDevice, info, infoBufferSize); }
+            virtual InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* origins, uint32_t originsCount) { return Input_007::getActionOrigins(actionSet, action, origins, originsCount); }
+            virtual InputError getOriginLocalizedName(uint64_t origin, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude) { return Input_007::getOriginLocalizedName(origin, name, bufferSize, stringSectionsToInclude); }
+            virtual InputError getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInfo* info, uint32_t infoBufferSize) { return Input_007::getOriginTrackedDeviceInfo(origin, info, infoBufferSize); }
             virtual InputError getActionBindingInfo(uint64_t action, InputBindingInfo* bindings, uint32_t bindingInfoSize, uint32_t bindingsBufferCount, uint32_t* returnedBindingsCount) { return Input_007::getActionBindingInfo(action, bindings, bindingInfoSize, bindingsBufferCount, returnedBindingsCount); }
             virtual InputError showActionOrigins(uint64_t actionSet, uint64_t action) { return Input_007::showActionOrigins(actionSet, action); }
-            virtual InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originDeviceToHighlight) { return Input_007::showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originDeviceToHighlight); }
+            virtual InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originToHighlight) { return Input_007::showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originToHighlight); }
             virtual bool isUsingLegacyInput() { return Input_007::isUsingLegacyInput(); }
             virtual InputError openBindingUI(const char* appKey, uint64_t actionSet, uint64_t device, bool showOnDesktop) { return Input_007::openBindingUI(appKey, actionSet, device, showOnDesktop); }
     };
@@ -471,12 +471,12 @@ namespace openvr
 
         static InputError triggerHapticVibrationAction(uint64_t action, float startSecondsFromNow, float durationSeconds, float frequency, float amplitude, uint64_t restrictToDevice);
 
-        static InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* originDevices, uint32_t originDevicesCount);
-        static InputError getOriginLocalizedName(uint64_t originDevice, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude);
-        static InputError getOriginTrackedDeviceInfo(uint64_t originDevice, InputOriginInfo* info, uint32_t infoBufferSize);
+        static InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* origins, uint32_t originsCount);
+        static InputError getOriginLocalizedName(uint64_t origin, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude);
+        static InputError getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInfo* info, uint32_t infoBufferSize);
         static InputError getActionBindingInfo(uint64_t action, InputBindingInfo* bindings, uint32_t bindingInfoSize, uint32_t bindingsBufferCount, uint32_t* returnedBindingsCount);
         static InputError showActionOrigins(uint64_t actionSet, uint64_t action);
-        static InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originDeviceToHighlight);
+        static InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originToHighlight);
         static InputError getComponentStateForBinding(const char* renderModelName, const char* componentName, const InputBindingInfo* bindings, uint32_t bindingInfoSize, uint32_t bindingsCount, RenderModelComponentState* componentState);
 
         static bool isUsingLegacyInput();
@@ -544,12 +544,12 @@ namespace openvr
             virtual InputError getSkeletalBoneDataCompressed(uint64_t action, SkeletalMotionRange motionRange, void* data, uint32_t bufferSize, uint32_t* requiredBufferSize) { return Input_010::getSkeletalBoneDataCompressed(action, motionRange, data, bufferSize, requiredBufferSize); }
             virtual InputError decompressSkeletalBoneData(const void* data, uint32_t size, SkeletalTransformSpace transformSpace, BoneTransform* transforms, uint32_t transformsCount) { return Input_010::decompressSkeletalBoneData(data, size, transformSpace, transforms, transformsCount); }
             virtual InputError triggerHapticVibrationAction(uint64_t action, float startSecondsFromNow, float durationSeconds, float frequency, float amplitude, uint64_t restrictToDevice) { return Input_010::triggerHapticVibrationAction(action, startSecondsFromNow, durationSeconds, frequency, amplitude, restrictToDevice); }
-            virtual InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* originDevices, uint32_t originDevicesCount) { return Input_010::getActionOrigins(actionSet, action, originDevices, originDevicesCount); }
-            virtual InputError getOriginLocalizedName(uint64_t originDevice, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude) { return Input_010::getOriginLocalizedName(originDevice, name, bufferSize, stringSectionsToInclude); }
-            virtual InputError getOriginTrackedDeviceInfo(uint64_t originDevice, InputOriginInfo* info, uint32_t infoBufferSize) { return Input_010::getOriginTrackedDeviceInfo(originDevice, info, infoBufferSize); }
+            virtual InputError getActionOrigins(uint64_t actionSet, uint64_t action, uint64_t* origins, uint32_t originsCount) { return Input_010::getActionOrigins(actionSet, action, origins, originsCount); }
+            virtual InputError getOriginLocalizedName(uint64_t origin, char* name, uint32_t bufferSize, int32_t stringSectionsToInclude) { return Input_010::getOriginLocalizedName(origin, name, bufferSize, stringSectionsToInclude); }
+            virtual InputError getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInfo* info, uint32_t infoBufferSize) { return Input_010::getOriginTrackedDeviceInfo(origin, info, infoBufferSize); }
             virtual InputError getActionBindingInfo(uint64_t action, InputBindingInfo* bindings, uint32_t bindingInfoSize, uint32_t bindingsBufferCount, uint32_t* returnedBindingsCount) { return Input_010::getActionBindingInfo(action, bindings, bindingInfoSize, bindingsBufferCount, returnedBindingsCount); }
             virtual InputError showActionOrigins(uint64_t actionSet, uint64_t action) { return Input_010::showActionOrigins(actionSet, action); }
-            virtual InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originDeviceToHighlight) { return Input_010::showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originDeviceToHighlight); }
+            virtual InputError showBindingsForActionSet(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount, uint64_t originToHighlight) { return Input_010::showBindingsForActionSet(actionSets, actionSetSize, actionSetsCount, originToHighlight); }
             virtual InputError getComponentStateForBinding(const char* renderModelName, const char* componentName, const InputBindingInfo* bindings, uint32_t bindingInfoSize, uint32_t bindingsCount, RenderModelComponentState* componentState) { return Input_010::getComponentStateForBinding(renderModelName, componentName, bindings, bindingInfoSize, bindingsCount, componentState); }
             virtual bool isUsingLegacyInput() { return Input_010::isUsingLegacyInput(); }
             virtual InputError openBindingUI(const char* appKey, uint64_t actionSet, uint64_t device, bool showOnDesktop) { return Input_010::openBindingUI(appKey, actionSet, device, showOnDesktop); }

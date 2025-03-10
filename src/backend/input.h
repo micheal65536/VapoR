@@ -12,48 +12,81 @@ namespace vapor
         OpenXR::PoseAndVelocity localFloor;
         OpenXR::PoseAndVelocity localNextFrame;
         OpenXR::PoseAndVelocity localFloorNextFrame;
+
+        float offsetMatrix[3][4];
     };
 
-    enum InputType
+    enum class OpenXRInputType
     {
-        // this contains a mix of types valid for OpenXR and OpenVR, but it's neater than making two separate enums
         NONE,
         BOOLEAN,
         FLOAT,
         VECTOR2,
-        VECTOR3,
         POSE,
-        SKELETON,
         HAPTIC
     };
 
     struct OpenXRInputDescription
     {
         std::string path;
-        InputType type;
+        OpenXRInputType type;
+    };
+
+    enum class OpenVRInputType
+    {
+        NONE,
+        BUTTON,
+        TRIGGER,
+        JOYSTICK,
+        TRACKPAD,
+        POSE,
+        SKELETON,
+        HAPTIC
+    };
+
+    enum class OpenVRInputSubpath
+    {
+        NONE,
+        CLICK,
+        TOUCH,
+        VALUE,
+        X,
+        Y
     };
 
     struct OpenVRInputDescription
     {
         std::string path;
-        InputType type;
-        bool click = false;
-        bool touch = false;
+        OpenVRInputType type;
+        OpenVRInputSubpath subpath;
     };
 
-    union InputData
+    struct OpenXRInputState
     {
-        bool b;
-        float f;
-        XrVector2f vec2;
-        XrVector3f vec3;
-        PoseSet pose;
+        union Data
+        {
+            bool b;
+            float f;
+            XrVector2f vec2;
+            PoseSet pose;
+        };
+
+        OpenXRInputType type;
+        Data data;
+        long changeTime;
     };
 
-    struct InputState
+    struct OpenVRInputState
     {
-        InputType type;
-        InputData data;
-        bool touching = false;
+        union Data
+        {
+            bool b;
+            float f;
+            PoseSet pose;
+        };
+
+        Data data;
+        long changeTime;
     };
+
 }

@@ -16,6 +16,7 @@
 
 #include <format>
 #include <cmath>
+#include <cstring>
 
 using namespace vapor;
 
@@ -95,19 +96,19 @@ Backend::Backend()
         XrActionType actionType;
         switch (inputs[i].type)
         {
-            case InputType::BOOLEAN:
+            case OpenXRInputType::BOOLEAN:
                 actionType = XR_ACTION_TYPE_BOOLEAN_INPUT;
                 break;
-            case InputType::FLOAT:
+            case OpenXRInputType::FLOAT:
                 actionType = XR_ACTION_TYPE_FLOAT_INPUT;
                 break;
-            case InputType::VECTOR2:
+            case OpenXRInputType::VECTOR2:
                 actionType = XR_ACTION_TYPE_VECTOR2F_INPUT;
                 break;
-            case InputType::POSE:
+            case OpenXRInputType::POSE:
                 actionType = XR_ACTION_TYPE_POSE_INPUT;
                 break;
-            case InputType::HAPTIC:
+            case OpenXRInputType::HAPTIC:
                 actionType = XR_ACTION_TYPE_VIBRATION_OUTPUT;
                 break;
         }
@@ -121,7 +122,7 @@ Backend::Backend()
     for (int i = 0; i < inputsCount; i++)
     {
         OpenXR::Space* actionSpace = nullptr;
-        if (inputs[i].type == InputType::POSE)
+        if (inputs[i].type == OpenXRInputType::POSE)
         {
             actionSpace = new OpenXR::Space(*this->session, *this->actions[i], "", OpenXR::IDENTITY_POSE);
         }
@@ -445,34 +446,39 @@ void Backend::step(XrTime displayTime, XrDuration displayDuration)
 
     this->session->syncActions({this->actionSet});
 
-    InputState* openXRInputStates = new InputState[this->openXRInputs.size()];
+    OpenXRInputState* openXRInputStates = new OpenXRInputState[this->openXRInputs.size()];
     for (int i = 0; i < this->openXRInputs.size(); i++)
     {
         OpenXRInputDescription& input = this->openXRInputs[i];
         OpenXR::Action* action = this->actions[i];
-        InputState& state = openXRInputStates[i];
+        OpenXRInputState& state = openXRInputStates[i];
         state.type = input.type;
         switch (input.type)
         {
-            case InputType::BOOLEAN:
-                state.data.b = action->getStateBool(*this->session, "");
+            case OpenXRInputType::BOOLEAN:
+                state.data.b = action->getStateBool(*this->session, "", &state.changeTime);
                 break;
-            case InputType::FLOAT:
-                state.data.f = action->getStateFloat(*this->session, "");
+            case OpenXRInputType::FLOAT:
+                state.data.f = action->getStateFloat(*this->session, "", &state.changeTime);
                 break;
-            case InputType::VECTOR2:
-                state.data.vec2 = action->getStateVector(*this->session, "");
+            case OpenXRInputType::VECTOR2:
+                state.data.vec2 = action->getStateVector(*this->session, "", &state.changeTime);
                 break;
-            case InputType::POSE:
+            case OpenXRInputType::POSE:
                 state.data.pose.local = offsetPose(this->actionSpaces[i]->locateWithVelocity(*this->localSpace, displayTime), this->seatedZeroPose);
                 state.data.pose.localFloor = offsetPose(this->actionSpaces[i]->locateWithVelocity(*this->localFloorSpace, displayTime), this->standingZeroPose);
                 state.data.pose.localNextFrame = offsetPose(this->actionSpaces[i]->locateWithVelocity(*this->localSpace, displayTime + displayDuration), this->seatedZeroPose);
                 state.data.pose.localFloorNextFrame = offsetPose(this->actionSpaces[i]->locateWithVelocity(*this->localFloorSpace, displayTime + displayDuration), this->standingZeroPose);
+                {
+                    static float identityOffset[3][4] = {{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 0.0f}};
+                    std::memcpy(state.data.pose.offsetMatrix, identityOffset, sizeof(float[3][4]));
+                }
+                state.changeTime = displayTime;
                 break;
         }
     }
 
-    std::vector<InputState> openVRInputStates;
+    std::vector<OpenVRInputState> openVRInputStates;
     int openVRInputsCount = this->inputProfile->getOpenVRInputsCount();
     openVRInputStates.reserve(openVRInputsCount);
     for (int i = 0; i < openVRInputsCount; i++)
@@ -496,12 +502,13 @@ void Backend::step(XrTime displayTime, XrDuration displayDuration)
             .local = offsetPose(this->viewSpace->locateWithVelocity(*this->localSpace, displayTime), this->seatedZeroPose),
             .localFloor = offsetPose(this->viewSpace->locateWithVelocity(*this->localFloorSpace, displayTime), this->standingZeroPose),
             .localNextFrame = offsetPose(this->viewSpace->locateWithVelocity(*this->localSpace, displayTime + displayDuration), this->seatedZeroPose),
-            .localFloorNextFrame = offsetPose(this->viewSpace->locateWithVelocity(*this->localFloorSpace, displayTime + displayDuration), this->standingZeroPose)
+            .localFloorNextFrame = offsetPose(this->viewSpace->locateWithVelocity(*this->localFloorSpace, displayTime + displayDuration), this->standingZeroPose),
+            .offsetMatrix = {{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 0.0f}}
         },
         .inputStates = openVRInputStates,
         .controllerPoses = {
-            this->inputProfile->getOpenVRControllerPose(0, openXRInputStates).data.pose,
-            this->inputProfile->getOpenVRControllerPose(1, openXRInputStates).data.pose
+            this->inputProfile->getOpenVRControllerPose(0, openVRInputStates.data()).data.pose,
+            this->inputProfile->getOpenVRControllerPose(1, openVRInputStates.data()).data.pose
         },
         .legacyInputStates = {
             this->inputProfile->getOpenVRLegacyInputState(0, openXRInputStates),

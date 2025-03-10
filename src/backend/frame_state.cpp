@@ -44,6 +44,15 @@ FrameState FrameStateStore::getFrame(int indexAgo)
     return frame;
 }
 
+long FrameStateStore::getFrameTime(int indexAgo)
+{
+    this->mutex.lock();
+    int index = this->size - indexAgo - 1;
+    long time = this->frames[index < 0 ? 0 : index].time;
+    this->mutex.unlock();
+    return time;
+}
+
 long FrameStateStore::getFrameCounter()
 {
     this->mutex.lock();

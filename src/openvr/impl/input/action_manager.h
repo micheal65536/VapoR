@@ -2,12 +2,15 @@
 
 #include <string>
 #include <map>
+#include <vector>
 #include <cstdint>
 
-#include "../../types_input.h"
-#include "../../../backend/input.h"
-#include "../../../backend/input_profile.h"
+#include "openvr/types_input.h"
+#include "backend/input.h"
+#include "backend/input_profile.h"
 #include "input_devices.h"
+#include "binding.h"
+#include "input_state.h"
 
 namespace openvr
 {
@@ -20,17 +23,41 @@ namespace openvr
             friend class ActionManager;
 
             public:
-                vapor::InputState getCapturedInputState(int device);
-                vapor::InputState getPreviousCapturedInputState(int device);
+                Action(InputType type);
 
-                Action(vapor::InputType type);
+                const InputType type;
 
-                const vapor::InputType type;
+                struct Source
+                {
+                    Binding* binding;
+                    Device device;
+                    std::vector<int> openVRInputIndexes;
 
-            private:
-                std::map<int, int> inputBindings;
-                std::map<int, vapor::InputState> capturedInputStates;
-                std::map<int, vapor::InputState> capturedInputStatesPrevious;
+                    bool active;
+                    bool activePrevious;
+                    InputState inputState;
+                    InputState inputStatePrevious;
+                };
+                struct PoseSource
+                {
+                    Device device;
+                    int openVRInputIndex;
+                    uint64_t inputSourceHandle;
+
+                    bool active;
+                    vapor::PoseSet pose;
+                };
+                struct HapticOutput
+                {
+                    Device device;
+                    int openVRInputIndex;
+                    uint64_t inputSourceHandle;
+                };
+
+                // only one of these is used, depending on the action type
+                std::vector<Source> sources;
+                std::vector<PoseSource> poseSources;
+                std::vector<HapticOutput> hapticOutputs;
         };
 
         class ActionSet
@@ -52,10 +79,10 @@ namespace openvr
 
                 bool populateFromJSON(const std::string& filePath);
 
-                void loadBinding(const std::string& filePath, vapor::InputProfile* inputProfile);
-                void loadDefaultBindingForControllerProfile(const std::string& profileName, vapor::InputProfile* inputProfile);
+                bool loadBinding(const std::string& filePath, vapor::InputProfile* inputProfile);
+                void loadDefaultBindingForControllerProfile(vapor::InputProfile* inputProfile);
 
-                static void update(const ActiveActionSet* activeActionSets, int actionSetSize, int activeActionSetsCount, const vapor::InputState* inputStates);
+                void update(const ActiveActionSet* activeActionSets, int actionSetSize, int activeActionSetsCount, const vapor::OpenVRInputState* inputStates);
 
                 ActionSet* findActionSet(const std::string& name);
                 Action* findAction(const std::string& name);

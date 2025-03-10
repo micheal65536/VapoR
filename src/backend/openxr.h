@@ -194,8 +194,11 @@ namespace OpenXR
             ~Action();
 
             bool getStateBool(const Session& session, const std::string& subactionPath) const;
+            bool getStateBool(const Session& session, const std::string& subactionPath, XrTime* lastChangeTime) const;
             float getStateFloat(const Session& session, const std::string& subactionPath) const;
+            float getStateFloat(const Session& session, const std::string& subactionPath, XrTime* lastChangeTime) const;
             XrVector2f getStateVector(const Session& session, const std::string& subactionPath) const;
+            XrVector2f getStateVector(const Session& session, const std::string& subactionPath, XrTime* lastChangeTime) const;
 
             void applyHapticFeedback(const Session& session, const std::string& subactionPath, XrDuration duration, float frequency, float amplitude) const;
 
