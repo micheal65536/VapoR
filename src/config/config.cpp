@@ -56,6 +56,10 @@ static bool loadConfigFromFile(const std::string& filePath)
 
 void vapor::config::config::loadConfig()
 {
-    loadConfigFromFile(paths::dataDir + "/config.json");
+    if (!paths::systemDataDir.empty())
+    {
+        loadConfigFromFile(paths::systemDataDir + "/config.json");
+    }
+    loadConfigFromFile(paths::userConfigDir + "/config.json");
     loadConfigFromFile("vapor_config.json");
 }

@@ -211,7 +211,7 @@ openvr::RenderModel_0_9_12* RenderModelLoader::loadModel(const std::string& name
 
     try
     {
-        std::ifstream stream(config::paths::dataDir + "/render_models/" + name + ".bin", std::ios::binary);
+        std::ifstream stream(config::paths::selectDataDirForFile("render_models/" + name + ".bin"), std::ios::binary);
 
         stream.read((char*) &renderModel->vertexCount, sizeof(uint32_t));
         renderModel->vertices = new openvr::RenderModelVertex[renderModel->vertexCount];

@@ -22,7 +22,7 @@ using namespace vapor;
 
 Backend::Backend()
 {
-    config::paths::setDataDir();
+    config::paths::setDataDirs();
     config::config::loadConfig();
 
     this->instance = new OpenXR::Instance("VapoR", {});
@@ -48,7 +48,7 @@ Backend::Backend()
 
     LOG("Using device profile %s", config::config::deviceProfileName.c_str());
     config::DeviceProfile deviceProfile;
-    if (!deviceProfile.populateFromJSON(config::paths::dataDir + "/device_profiles/" + config::config::deviceProfileName + ".json"))
+    if (!deviceProfile.populateFromJSON(config::paths::selectDataDirForFile("device_profiles/" + config::config::deviceProfileName + ".json")))
     {
         ABORT("Failed to load device profile");
     }
@@ -61,15 +61,15 @@ Backend::Backend()
         ABORT("Unknown input profile %s", deviceProfile.inputProfileName.c_str());
     }
     this->devicePropertySets = new DevicePropertySet[3];
-    if (!this->devicePropertySets[0].populateFromJSON(config::paths::dataDir + "/property_sets/" + deviceProfile.hmdPropertySetName + ".json"))
+    if (!this->devicePropertySets[0].populateFromJSON(config::paths::selectDataDirForFile("property_sets/" + deviceProfile.hmdPropertySetName + ".json")))
     {
         ABORT("Failed to load property set %s", deviceProfile.hmdPropertySetName.c_str());
     }
-    if (!this->devicePropertySets[1].populateFromJSON(config::paths::dataDir + "/property_sets/" + deviceProfile.controllerPropertySetNames[0] + ".json"))
+    if (!this->devicePropertySets[1].populateFromJSON(config::paths::selectDataDirForFile("property_sets/" + deviceProfile.controllerPropertySetNames[0] + ".json")))
     {
         ABORT("Failed to load property set %s", deviceProfile.controllerPropertySetNames[0].c_str());
     }
-    if (!this->devicePropertySets[2].populateFromJSON(config::paths::dataDir + "/property_sets/" + deviceProfile.controllerPropertySetNames[1] + ".json"))
+    if (!this->devicePropertySets[2].populateFromJSON(config::paths::selectDataDirForFile("property_sets/" + deviceProfile.controllerPropertySetNames[1] + ".json")))
     {
         ABORT("Failed to load property set %s", deviceProfile.controllerPropertySetNames[1].c_str());
     }
@@ -80,7 +80,7 @@ Backend::Backend()
     this->deviceRenderModelNames[2] = deviceProfile.controllerRenderModelNames[1];
     for (int i = 0; i < 3; i++)
     {
-        if (!this->renderModelLoader->addDefinitionFromJSON(config::paths::dataDir + "/render_models/" + this->deviceRenderModelNames[i] + ".json"))
+        if (!this->renderModelLoader->addDefinitionFromJSON(config::paths::selectDataDirForFile("render_models/" + this->deviceRenderModelNames[i] + ".json")))
         {
             LOG("Failed to load render model %s", this->deviceRenderModelNames[i].c_str());
         }

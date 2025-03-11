@@ -10,21 +10,23 @@ Linux only. Supports OpenGL and Vulkan clients.
 
 VapoR uses the CMake build system.
 
-Set flags in `src/log/log.h` to enable trace log output or to disable all log output (log output is very spammy at present and may cause games to slow down if your terminal or log file can't keep up).
+Set `VAPOR_LOG_TRACE=ON` to enable trace log output or `VAPOR_LOG_SILENT=ON` to disable all log output (log output is very spammy at present and may cause games to slow down if your terminal or log file can't keep up).
 
-Make sure that the `data` directory is copied/linked to `$HOME/.VapoR` or that you set the `VAPOR_DIR` environment variable (see below).
+Running `make install` will copy VapoR's `vrclient.so` file and the data files needed by VapoR to the expected places (files are installed under `${CMAKE_INSTALL_PREFIX}/lib/VapoR` and `${CMAKE_INSTALL_PREFIX}/share/VapoR`).
 
-Set your `~/.config/openvr/openvrpaths.vrpath` file to point to VapoR's `vrclient.so`.
+Copy the `openvrpaths.vrpath` file from the build output directory or the installed `${CMAKE_INSTALL_PREFIX}/lib/VapoR` directory to your `~/.config/openvr/openvrpaths.vrpath` file (beware that Steam will usually overwrite this file when opened/closed).
+
+If you don't want to run `make install`, you will need to set up VapoR's `vrclient.so` file somewhere with the required `bin/linux64/vrclient.so` directory structure and edit your `~/.config/openvr/openvrpaths.vrpath` accordingly. You will also need to copy the data files to your home directory or set the `VAPOR_DIR` environment variable to point to the data location (see below).
 
 # Config
 
 ## Paths
 
-VapoR looks for all data in the "VapoR data directory". By default this is `$HOME/.VapoR`, but this can be changed by using the `VAPOR_DIR` environment variable (e.g. for portable or app-specific installation).
+VapoR loads config from `${CMAKE_INSTALL_PREFIX}/share/VapoR/config.json`, `$XDG_CONFIG_HOME/VapoR/config.json` (by default this is `$HOME/.config/VapoR/config.json`), and `vapor_config.json` in the current working directory (for Steam games this is usually the "top-level" directory under which the game is installed, e.g. `~/.steam/steam/steamapps/common/Derail Valley/vapor_config.json`). Options set in the current working directory take precedence over options in the global config file, and options in the global config file take precedence over options in the installed system default config file.
 
-VapoR looks for a config file named `config.json` in the VapoR data directory and `vapor_config.json` in the current working directory (for Steam games this is usually the "top-level" directory under which the game is installed, e.g. `~/.steam/steam/steamapps/common/Derail Valley`). Options set in the current working directory take precedence over options in the global config file.
+VapoR loads device profiles, property sets, and render models from `${CMAKE_INSTALL_PREFIX}/share/VapoR` and `$XDG_DATA_HOME/VapoR` (by default this is `$HOME/.local/share/VapoR`).
 
-VapoR loads device profiles, property sets, and render models from the VapoR data directory.
+Both of these directories can be overridden using the `VAPOR_DIR` environment variable (e.g. for portable or app-specific installation). If set, this will replace `$XDG_CONFIG_HOME/VapoR/config.json` and `$XDG_DATA_HOME/VapoR` in the config and data search paths (config will be loaded from `$VAPOR_DIR/config.json`). Install prefix directories are still searched if they exist.
 
 For games that use action set input, VapoR will try to load a custom input binding from the file `vapor_binding.json` in the current working directory, if it exists and matches the configured input profile. If this binding cannot be loaded then it will fall back to the game's provided default binding.
 

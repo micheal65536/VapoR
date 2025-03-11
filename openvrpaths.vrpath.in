@@ -1,0 +1,7 @@
+{
+	"jsonid": "vrpathreg",
+	"runtime": [
+		"${CMAKE_INSTALL_FULL_LIBDIR}/VapoR"
+	],
+	"version": 1
+}

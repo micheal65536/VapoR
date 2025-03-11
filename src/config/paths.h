@@ -4,7 +4,11 @@
 
 namespace vapor::config::paths
 {
-    extern std::string dataDir;
+    extern std::string systemDataDir;
+    extern std::string userConfigDir;
+    extern std::string userDataDir;
 
-    void setDataDir();
+    std::string selectDataDirForFile(const std::string& relativePath);
+
+    void setDataDirs();
 }
