@@ -1,0 +1,15 @@
+{
+    "input_profile": "vive_controller",
+
+    "hmd": {
+        "properties": "steamvr_vive_hmd"
+    },
+    "controller_left": {
+        "properties": "steamvr_vive_controller_left",
+        "render_model": "vr_controller_vive_1_5"
+    },
+    "controller_right": {
+        "properties": "steamvr_vive_controller_right",
+        "render_model": "vr_controller_vive_1_5"
+    }
+}

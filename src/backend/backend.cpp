@@ -10,6 +10,7 @@
 
 #include "input.h"
 #include "input_profiles/oculus_touch.h"
+#include "input_profiles/vive_controller.h"
 
 #include <GL/glx.h>
 #include <GL/glext.h>
@@ -55,6 +56,10 @@ Backend::Backend()
     if (deviceProfile.inputProfileName == "oculus_touch")
     {
         this->inputProfile = new input_profiles::OculusTouch();
+    }
+    else if (deviceProfile.inputProfileName == "vive_controller")
+    {
+        this->inputProfile = new input_profiles::ViveController();
     }
     else
     {
