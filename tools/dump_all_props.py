@@ -239,7 +239,8 @@ for id, type in known_properties.items():
         elif type == 'string':
             value = i_system.getStringTrackedDeviceProperty(device_index, id)
         elif type == 'matrix34':
-            value = i_system.getMatrix34TrackedDeviceProperty(device_index, id)
+            m = struct.unpack('=ffffffffffff', bytes(i_system.getMatrix34TrackedDeviceProperty(device_index, id)))
+            value = [[m[0], m[1], m[2], m[3]], [m[4], m[5], m[6], m[7]], [m[8], m[9], m[10], m[11]]]
         elif type.startswith('array '):
             element_type = type[len('array '):]
             type = 'array'
