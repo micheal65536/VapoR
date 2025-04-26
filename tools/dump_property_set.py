@@ -29,9 +29,8 @@ properties['model_name'] = try_get_property(1001)
 properties['serial_number'] = try_get_property(1002)
 properties['manufacturer_name'] = try_get_property(1005)
 properties['registered_device_type'] = try_get_property(1036)
-attached_device_id = try_get_property(3000, optional=True)
-if attached_device_id != None:
-    properties['attached_device_id'] = attached_device_id
+properties['controller_type'] = try_get_property(7000)
+properties['attached_device_id'] = try_get_property(3000, optional=True)
 
 with open(sys.argv[2], 'wt') as file:
     json.dump(properties, file)

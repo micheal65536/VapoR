@@ -305,6 +305,8 @@ int32_t SystemImpl::getInt32TrackedDeviceProperty(uint32_t index, TrackedDeviceP
     {
         case TrackedDeviceProperty::PROPERTY_DEVICE_CLASS:
             return index == 0 ? TrackedDeviceClass::DEVICE_CLASS_HMD : TrackedDeviceClass::DEVICE_CLASS_CONTROLLER;
+        case TrackedDeviceProperty::PROPERTY_CONTROLLER_HAND_SELECTION_PRIORITY:
+            return 0;
     }
 
     if (index == 0)
@@ -483,6 +485,8 @@ uint32_t SystemImpl::getStringTrackedDeviceProperty(uint32_t index, TrackedDevic
             return returnStringTrackedDeviceProperty(devicePropertySet.registeredDeviceType, buffer, bufferSize, error);
         case TrackedDeviceProperty::PROPERTY_ACTUAL_SYSTEM_NAME:
             return returnStringTrackedDeviceProperty("VapoR", buffer, bufferSize, error);
+        case TrackedDeviceProperty::PROPERTY_CONTROLLER_TYPE:
+            return returnStringTrackedDeviceProperty(devicePropertySet.controllerType, buffer, bufferSize, error);
     }
 
     if (index == 0)

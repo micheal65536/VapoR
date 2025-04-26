@@ -19,6 +19,7 @@ namespace vapor
             std::string serialNumber;
             std::string manufacturerName;
             std::string registeredDeviceType;
+            std::string controllerType;
             std::string attachedDeviceId;
     };
 }

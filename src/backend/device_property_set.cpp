@@ -26,7 +26,8 @@ bool DevicePropertySet::populateFromJSON(const std::string& filePath)
         serialNumber = j.at("serial_number");
         manufacturerName = j.at("manufacturer_name");
         registeredDeviceType = j.at("registered_device_type");
-        attachedDeviceId = j.contains("attached_device_id") ? j.at("attached_device_id") : "";
+        controllerType = j.at("controller_type");
+        attachedDeviceId = j.contains("attached_device_id") && !j.at("attached_device_id").is_null() ? j.at("attached_device_id") : "";
 
         return true;
     }

@@ -199,7 +199,21 @@ known_properties = {
     3004: 'int32',
     3005: 'int32',
     3006: 'int32',
-    3007: 'int32'
+    3007: 'int32',
+
+    4000: 'float',
+    4001: 'float',
+    4002: 'float',
+    4003: 'float',
+    4004: 'float',
+    4005: 'float',
+    4006: 'string',
+    4007: 'boolean',
+    4008: 'int32',
+
+    7000: 'string',
+    7001: 'string',
+    7002: 'int32'
 }
 
 if len(sys.argv) != 3:
