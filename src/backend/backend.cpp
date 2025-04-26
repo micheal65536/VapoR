@@ -511,8 +511,8 @@ void Backend::step(XrTime displayTime, XrDuration displayDuration)
             this->inputProfile->getOpenVRControllerPose(1, openVRInputStates.data()).data.pose
         },
         .legacyInputStates = {
-            this->inputProfile->getOpenVRLegacyInputState(0, openXRInputStates),
-            this->inputProfile->getOpenVRLegacyInputState(1, openXRInputStates)
+            this->inputProfile->getOpenVRLegacyInputState(0, openVRInputStates.data()),
+            this->inputProfile->getOpenVRLegacyInputState(1, openVRInputStates.data())
         }
     });
 

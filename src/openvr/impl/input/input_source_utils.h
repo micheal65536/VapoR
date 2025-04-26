@@ -1,7 +1,6 @@
 #pragma once
 
 #include "input_devices.h"
-#include "binding.h"
 #include "backend/input.h"
 
 namespace openvr
@@ -80,27 +79,6 @@ namespace openvr
                     return "/user/waist/left";
                 case Device::CAMERA:
                     return "/user/camera/right";
-                default:
-                    return "";
-            }
-        }
-
-        inline std::string getSuffixedInputSourcePath(const std::string& basePath, vapor::OpenVRInputSubpath subpath)
-        {
-            switch (subpath)
-            {
-                case vapor::OpenVRInputSubpath::NONE:
-                    return basePath;
-                case vapor::OpenVRInputSubpath::CLICK:
-                    return basePath + "/click";
-                case vapor::OpenVRInputSubpath::TOUCH:
-                    return basePath + "/touch";
-                case vapor::OpenVRInputSubpath::VALUE:
-                    return basePath + "/value";
-                case vapor::OpenVRInputSubpath::X:
-                    return basePath + "/x";
-                case vapor::OpenVRInputSubpath::Y:
-                    return basePath + "/y";
                 default:
                     return "";
             }

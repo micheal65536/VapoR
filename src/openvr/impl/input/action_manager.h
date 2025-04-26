@@ -9,7 +9,7 @@
 #include "backend/input.h"
 #include "backend/input_profile.h"
 #include "input_devices.h"
-#include "binding.h"
+#include "mode.h"
 #include "input_state.h"
 
 namespace openvr
@@ -17,6 +17,36 @@ namespace openvr
     namespace input
     {
         class ActionManager;
+
+        class Action;
+
+        class ActionSet
+        {
+            friend class ActionManager;
+            friend class Action;
+
+            public:
+                //
+
+            private:
+                std::map<std::string, Action*> actions;
+
+                struct Source
+                {
+                    struct OpenVRInput
+                    {
+                        int inputIndex;
+                        uint64_t inputSourceHandle;
+                    };
+
+                    Mode* mode;
+                    Device device;
+                    std::vector<OpenVRInput> openVRInputs;
+
+                    std::vector<InputState> inputStates;
+                };
+                std::vector<Source> sources;
+        };
 
         class Action
         {
@@ -29,12 +59,10 @@ namespace openvr
 
                 struct Source
                 {
-                    Binding* binding;
-                    Device device;
-                    std::vector<int> openVRInputIndexes;
+                    ActionSet::Source* source;
+                    int sourceOutputIndex;
+                    Device device; // copied from action set source for convenience when reading the input state from the action
 
-                    bool active;
-                    bool activePrevious;
                     InputState inputState;
                     InputState inputStatePrevious;
                 };
@@ -60,17 +88,6 @@ namespace openvr
                 std::vector<HapticOutput> hapticOutputs;
         };
 
-        class ActionSet
-        {
-            friend class ActionManager;
-
-            public:
-                //
-
-            private:
-                std::map<std::string, Action*> actions;
-        };
-
         class ActionManager
         {
             public:
@@ -82,7 +99,7 @@ namespace openvr
                 bool loadBinding(const std::string& filePath, vapor::InputProfile* inputProfile);
                 void loadDefaultBindingForControllerProfile(vapor::InputProfile* inputProfile);
 
-                void update(const ActiveActionSet* activeActionSets, int actionSetSize, int activeActionSetsCount, const vapor::OpenVRInputState* inputStates);
+                void update(const ActiveActionSet* activeActionSets, int actionSetSize, int activeActionSetsCount, const vapor::OpenVRInputState* inputStates, long currentTime);
 
                 ActionSet* findActionSet(const std::string& name);
                 Action* findAction(const std::string& name);

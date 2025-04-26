@@ -41,47 +41,18 @@ static inline std::string stringToLowercase(const std::string& in)
     return out;
 }
 
-static inline InputState getDefaultInputState(const InputType& inputType, uint64_t inputSourceHandle)
-{
-    switch (inputType)
-    {
-        case InputType::DIGITAL:
-            return InputState {
-                .type = InputType::DIGITAL,
-                .data = {.digital = false},
-                .inputSourceHandle = inputSourceHandle,
-                .changeTime = 0
-            };
-        case InputType::ANALOG:
-            return InputState {
-                .type = InputType::ANALOG,
-                .data = {.analog = {0.0f, 0.0f, 0.0f}},
-                .inputSourceHandle = inputSourceHandle,
-                .changeTime = 0
-            };
-    }
-}
-
 static inline InputState convertInputType(const InputState& inputState, const InputType& inputType)
 {
     if (inputState.type == inputType)
     {
         return inputState;
     }
+    if (inputState.type == InputType::EMPTY)
+    {
+        return inputState;
+    }
     switch (inputType)
     {
-        case InputType::DIGITAL:
-            switch (inputState.type)
-            {
-                case InputType::ANALOG:
-                    return InputState {
-                        .type = InputType::DIGITAL,
-                        .data = {.digital = inputState.data.analog.x > 0.5f},
-                        .inputSourceHandle = inputState.inputSourceHandle,
-                        .changeTime = inputState.changeTime
-                    };
-            }
-            break;
         case InputType::ANALOG:
             switch (inputState.type)
             {
@@ -95,7 +66,9 @@ static inline InputState convertInputType(const InputState& inputState, const In
             }
             break;
     }
-    return getDefaultInputState(inputType, inputState.inputSourceHandle);
+    return InputState {
+        .type = InputType::EMPTY
+    };
 }
 
 bool ActionManager::populateFromJSON(const std::string& filePath)
@@ -196,13 +169,17 @@ bool ActionManager::loadBinding(const std::string& filePath, vapor::InputProfile
     for (auto& it: this->actions)
     {
         Action& action = it.second;
-        for (Action::Source& source: action.sources)
-        {
-            delete source.binding;
-        }
         action.sources.clear();
         action.poseSources.clear();
         action.hapticOutputs.clear();
+    }
+    for (auto& it: this->actionSets)
+    {
+        ActionSet& actionSet = it.second;
+        for (ActionSet::Source& source: actionSet.sources)
+        {
+            delete source.mode;
+        }
     }
 
     try
@@ -222,84 +199,83 @@ bool ActionManager::loadBinding(const std::string& filePath, vapor::InputProfile
         for (const auto& it: j.at("bindings").items())
         {
             const std::string& actionSetName = stringToLowercase(it.key());
+            ActionSet* actionSet = this->findActionSet(actionSetName);
+            if (actionSet == nullptr)
+            {
+                LOG("Action set %s does not exist", actionSetName.c_str());
+                continue;
+            }
 
             if (it.value().contains("sources"))
             {
+                actionSet->sources.reserve(it.value().at("sources").size());
+
                 for (const auto& source: it.value().at("sources"))
                 {
                     const std::string& basePath = stringToLowercase(source.at("path"));
-                    vapor::OpenVRInputType inputType = vapor::OpenVRInputType::NONE;
+                    std::vector<Mode::ComponentDescription> components;
+                    std::vector<int> componentInputIndexes;
                     for (int i = 0; i < inputProfile->getOpenVRInputsCount(); i++)
                     {
-                        if (inputProfile->getOpenVRInputs()[i].path == basePath)
+                        const vapor::OpenVRInputDescription& inputDescription = inputProfile->getOpenVRInputs()[i];
+                        if (inputDescription.path == basePath || inputDescription.path.starts_with(basePath + "/"))
                         {
-                            inputType = inputProfile->getOpenVRInputs()[i].type;
-                            break;
+                            std::string subpath = inputDescription.path == basePath ? "" : inputDescription.path.substr(basePath.length() + 1);
+                            components.push_back({.subpath = subpath, .type = inputDescription.type});
+                            componentInputIndexes.push_back(i);
                         }
-                    }
-                    if (inputType == vapor::OpenVRInputType::NONE)
-                    {
-                        LOG("Input source path %s not found in profile %s", basePath.c_str(), inputProfile->getOpenVRProfileName().c_str());
-                        continue;
                     }
 
-                    // TODO: toggle_button mode, scalar_constant mode
-                    enum class SourceMode
+                    Mode* mode;
+                    const std::string& modeName = stringToLowercase(source.at("mode"));
+                    json::object_t parameters = source.contains("parameters") ? source.at("parameters") : json::object();
+                    if (modeName == "button")
                     {
-                        BUTTON,
-                        TRIGGER,
-                        JOYSTICK,
-                        DPAD_TOUCH,
-                        DPAD_CLICK
-                    };
-                    const std::string& mode = stringToLowercase(source.at("mode"));
-                    SourceMode sourceMode;
-                    if (mode == "button")
-                    {
-                        sourceMode = SourceMode::BUTTON;
+                        mode = new ButtonMode(parameters);
                     }
-                    else if (mode == "trigger")
+                    else if (modeName == "trigger")
                     {
-                        sourceMode = SourceMode::TRIGGER;
+                        mode = new TriggerMode(parameters);
                     }
-                    else if (mode == "joystick")
+                    else if (modeName == "joystick")
                     {
-                        sourceMode = SourceMode::JOYSTICK;
+                        mode = new JoystickMode(parameters);
                     }
-                    else if (mode == "dpad")
+                    else if (modeName == "trackpad")
                     {
-                        if (!source.contains("parameters") || !source.at("parameters").contains("sub_mode"))
-                        {
-                            sourceMode = SourceMode::DPAD_CLICK;
-                        }
-                        else
-                        {
-                            const std::string& subMode = source.at("parameters").at("sub_mode");
-                            if (subMode == "touch")
-                            {
-                                sourceMode = SourceMode::DPAD_TOUCH;
-                            }
-                            else if (subMode == "click")
-                            {
-                                sourceMode = SourceMode::DPAD_CLICK;
-                            }
-                            else
-                            {
-                                LOG("Unknown dpad sub mode %s", subMode.c_str());
-                                continue;
-                            }
-                        }
+                        mode = new TrackpadMode(parameters);
+                    }
+                    /*else if (modeName == "dpad")
+                    {
+                        mode = new DpadMode(parameters);
+                    }*/
+                    /*else if (modeName == "scroll")
+                    {
+                        // TODO: profile input type
+                        mode = new ScrollMode(parameters);
+                    }*/
+                    else if (modeName == "toggle_button")
+                    {
+                        mode = new ToggleButtonMode(parameters);
+                    }
+                    else if (modeName == "scalar_constant")
+                    {
+                        mode = new ScalarConstantMode(parameters);
+                    }
+                    else if (modeName == "force_sensor")
+                    {
+                        mode = new ForceSensorMode(parameters);
                     }
                     else
                     {
-                        LOG("Unknown source mode %s", mode.c_str());
+                        LOG("Unknown source mode %s", modeName.c_str());
                         continue;
                     }
 
+                    std::map<std::string, Action*> connectedModeOutputs;
                     for (const auto& input: source.at("inputs").items())
                     {
                         const std::string& actionName = stringToLowercase(input.value().at("output"));
-                        // TODO: does "output" object ever contain extra parameters?
                         if (!actionName.starts_with(actionSetName + "/"))
                         {
                             LOG("Action name %s is not valid for action set %s", actionName.c_str(), actionSetName.c_str());
@@ -312,96 +288,70 @@ bool ActionManager::loadBinding(const std::string& filePath, vapor::InputProfile
                             continue;
                         }
 
-                        Binding* binding = nullptr;
                         const std::string& inputName = stringToLowercase(input.key());
-                        switch (sourceMode)
-                        {
-                            case SourceMode::BUTTON:
-                                if (inputName == "click")
-                                {
-                                    binding = new ButtonBinding(ButtonBinding::Input::CLICK);
-                                }
-                                else if (inputName == "touch")
-                                {
-                                    binding = new ButtonBinding(ButtonBinding::Input::TOUCH);
-                                }
-                                break;
-                            case SourceMode::TRIGGER:
-                                if (inputName == "pull")
-                                {
-                                    binding = new TriggerBinding(TriggerBinding::Input::PULL);
-                                }
-                                else if (inputName == "click")
-                                {
-                                    binding = new TriggerBinding(TriggerBinding::Input::CLICK);
-                                }
-                                else if (inputName == "touch")
-                                {
-                                    binding = new TriggerBinding(TriggerBinding::Input::TOUCH);
-                                }
-                                break;
-                            case SourceMode::JOYSTICK:
-                                if (inputName == "position")
-                                {
-                                    binding = new JoystickBinding(JoystickBinding::Input::POSITION);
-                                }
-                                else if (inputName == "click")
-                                {
-                                    binding = new JoystickBinding(JoystickBinding::Input::CLICK);
-                                }
-                                else if (inputName == "touch")
-                                {
-                                    binding = new JoystickBinding(JoystickBinding::Input::TOUCH);
-                                }
-                                break;
-                            case SourceMode::DPAD_TOUCH:
-                            case SourceMode::DPAD_CLICK:
-                                if (inputName == "north")
-                                {
-                                    binding = new DpadBinding(DpadBinding::Input::NORTH, sourceMode == SourceMode::DPAD_CLICK);
-                                }
-                                else if (inputName == "east")
-                                {
-                                    binding = new DpadBinding(DpadBinding::Input::EAST, sourceMode == SourceMode::DPAD_CLICK);
-                                }
-                                else if (inputName == "south")
-                                {
-                                    binding = new DpadBinding(DpadBinding::Input::SOUTH, sourceMode == SourceMode::DPAD_CLICK);
-                                }
-                                else if (inputName == "west")
-                                {
-                                    binding = new DpadBinding(DpadBinding::Input::WEST, sourceMode == SourceMode::DPAD_CLICK);
-                                }
-                                else if (inputName == "center")
-                                {
-                                    binding = new DpadBinding(DpadBinding::Input::CENTER, sourceMode == SourceMode::DPAD_CLICK);
-                                }
-                                break;
-                        }
-                        if (binding == nullptr)
-                        {
-                            LOG("Unknown input %s for source mode %s", inputName.c_str(), mode.c_str());
-                            continue;
-                        }
+                        connectedModeOutputs[inputName] = action;
+                    }
 
-                        std::vector<int> openVRInputIndexes = binding->bindToProfile(inputType, basePath, inputProfile->getOpenVRInputs(), inputProfile->getOpenVRInputsCount());
-                        if (openVRInputIndexes.size() == 0)
+                    const std::vector<std::string>& modeOutputs = mode->getProvidedOutputNames();
+                    bool connectedOutputs[modeOutputs.size()];
+                    for (int i = 0; i < modeOutputs.size(); i++)
+                    {
+                        connectedOutputs[i] = connectedModeOutputs.contains(modeOutputs[i]);
+                    }
+                    std::vector<int> modeGrabbedComponentIndexes = mode->connect(components, connectedOutputs);
+
+                    std::vector<ActionSet::Source::OpenVRInput> openVRInputs;
+                    uint64_t inputSourceHandles[modeGrabbedComponentIndexes.size()];
+                    for (int i = 0; i < modeGrabbedComponentIndexes.size(); i++)
+                    {
+                        int componentIndex = modeGrabbedComponentIndexes[i];
+                        if (componentIndex != -1)
                         {
-                            LOG("Unable to bind mode %s to path %s", mode.c_str(), basePath.c_str());
-                            continue;
+                            int inputIndex = componentInputIndexes[componentIndex];
+                            uint64_t inputSourceHandle = pathHandleRegistry.getHandle(inputProfile->getOpenVRInputs()[inputIndex].path);
+                            openVRInputs.push_back(ActionSet::Source::OpenVRInput {
+                                .inputIndex = inputIndex,
+                                .inputSourceHandle = inputSourceHandle
+                            });
+                            inputSourceHandles[i] = inputSourceHandle;
                         }
+                        else
+                        {
+                            openVRInputs.push_back(ActionSet::Source::OpenVRInput {
+                                .inputIndex = -1,
+                                .inputSourceHandle = 0
+                            });
+                            inputSourceHandles[i] = 0;
+                        }
+                    }
 
-                        Action::Source source {
-                            .binding = binding,
-                            .device = getDeviceFromInputSourcePath(basePath, true),
-                            .openVRInputIndexes = openVRInputIndexes,
+                    ActionSet::Source actionSetSource {
+                        .mode = mode,
+                        .device = getDeviceFromInputSourcePath(basePath, true),
+                        .openVRInputs = openVRInputs,
 
-                            .active = false,
-                            .activePrevious = false,
-                            .inputState = binding->getInitialState(),
-                            .inputStatePrevious = binding->getInitialState()
-                        };
-                        action->sources.push_back(source);
+                        .inputStates = mode->getInitialStates(inputSourceHandles)
+                    };
+                    actionSet->sources.push_back(actionSetSource);
+                    for (int i = 0; i < modeOutputs.size(); i++)
+                    {
+                        const std::string& name = modeOutputs[i];
+                        if (connectedOutputs[i] && connectedModeOutputs.contains(name))
+                        {
+                            Action* action = connectedModeOutputs[name];
+                            if (action != nullptr)
+                            {
+                                Action::Source source {
+                                    .source = &actionSet->sources.back(),
+                                    .sourceOutputIndex = i,
+                                    .device = actionSetSource.device,
+
+                                    .inputState = actionSetSource.inputStates[i],
+                                    .inputStatePrevious = actionSetSource.inputStates[i]
+                                };
+                                action->sources.push_back(source);
+                            }
+                        }
                     }
                 }
             }
@@ -549,16 +499,32 @@ static inline void markConsumedInput(std::unordered_set<int>& usedInputs, const 
     }
 }
 
-static inline bool hasInputStateChanged(const InputState& a, const InputState& b)
+static inline InputState convertOpenVRInputState(const vapor::OpenVRInputState& inputState, uint64_t inputSourceHandle)
 {
-    if (a.type != InputType::DIGITAL || b.type != InputType::DIGITAL)
+    switch (inputState.type)
     {
-        return true;
+        case vapor::OpenVRInputType::BOOLEAN:
+            return InputState {
+                .type = InputType::DIGITAL,
+                .data = {.digital = inputState.data.b},
+                .inputSourceHandle = inputSourceHandle,
+                .changeTime = inputState.changeTime
+            };
+        case vapor::OpenVRInputType::FLOAT:
+            return InputState {
+                .type = InputType::ANALOG,
+                .data = {.analog = {inputState.data.f, 0.0f, 0.0f}},
+                .inputSourceHandle = inputSourceHandle,
+                .changeTime = inputState.changeTime
+            };
     }
-    return a.data.digital != b.data.digital || a.inputSourceHandle != b.inputSourceHandle;
+    return InputState {
+        .type = InputType::EMPTY,
+        .inputSourceHandle = inputSourceHandle
+    };
 }
 
-void ActionManager::update(const openvr::ActiveActionSet* activeActionSets, int actionSetSize, int activeActionSetsCount, const vapor::OpenVRInputState* inputStates)
+void ActionManager::update(const openvr::ActiveActionSet* activeActionSets, int actionSetSize, int activeActionSetsCount, const vapor::OpenVRInputState* inputStates, long currentTime)
 {
     TRACE_F("%d", activeActionSetsCount);
 
@@ -568,8 +534,7 @@ void ActionManager::update(const openvr::ActiveActionSet* activeActionSets, int 
         for (Action::Source& source: action.sources)
         {
             source.inputStatePrevious = source.inputState;
-            source.activePrevious = source.active;
-            source.active = false;
+            source.inputState = InputState {.type = InputType::EMPTY};
         }
         for (Action::PoseSource& poseSource: action.poseSources)
         {
@@ -615,6 +580,28 @@ void ActionManager::update(const openvr::ActiveActionSet* activeActionSets, int 
 
             if (actionSet != nullptr)
             {
+                for (ActionSet::Source& source: actionSet->sources)
+                {
+                    if (controllerFilter == 0 || source.device == controllerFilter)
+                    {
+                        std::vector<InputState> collectedInputStates;
+                        for (const ActionSet::Source::OpenVRInput& sourceInput: source.openVRInputs)
+                        {
+                            if (sourceInput.inputIndex != -1 && !usedInputsCopy.contains(sourceInput.inputIndex))
+                            {
+                                collectedInputStates.push_back(convertOpenVRInputState(inputStates[sourceInput.inputIndex], sourceInput.inputSourceHandle));
+                                usedInputs.insert(sourceInput.inputIndex);
+                            }
+                            else
+                            {
+                                collectedInputStates.push_back({.type = InputType::EMPTY, .inputSourceHandle = sourceInput.inputSourceHandle});
+                            }
+                        }
+
+                        source.inputStates = source.mode->update(collectedInputStates.data(), currentTime);
+                    }
+                }
+
                 for (auto& it: actionSet->actions)
                 {
                     Action* action = it.second;
@@ -623,21 +610,7 @@ void ActionManager::update(const openvr::ActiveActionSet* activeActionSets, int 
                     {
                         if (controllerFilter == 0 || source.device == controllerFilter)
                         {
-                            source.active = true;
-                            if (checkConsumedInput(usedInputsCopy, source.openVRInputIndexes))
-                            {
-                                std::vector<vapor::OpenVRInputState> collectedInputStates;
-                                for (int index: source.openVRInputIndexes)
-                                {
-                                    collectedInputStates.push_back(inputStates[index]);
-                                }
-                                InputState inputState = convertInputType(source.binding->update(collectedInputStates), action->type);
-                                if (hasInputStateChanged(source.inputState, inputState))
-                                {
-                                    source.inputState = inputState;
-                                }
-                                markConsumedInput(usedInputs, source.openVRInputIndexes);
-                            }
+                            source.inputState = convertInputType(source.source->inputStates[source.sourceOutputIndex], action->type);
                         }
                     }
 
@@ -658,6 +631,28 @@ void ActionManager::update(const openvr::ActiveActionSet* activeActionSets, int 
 
             if (secondaryActionSet != nullptr)
             {
+                for (ActionSet::Source& source: actionSet->sources)
+                {
+                    if (source.device != controllerFilter)
+                    {
+                        std::vector<InputState> collectedInputStates;
+                        for (const ActionSet::Source::OpenVRInput& sourceInput: source.openVRInputs)
+                        {
+                            if (sourceInput.inputIndex != -1 && !usedInputsCopy.contains(sourceInput.inputIndex))
+                            {
+                                collectedInputStates.push_back(convertOpenVRInputState(inputStates[sourceInput.inputIndex], sourceInput.inputSourceHandle));
+                                usedInputs.insert(sourceInput.inputIndex);
+                            }
+                            else
+                            {
+                                collectedInputStates.push_back({.type = InputType::EMPTY, .inputSourceHandle = sourceInput.inputSourceHandle});
+                            }
+                        }
+
+                        source.inputStates = source.mode->update(collectedInputStates.data(), currentTime);
+                    }
+                }
+
                 for (auto& it: secondaryActionSet->actions)
                 {
                     Action* action = it.second;
@@ -666,21 +661,7 @@ void ActionManager::update(const openvr::ActiveActionSet* activeActionSets, int 
                     {
                         if (source.device != controllerFilter)
                         {
-                            source.active = true;
-                            if (checkConsumedInput(usedInputsCopy, source.openVRInputIndexes))
-                            {
-                                std::vector<vapor::OpenVRInputState> collectedInputStates;
-                                for (int index: source.openVRInputIndexes)
-                                {
-                                    collectedInputStates.push_back(inputStates[index]);
-                                }
-                                InputState inputState = convertInputType(source.binding->update(collectedInputStates), action->type);
-                                if (hasInputStateChanged(source.inputState, inputState))
-                                {
-                                    source.inputState = inputState;
-                                }
-                                markConsumedInput(usedInputs, source.openVRInputIndexes);
-                            }
+                            source.inputState = convertInputType(source.source->inputStates[source.sourceOutputIndex], action->type);
                         }
                     }
 

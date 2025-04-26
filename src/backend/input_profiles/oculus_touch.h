@@ -16,11 +16,13 @@ namespace vapor
                 virtual std::string getOpenVRProfileName();
                 virtual int getOpenVRInputsCount();
                 virtual const OpenVRInputDescription* getOpenVRInputs();
+                virtual int getOpenVRProfileInputsCount();
+                virtual const OpenVRProfileInputDescription* getOpenVRProfileInputs();
                 virtual LegacyInputDescription getOpenVRLegacyInputDescription();
 
                 virtual OpenVRInputState getOpenVRInputState(int inputIndex, const OpenXRInputState* openXRInputStates);
                 virtual OpenVRInputState getOpenVRControllerPose(int controllerIndex, const OpenVRInputState* openVRInputStates);
-                virtual LegacyInputState getOpenVRLegacyInputState(int controllerIndex, const OpenXRInputState* openXRInputStates);
+                virtual LegacyInputState getOpenVRLegacyInputState(int controllerIndex, const OpenVRInputState* openVRInputStates);
 
                 virtual int getOpenXRHapticActionIndex(int openVRInputIndex);
                 virtual int getOpenXRHapticActionIndexForLegacyInput(int controllerIndex);

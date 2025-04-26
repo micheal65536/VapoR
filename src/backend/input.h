@@ -35,30 +35,17 @@ namespace vapor
     enum class OpenVRInputType
     {
         NONE,
-        BUTTON,
-        TRIGGER,
-        JOYSTICK,
-        TRACKPAD,
+        BOOLEAN,
+        FLOAT,
         POSE,
         SKELETON,
         HAPTIC
-    };
-
-    enum class OpenVRInputSubpath
-    {
-        NONE,
-        CLICK,
-        TOUCH,
-        VALUE,
-        X,
-        Y
     };
 
     struct OpenVRInputDescription
     {
         std::string path;
         OpenVRInputType type;
-        OpenVRInputSubpath subpath;
     };
 
     struct OpenXRInputState
@@ -85,8 +72,29 @@ namespace vapor
             PoseSet pose;
         };
 
+        OpenVRInputType type;
         Data data;
         long changeTime;
     };
 
+    enum class OpenVRProfileInputType
+    {
+        NONE,
+        BUTTON,
+        TRIGGER,
+        JOYSTICK,
+        TRACKPAD,
+        POSE,
+        SKELETON,
+        HAPTIC
+    };
+
+    struct OpenVRProfileInputDescription
+    {
+        std::string path;
+        OpenVRProfileInputType type;
+        bool click;
+        bool touch;
+        bool value;
+    };
 }

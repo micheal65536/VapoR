@@ -49,8 +49,7 @@ VapoR includes various "fixes" that can be manually set for specific games if ne
 * Getting device poses
 * Legacy input
 * Action set input
-  - Some advanced source modes such as toggle button or button long-press are not yet implemented (you will need to use a binding without these source modes)
-  - Trackpads most likely don't work as I don't have any controllers with trackpads to test with (testers welcome!)
+  - Dpad and scroll source modes are not yet implemented (you will need to use a binding without these source modes)
 * Render models (missing textures)
 * Oculus Quest 2 and Quest 3 device profiles (from ALVR)
 * Derail Valley works (except loading screen)

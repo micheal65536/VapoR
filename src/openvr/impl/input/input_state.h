@@ -12,6 +12,7 @@ namespace openvr
     {
         enum class InputType
         {
+            EMPTY, // for input state which is currently inactive/blocked
             DIGITAL,
             ANALOG,
             POSE,

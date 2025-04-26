@@ -70,7 +70,7 @@ InputError InputImpl::updateActionState(ActiveActionSet* actionSets, uint32_t ac
 {
     if (this->clientCore.actionManager != nullptr)
     {
-        this->clientCore.actionManager->update(actionSets, actionSetSize, actionSetsCount, this->clientCore.backend->frameStates.getFrame(0).inputStates.data());
+        this->clientCore.actionManager->update(actionSets, actionSetSize, actionSetsCount, this->clientCore.backend->frameStates.getFrame(0).inputStates.data(), this->clientCore.backend->frameStates.getFrameTime(0));
         return InputError::INPUT_ERROR_NONE;
     }
     else
@@ -100,14 +100,14 @@ InputError InputImpl::getDigitalActionData(uint64_t action, InputDigitalActionDa
     {
         if (restrictToDevice == 0 || source.device == device)
         {
-            if (source.active)
+            if (source.inputState.type == input::InputType::DIGITAL)
             {
                 if (inputState == nullptr || (source.inputState.data.digital && !inputState->data.digital) || (source.inputState.data.digital == inputState->data.digital && source.inputState.changeTime > inputState->changeTime))
                 {
                     inputState = &source.inputState;
                 }
             }
-            if (source.activePrevious)
+            if (source.inputStatePrevious.type == input::InputType::DIGITAL)
             {
                 if (inputStatePrevious == nullptr || (source.inputStatePrevious.data.digital && !inputStatePrevious->data.digital) || (source.inputStatePrevious.data.digital == inputStatePrevious->data.digital && source.inputStatePrevious.changeTime > inputStatePrevious->changeTime))
                 {
@@ -150,14 +150,14 @@ InputError InputImpl::getAnalogActionData(uint64_t action, InputAnalogActionData
     {
         if (restrictToDevice == 0 || source.device == device)
         {
-            if (source.active)
+            if (source.inputState.type == input::InputType::ANALOG)
             {
                 if (inputState == nullptr || (source.inputState.data.analog > inputState->data.analog))
                 {
                     inputState = &source.inputState;
                 }
             }
-            if (source.activePrevious)
+            if (source.inputStatePrevious.type == input::InputType::ANALOG)
             {
                 if (inputStatePrevious == nullptr || (source.inputStatePrevious.data.analog > inputStatePrevious->data.analog))
                 {
@@ -384,7 +384,7 @@ InputError InputImpl::getActionOrigins(uint64_t actionSet, uint64_t action, uint
     int activeSourcesCount = 0;
     for (const input::Action::Source& source: action_->sources)
     {
-        if (source.active)
+        if (source.inputState.type != input::InputType::EMPTY)
         {
             activeSourcesCount++;
         }
@@ -404,7 +404,7 @@ InputError InputImpl::getActionOrigins(uint64_t actionSet, uint64_t action, uint
     int index = 0;
     for (const input::Action::Source& source: action_->sources)
     {
-        if (source.active)
+        if (source.inputState.type != input::InputType::EMPTY)
         {
             origins[index++] = source.inputState.inputSourceHandle;
         }
@@ -493,7 +493,11 @@ InputError InputImpl::getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInf
                 valid = true;
                 break;
             }
-            else if (fullPath == input::getSuffixedInputSourcePath(inputDescription.path, inputDescription.subpath))
+        }
+        for (int i = 0; i < inputProfile->getOpenVRProfileInputsCount(); i++)
+        {
+            const vapor::OpenVRProfileInputDescription& profileInputDescription = inputProfile->getOpenVRProfileInputs()[i];
+            if (fullPath == profileInputDescription.path)
             {
                 valid = true;
                 break;
