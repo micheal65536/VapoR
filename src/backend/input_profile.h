@@ -10,6 +10,8 @@ namespace vapor
     class InputProfile
     {
         public:
+            virtual ~InputProfile() = default;
+
             virtual std::string getOpenXRInteractionProfileName() = 0;
             virtual int getOpenXRInputsCount() = 0;
             virtual const OpenXRInputDescription* getOpenXRInputs() = 0;
