@@ -15,7 +15,7 @@
 #include <GL/glx.h>
 #include <GL/glext.h>
 
-#include <format>
+#include <string>
 #include <cmath>
 #include <cstring>
 
@@ -117,7 +117,7 @@ Backend::Backend()
                 actionType = XR_ACTION_TYPE_VIBRATION_OUTPUT;
                 break;
         }
-        OpenXR::Action* action = new OpenXR::Action(*this->actionSet, std::format("input_{}", i), std::format("Input {}", i), actionType, {});
+        OpenXR::Action* action = new OpenXR::Action(*this->actionSet, "input_" + std::to_string(i), "Input " + std::to_string(i), actionType, {});
         this->actions.push_back(action);
         OpenXR::ActionSet::ActionBinding binding(*action, inputs[i].path);
         actionSetBindings.push_back(binding);
