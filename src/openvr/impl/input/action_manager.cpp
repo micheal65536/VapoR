@@ -225,6 +225,16 @@ bool ActionManager::loadBinding(const std::string& filePath, vapor::InputProfile
                             componentInputIndexes.push_back(i);
                         }
                     }
+                    vapor::OpenVRProfileInputType profileInputType = vapor::OpenVRProfileInputType::NONE;
+                    for (int i = 0; i < inputProfile->getOpenVRProfileInputsCount(); i++)
+                    {
+                        const vapor::OpenVRProfileInputDescription& inputDescription = inputProfile->getOpenVRProfileInputs()[i];
+                        if (inputDescription.path == basePath)
+                        {
+                            profileInputType = inputDescription.type;
+                            break;
+                        }
+                    }
 
                     Mode* mode;
                     const std::string& modeName = stringToLowercase(source.at("mode"));
@@ -245,14 +255,13 @@ bool ActionManager::loadBinding(const std::string& filePath, vapor::InputProfile
                     {
                         mode = new TrackpadMode(parameters);
                     }
-                    /*else if (modeName == "dpad")
+                    else if (modeName == "dpad")
                     {
-                        mode = new DpadMode(parameters);
-                    }*/
+                        mode = new DpadMode(parameters, profileInputType);
+                    }
                     /*else if (modeName == "scroll")
                     {
-                        // TODO: profile input type
-                        mode = new ScrollMode(parameters);
+                        mode = new ScrollMode(parameters, profileInputType);
                     }*/
                     else if (modeName == "toggle_button")
                     {

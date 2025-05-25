@@ -216,10 +216,10 @@ namespace openvr
                 TrackpadMode(const nlohmann::json::object_t& parameters): JoystickMode(parameters) {}
         };
 
-        /*class DpadMode: public Mode
+        class DpadMode: public Mode
         {
             public:
-                DpadMode(const nlohmann::json::object_t& parameters);
+                DpadMode(const nlohmann::json::object_t& parameters, vapor::OpenVRProfileInputType profileInputType);
                 virtual std::vector<std::string> getProvidedOutputNames();
                 virtual std::vector<int> connect(const std::vector<ComponentDescription>& availableComponents, const bool* connectedOutputs);
                 virtual std::vector<InputState> getInitialStates(const uint64_t* inputSourceHandles);
@@ -232,8 +232,41 @@ namespace openvr
                     CLICK
                 };
                 SubMode subMode;
-                // TODO
-        };*/
+                float deadZone = 0.25f;
+                float overlap = 0.5f;
+                bool sticky = false;
+                ForceInput clickForceInput = ForceInput::NONE;
+                std::optional<float> clickActivateThreshold;
+                std::optional<float> clickDeactivateThreshold;
+                bool isJoystick;
+
+                bool forceInactive;
+                ClickFilter click;
+                long lastClickChangeTime = 0;
+                float lastX = 0.0f;
+                float lastY = 0.0f;
+                uint64_t lastPositionInputSourceHandle;
+                long lastPositionChangeTime = 0;
+
+                uint64_t outputInputSourceHandle;
+                struct DpadOutput
+                {
+                    bool state = false;
+                    long changeTime = 0;
+
+                    void configure(float deadZone, float overlap);
+                    bool update(float x, float y);
+
+                    private:
+                        float deadZone;
+                        float overlap;
+                };
+                DpadOutput north;
+                DpadOutput east;
+                DpadOutput south;
+                DpadOutput west;
+                DpadOutput center;
+        };
 
         /*class ScrollMode: public Mode
         {

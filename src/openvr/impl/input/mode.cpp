@@ -1025,14 +1025,24 @@ std::vector<InputState> JoystickMode::update(const InputState* inputStates, long
 
 //
 
-/*DpadMode::DpadMode(const nlohmann::json::object_t& parameters)
+DpadMode::DpadMode(const nlohmann::json::object_t& parameters, vapor::OpenVRProfileInputType profileInputType)
 {
     subMode = parameters.contains("sub_mode") && parameters.at("sub_mode") == "touch" ? SubMode::TOUCH : SubMode::CLICK;
 
-    // TODO
-    // sticky
-    // deadzone stuff
-    // click activate threshold ?
+    if (parameters.contains("deadzone_pct"))
+    {
+        deadZone = parameters.at("deadzone_pct").get<float>() / 100.0f;
+    }
+    if (parameters.contains("overlap_pct"))
+    {
+        overlap = parameters.at("overlap_pct").get<float>() / 100.0f;
+    }
+    sticky = parameters.contains("sticky") ? parameters.at("sticky").get<bool>() : false;
+
+    clickForceInput = readForceInput(parameters);
+    readThresholds(parameters, "click", clickActivateThreshold, clickDeactivateThreshold);
+
+    isJoystick = profileInputType == vapor::OpenVRProfileInputType::JOYSTICK;
 }
 
 std::vector<std::string> DpadMode::getProvidedOutputNames()
@@ -1043,18 +1053,267 @@ std::vector<std::string> DpadMode::getProvidedOutputNames()
 
 std::vector<int> DpadMode::connect(const std::vector<Mode::ComponentDescription>& availableComponents, const bool* connectedOutputs)
 {
-    // TODO
+    std::vector<int> indexes;
+
+    forceInactive = false;
+
+    if (!connectedOutputs[0] && !connectedOutputs[1] && !connectedOutputs[2] && !connectedOutputs[3] && !connectedOutputs[4])
+    {
+        forceInactive = true;
+        return indexes;
+    }
+
+    int index1 = findComponent("x", vapor::OpenVRInputType::FLOAT, availableComponents);
+    int index2 = findComponent("y", vapor::OpenVRInputType::FLOAT, availableComponents);
+    if (index1 == -1 || index2 == -1)
+    {
+        forceInactive = true;
+        return indexes;
+    }
+    indexes.push_back(index1);
+    indexes.push_back(index2);
+
+    if (subMode == SubMode::CLICK)
+    {
+        switch (clickForceInput)
+        {
+            default:
+                if (click.tryGrab(ClickFilter::Source::CLICK, ClickFilter::DefaultThresholdsType::CLICK, clickActivateThreshold, clickDeactivateThreshold, availableComponents, indexes)) break;
+                if (findComponent("force", vapor::OpenVRInputType::FLOAT, availableComponents) != -1 && click.tryGrab(ClickFilter::Source::BASE, ClickFilter::DefaultThresholdsType::CLICK, clickActivateThreshold, clickDeactivateThreshold, availableComponents, indexes)) break;
+                if (findComponent("force", vapor::OpenVRInputType::FLOAT, availableComponents) != -1 && click.tryGrab(ClickFilter::Source::VALUE, ClickFilter::DefaultThresholdsType::CLICK, clickActivateThreshold, clickDeactivateThreshold, availableComponents, indexes)) break;
+                if (click.tryGrab(ClickFilter::Source::FORCE, ClickFilter::DefaultThresholdsType::CLICK, clickActivateThreshold, clickDeactivateThreshold, availableComponents, indexes)) break;
+                forceInactive = true; indexes.clear(); return indexes;
+            case ForceInput::POSITION:
+                if (click.tryGrab(ClickFilter::Source::CLICK, ClickFilter::DefaultThresholdsType::CLICK, clickActivateThreshold, clickDeactivateThreshold, availableComponents, indexes)) break;
+                if (findComponent("force", vapor::OpenVRInputType::FLOAT, availableComponents) != -1 && click.tryGrab(ClickFilter::Source::BASE, ClickFilter::DefaultThresholdsType::CLICK, clickActivateThreshold, clickDeactivateThreshold, availableComponents, indexes)) break;
+                if (findComponent("force", vapor::OpenVRInputType::FLOAT, availableComponents) != -1 && click.tryGrab(ClickFilter::Source::POSITION, ClickFilter::DefaultThresholdsType::CLICK, clickActivateThreshold, clickDeactivateThreshold, availableComponents, indexes)) break;
+                if (click.tryGrab(ClickFilter::Source::FORCE, ClickFilter::DefaultThresholdsType::CLICK, clickActivateThreshold, clickDeactivateThreshold, availableComponents, indexes)) break;
+                forceInactive = true; indexes.clear(); return indexes;
+            case ForceInput::FORCE:
+                if (click.tryGrab(ClickFilter::Source::CLICK, ClickFilter::DefaultThresholdsType::CLICK, clickActivateThreshold, clickDeactivateThreshold, availableComponents, indexes)) break;
+                if (findComponent("force", vapor::OpenVRInputType::FLOAT, availableComponents) != -1 && click.tryGrab(ClickFilter::Source::BASE, ClickFilter::DefaultThresholdsType::CLICK, clickActivateThreshold, clickDeactivateThreshold, availableComponents, indexes)) break;
+                if (click.tryGrab(ClickFilter::Source::FORCE, ClickFilter::DefaultThresholdsType::CLICK, clickActivateThreshold, clickDeactivateThreshold, availableComponents, indexes)) break;
+                forceInactive = true; indexes.clear(); return indexes;
+        }
+    }
+    else if (subMode == SubMode::TOUCH)
+    {
+        if (!isJoystick)
+        {
+            if (!click.tryGrab(ClickFilter::Source::TOUCH, ClickFilter::DefaultThresholdsType::TOUCH, std::optional<float>(), std::optional<float>(), availableComponents, indexes))
+            {
+                forceInactive = true;
+                indexes.clear();
+                return indexes;
+            }
+        }
+    }
+    else
+    {
+        forceInactive = true;
+        indexes.clear();
+        return indexes;
+    }
+
+    north.configure(deadZone, overlap);
+    east.configure(deadZone, overlap);
+    south.configure(deadZone, overlap);
+    west.configure(deadZone, overlap);
+    center.configure(deadZone, overlap);
+
+    return indexes;
+
 }
 
 std::vector<InputState> DpadMode::getInitialStates(const uint64_t* inputSourceHandles)
 {
-    // TODO
+    if (forceInactive)
+    {
+        InputState emptyInitialState = InputState {
+            .type = InputType::EMPTY
+        };
+        return std::vector<InputState> {emptyInitialState, emptyInitialState, emptyInitialState, emptyInitialState, emptyInitialState};
+    }
+
+    lastPositionInputSourceHandle = inputSourceHandles[0];
+    inputSourceHandles += 2;
+    outputInputSourceHandle = (subMode == SubMode::TOUCH && isJoystick) ? inputSourceHandles[0] : click.getInitialState(inputSourceHandles).inputSourceHandle;
+
+    InputState directionInitialState = InputState {
+        .type = InputType::DIGITAL,
+        .data = {.digital = false},
+        .inputSourceHandle = outputInputSourceHandle,
+        .changeTime = 0
+    };
+    InputState centerInitialState = (subMode == SubMode::TOUCH && isJoystick) ? InputState {
+        .type = InputType::DIGITAL,
+        .data = {.digital = true},
+        .inputSourceHandle = outputInputSourceHandle,
+        .changeTime = 0
+    } : directionInitialState;
+    return std::vector<InputState> {directionInitialState, directionInitialState, directionInitialState, directionInitialState, centerInitialState};
 }
 
 std::vector<InputState> DpadMode::update(const InputState* inputStates, long currentTime)
 {
-    // TODO
-}*/
+    if (forceInactive)
+    {
+        InputState emptyInputState = InputState {
+            .type = InputType::EMPTY
+        };
+        return std::vector<InputState> {emptyInputState, emptyInputState, emptyInputState, emptyInputState, emptyInputState};
+    }
+
+    InputState xInputState = inputStates[0];
+    InputState yInputState = inputStates[1];
+    inputStates += 2;
+    InputState clickInputState = !(subMode == SubMode::TOUCH && isJoystick) ? click.update(inputStates, currentTime) : InputState {.type = InputType::EMPTY};
+
+    bool clickState = (subMode == SubMode::TOUCH && isJoystick) ? true : (clickInputState.type != InputType::EMPTY ? clickInputState.data.digital : false);
+    bool clickIsBlocked = (subMode == SubMode::TOUCH && isJoystick) ? false : clickInputState.type == InputType::EMPTY;
+    if (!clickIsBlocked)
+    {
+        lastClickChangeTime = (subMode == SubMode::TOUCH && isJoystick) ? 0 : clickInputState.changeTime;
+    }
+
+    bool positionIsBlocked = xInputState.type == InputType::EMPTY || yInputState.type == InputType::EMPTY;
+    if (!positionIsBlocked)
+    {
+        lastX = xInputState.data.analog.x;
+        lastY = yInputState.data.analog.x;
+        if (yInputState.changeTime > xInputState.changeTime) // CHECK: does SteamVR prioritise X or Y input when choosing the input source handle
+        {
+            lastPositionInputSourceHandle = yInputState.inputSourceHandle;
+            lastPositionChangeTime = yInputState.changeTime;
+        }
+        else
+        {
+            lastPositionInputSourceHandle = xInputState.inputSourceHandle;
+            lastPositionChangeTime = xInputState.changeTime;
+        }
+    }
+
+    if (clickState)
+    {
+        if (isJoystick || !positionIsBlocked)
+        {
+            long lastChangeTime = std::max(lastClickChangeTime, lastPositionChangeTime);
+            if (!sticky || ((!north.state && !east.state && !south.state && !west.state) || std::sqrt(lastX * lastX + lastY * lastY) <= deadZone - 0.03f))
+            {
+                if (north.update(lastX, lastY))
+                {
+                    north.changeTime = lastChangeTime;
+                }
+                if (east.update(-lastY, lastX))
+                {
+                    east.changeTime = lastChangeTime;
+                }
+                if (south.update(-lastX, -lastY))
+                {
+                    south.changeTime = lastChangeTime;
+                }
+                if (west.update(lastY, -lastX))
+                {
+                    west.changeTime = lastChangeTime;
+                }
+            }
+            if (center.state != (center.state = !(north.state || east.state || south.state || west.state)))
+            {
+                center.changeTime = lastChangeTime;
+            }
+
+            uint64_t lastInputSourceHandle = lastChangeTime == lastPositionChangeTime ? lastPositionInputSourceHandle : clickInputState.inputSourceHandle; // CHECK: does SteamVR prioritise position or click input when choosing the input source handle
+            if (outputInputSourceHandle != lastInputSourceHandle)
+            {
+                north.changeTime = east.changeTime = south.changeTime = west.changeTime = center.changeTime = lastChangeTime;
+                outputInputSourceHandle = lastInputSourceHandle;
+            }
+        }
+    }
+    else
+    {
+        if (!clickIsBlocked)
+        {
+            if (north.state)
+            {
+                north.changeTime = lastClickChangeTime;
+            }
+            if (east.state)
+            {
+                east.changeTime = lastClickChangeTime;
+            }
+            if (south.state)
+            {
+                south.changeTime = lastClickChangeTime;
+            }
+            if (west.state)
+            {
+                west.changeTime = lastClickChangeTime;
+            }
+            if (center.state)
+            {
+                center.changeTime = lastClickChangeTime;
+            }
+            north.state = east.state = south.state = west.state = center.state = false;
+
+            if (outputInputSourceHandle != clickInputState.inputSourceHandle)
+            {
+                north.changeTime = east.changeTime = south.changeTime = west.changeTime = center.changeTime = lastClickChangeTime;
+                outputInputSourceHandle = clickInputState.inputSourceHandle;
+            }
+        }
+        else
+        {
+            north.state = east.state = south.state = west.state = center.state = false;
+        }
+    }
+
+    InputState northInputState = InputState {
+        .type = InputType::DIGITAL,
+        .data = {.digital = north.state},
+        .inputSourceHandle = outputInputSourceHandle,
+        .changeTime = north.changeTime
+    };
+    InputState eastInputState = InputState {
+        .type = InputType::DIGITAL,
+        .data = {.digital = east.state},
+        .inputSourceHandle = outputInputSourceHandle,
+        .changeTime = east.changeTime
+    };
+    InputState southInputState = InputState {
+        .type = InputType::DIGITAL,
+        .data = {.digital = south.state},
+        .inputSourceHandle = outputInputSourceHandle,
+        .changeTime = south.changeTime
+    };
+    InputState westInputState = InputState {
+        .type = InputType::DIGITAL,
+        .data = {.digital = west.state},
+        .inputSourceHandle = outputInputSourceHandle,
+        .changeTime = west.changeTime
+    };
+    InputState centerInputState = InputState {
+        .type = InputType::DIGITAL,
+        .data = {.digital = center.state},
+        .inputSourceHandle = outputInputSourceHandle,
+        .changeTime = center.changeTime
+    };
+    return std::vector<InputState> {northInputState, eastInputState, southInputState, westInputState, centerInputState};
+}
+
+void DpadMode::DpadOutput::configure(float deadZone, float overlap)
+{
+    this->deadZone = deadZone;
+    this->overlap = overlap;
+}
+
+bool DpadMode::DpadOutput::update(float x, float y)
+{
+    float d = std::sqrt(x * x + y * y);
+    float a = 180.0f * std::abs(std::atan2(-x, y)) / 3.141592654f;
+    float boundaryAngle = 45.0f + 45.0f * overlap;
+    return state != (state = state ? (d > deadZone - 0.03f && a < boundaryAngle + 10.8f) : (d > deadZone + 0.03f && a < boundaryAngle - 10.8f));
+}
 
 //
 

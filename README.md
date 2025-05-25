@@ -49,7 +49,7 @@ VapoR includes various "fixes" that can be manually set for specific games if ne
 * Getting device poses
 * Legacy input
 * Action set input
-  - Dpad and scroll source modes are not yet implemented (you will need to use a binding without these source modes)
+  - Scroll source mode and various other obscure are not yet implemented (you will need to use a binding without these source modes)
 * Render models (missing textures)
 * Oculus Quest 2 and Quest 3 device profiles (from ALVR)
 * Derail Valley works (except loading screen)
