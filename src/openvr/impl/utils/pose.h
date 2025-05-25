@@ -6,6 +6,8 @@
 
 #include "matrix.h"
 
+#include <cstring>
+
 namespace openvr
 {
     namespace utils
@@ -69,7 +71,8 @@ namespace openvr
 
         inline void applyOffset(TrackedDevicePose* trackedDevicePose, const float (&offsetMatrix)[3][4])
         {
-            if (offsetMatrix == (float[3][4]) {{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 0.0f}})
+            static const float identityOffset[3][4] = {{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 0.0f}};
+            if (std::memcmp(offsetMatrix, identityOffset, sizeof(identityOffset)) == 0)
             {
                 return;
             }

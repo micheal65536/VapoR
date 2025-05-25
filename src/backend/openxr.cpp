@@ -97,7 +97,7 @@ Session::Session(const Instance& instance, XrSystemId system): instance(instance
         ABORT("Failed to open X11 display");
     }
     int fbConfigsCounts;
-    GLXFBConfig* fbConfigs = glXChooseFBConfig(this->xDisplay, DefaultScreen(this->xDisplay), (int[]) {
+    int configsAttribList[] = {
         GLX_X_RENDERABLE, True,
         GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT,
         GLX_RENDER_TYPE, GLX_RGBA_BIT,
@@ -107,7 +107,8 @@ Session::Session(const Instance& instance, XrSystemId system): instance(instance
         GLX_ALPHA_SIZE, 8,
         GLX_DEPTH_SIZE, 24,
         None
-    }, &fbConfigsCounts);
+    };
+    GLXFBConfig* fbConfigs = glXChooseFBConfig(this->xDisplay, DefaultScreen(this->xDisplay), configsAttribList, &fbConfigsCounts);
     if (!fbConfigs || fbConfigsCounts == 0)
     {
         ABORT("Failed to find framebuffer configuration");
@@ -118,11 +119,12 @@ Session::Session(const Instance& instance, XrSystemId system): instance(instance
     if (!this->glxContext) {
         ABORT("Failed to create OpenGL context");
     }
-    this->glxPbuffer = glXCreatePbuffer(this->xDisplay, fbConfig, (int[]) {
+    int bufferAttribList[] = {
         GLX_WIDTH, 16,
         GLX_HEIGHT, 16,
         None
-    });
+    };
+    this->glxPbuffer = glXCreatePbuffer(this->xDisplay, fbConfig, bufferAttribList);
     if (!this->glxPbuffer)
     {
         ABORT("Failed to create OpenGL pbuffer");
