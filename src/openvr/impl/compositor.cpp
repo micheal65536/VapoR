@@ -131,6 +131,8 @@ CompositorError CompositorImpl::getLastPoseForTrackedDeviceIndex(uint32_t device
     {
         utils::selectTrackedDevicePose(poseSet, this->clientCore.trackingSpace, true, gamePose);
     }
+
+    return CompositorError::COMPOSITOR_ERROR_NONE;
 }
 
 CompositorError CompositorImpl::submit(Eye eye, const Texture* texture, const TextureBounds* bounds, int32_t submitFlags)
