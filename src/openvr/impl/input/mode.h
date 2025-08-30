@@ -336,6 +336,12 @@ namespace openvr
                 virtual std::vector<InputState> update(const InputState* inputStates, long currentTime);
         };
 
+        // TODO: "grab" mode - needs investigation, has parameters "force_hold_threshold" and "force_release_threshold"
+
+        // TODO: "radial" mode???
+
+        // TODO: investigate Knuckles "pinch" input - has type "pinch"???
+
         // TODO: check if there are any other modes that we're missing
     }
 }

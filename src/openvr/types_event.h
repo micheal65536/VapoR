@@ -87,7 +87,7 @@ namespace openvr
         {
             EventDataReservedSpace reservedSpace;
             EventDataButton button;
-            EventDataMouse_0_9_0 mouse;
+            EventDataMouse_0_9_0 mouse; // TODO: mouse events are not converted in legacy event interface implementation
         };
 
         EventType type;

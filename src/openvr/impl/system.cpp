@@ -380,9 +380,10 @@ uint64_t SystemImpl::getUint64TrackedDeviceProperty(uint32_t index, TrackedDevic
         switch (property)
         {
             case TrackedDeviceProperty::PROPERTY_CURRENT_UNIVERSE_ID:
-                return 2; // comment in ALVR code assures that this is supposed to be hardcoded at 2
+                return 2; // comment in ALVR code assures that this is supposed to be hardcoded at 2, SteamVR native seems to return a timestamp of... setup date or something???
             case TrackedDeviceProperty::PROPERTY_PREVIOUS_UNIVERSE_ID:
                 // TODO
+                // CHECK: SteamVR native seems to return 0
                 break;
         }
     }
