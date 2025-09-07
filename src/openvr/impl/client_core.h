@@ -11,11 +11,13 @@ namespace openvr
     class ClientCoreImpl
     {
         public:
+            bool initialised = false;
+
             vapor::Backend* backend;
             std::promise<bool> backendFinishedPromise;
 
             TrackingUniverseOrigin trackingSpace = TrackingUniverseOrigin::ORIGIN_STANDING;
-            input::ActionManager* actionManager = nullptr;
+            input::ActionManager* actionManager = nullptr; // TODO: move this to backend
 
             //
 

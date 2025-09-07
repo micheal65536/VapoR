@@ -11,40 +11,48 @@ using namespace openvr;
 
 static void run(std::promise<vapor::Backend*>* promise, std::promise<bool>* finishPromise)
 {
+    TRACE_F("starting backend");
     vapor::Backend* backend = new vapor::Backend();
     promise->set_value(backend);
     backend->loop();
     delete backend;
     finishPromise->set_value(true);
+    TRACE_F("finished backend");
 }
 
 InitError ClientCoreImpl::init(ApplicationType applicationType, const char* startupInfo)
 {
-    TRACE_F("%d", applicationType);
+    TRACE_F("%d, %s", applicationType, startupInfo);
 
     if (applicationType != ApplicationType::APPLICATION_TYPE_SCENE && applicationType != ApplicationType::APPLICATION_TYPE_BACKGROUND)
     {
         LOG("Unsupported application type %d", applicationType);
     }
 
-    std::promise<vapor::Backend*> promise;
-    std::thread thread = std::thread(run, &promise, &this->backendFinishedPromise);
-    thread.detach();
-    vapor::Backend* backend = promise.get_future().get();
-    backend->waitForFirstFrame();
-    this->backend = backend;
+    if (!this->initialised)
+    {
+        this->initialised = true;
 
-    openvr::systemImpl = new SystemImpl(*openvr::clientCoreImpl);
-    openvr::compositorImpl = new CompositorImpl(*openvr::clientCoreImpl);
-    openvr::inputImpl = new InputImpl(*openvr::clientCoreImpl);
-    openvr::chaperoneImpl = new ChaperoneImpl(*openvr::clientCoreImpl);
-    //openvr::overlayImpl = new OverlayImpl(*openvr::clientCoreImpl);
-    openvr::renderModelsImpl = new RenderModelsImpl(*openvr::clientCoreImpl);
-    openvr::settingsImpl = new SettingsImpl(*openvr::clientCoreImpl);
-    openvr::screenshotsImpl = new ScreenshotsImpl(*openvr::clientCoreImpl);
-    openvr::chaperoneSetupImpl = new ChaperoneSetupImpl(*openvr::clientCoreImpl);
-    openvr::applicationsImpl = new ApplicationsImpl(*openvr::clientCoreImpl);
-    openvr::extendedDisplayImpl = new ExtendedDisplayImpl(*openvr::clientCoreImpl);
+        std::promise<vapor::Backend*> promise;
+        this->backendFinishedPromise = std::promise<bool>();
+        std::thread thread = std::thread(run, &promise, &this->backendFinishedPromise);
+        thread.detach();
+        vapor::Backend* backend = promise.get_future().get();
+        backend->waitForFirstFrame();
+        this->backend = backend;
+
+        openvr::systemImpl = new SystemImpl(*openvr::clientCoreImpl);
+        openvr::compositorImpl = new CompositorImpl(*openvr::clientCoreImpl);
+        openvr::inputImpl = new InputImpl(*openvr::clientCoreImpl);
+        openvr::chaperoneImpl = new ChaperoneImpl(*openvr::clientCoreImpl);
+        //openvr::overlayImpl = new OverlayImpl(*openvr::clientCoreImpl);
+        openvr::renderModelsImpl = new RenderModelsImpl(*openvr::clientCoreImpl);
+        openvr::settingsImpl = new SettingsImpl(*openvr::clientCoreImpl);
+        openvr::screenshotsImpl = new ScreenshotsImpl(*openvr::clientCoreImpl);
+        openvr::chaperoneSetupImpl = new ChaperoneSetupImpl(*openvr::clientCoreImpl);
+        openvr::applicationsImpl = new ApplicationsImpl(*openvr::clientCoreImpl);
+        openvr::extendedDisplayImpl = new ExtendedDisplayImpl(*openvr::clientCoreImpl);
+    }
 
     return InitError::INIT_ERROR_NONE;
 }
@@ -53,27 +61,40 @@ void ClientCoreImpl::cleanup()
 {
     TRACE();
 
-    openvr::createdInterfaces.clear();
+    if (this->initialised)
+    {
+        this->initialised = false;
 
-    delete openvr::systemImpl;
-    delete openvr::compositorImpl;
-    delete openvr::inputImpl;
-    delete openvr::chaperoneImpl;
-    //delete openvr::overlayImpl;
-    delete openvr::renderModelsImpl;
-    delete openvr::settingsImpl;
-    delete openvr::screenshotsImpl;
-    delete openvr::chaperoneSetupImpl;
-    delete openvr::applicationsImpl;
-    delete openvr::extendedDisplayImpl;
+        delete openvr::systemImpl;
+        delete openvr::compositorImpl;
+        delete openvr::inputImpl;
+        delete openvr::chaperoneImpl;
+        //delete openvr::overlayImpl;
+        delete openvr::renderModelsImpl;
+        delete openvr::settingsImpl;
+        delete openvr::screenshotsImpl;
+        delete openvr::chaperoneSetupImpl;
+        delete openvr::applicationsImpl;
+        delete openvr::extendedDisplayImpl;
+        openvr::systemImpl = nullptr;
+        openvr::compositorImpl = nullptr;
+        openvr::inputImpl = nullptr;
+        openvr::chaperoneImpl = nullptr;
+        //openvr::overlayImpl = nullptr;
+        openvr::renderModelsImpl = nullptr;
+        openvr::settingsImpl = nullptr;
+        openvr::screenshotsImpl = nullptr;
+        openvr::chaperoneSetupImpl = nullptr;
+        openvr::applicationsImpl = nullptr;
+        openvr::extendedDisplayImpl = nullptr;
 
-    this->backend->requestExit();
-    this->backendFinishedPromise.get_future().get();
-
-    TRACE_F("finished");
+        this->backend->requestExit();
+        this->backendFinishedPromise.get_future().get();
+        this->backend = nullptr;
+    }
 }
 
-static void* getInterface(ClientCoreImpl* clientCore, const std::string& nameAndVersion, bool create, bool* exists)
+static void* getInterface(const std::string& nameAndVersion, bool create, bool* exists)
 {
     bool fnTable = false;
     std::string str = std::string(nameAndVersion);
@@ -97,7 +118,15 @@ static void* getInterface(ClientCoreImpl* clientCore, const std::string& nameAnd
     }
 
     *exists = true;
-    if (name == "IVRSystem")
+    if (name == "IVRClientCore")
+    {
+        // TODO: support IVRClientCore_001 and IVRClientCore_002 (confirmed to exist in SteamVR)
+        if (version == "003")
+        {
+            return create ? (fnTable ? (void*) new ClientCore_003() : (void*) new ClientCore_003_v()) : nullptr;
+        }
+    }
+    else if (name == "IVRSystem")
     {
         if (version == "003")
         {
@@ -389,7 +418,7 @@ InitError ClientCoreImpl::isInterfaceVersionValid(const char* nameAndVersion)
 {
     TRACE_F("Testing for interface %s", nameAndVersion);
     bool exists;
-    getInterface(this, nameAndVersion, false, &exists);
+    getInterface(nameAndVersion, false, &exists);
     if (!exists)
     {
         return InitError::INIT_ERROR_INTERFACE_NOT_FOUND;
@@ -410,7 +439,7 @@ void* ClientCoreImpl::getGenericInterface(const char* nameAndVersion, InitError*
     else
     {
         bool exists;
-        void* interface = getInterface(this, nameAndVersion, true, &exists);
+        void* interface = getInterface(nameAndVersion, true, &exists);
         if (interface == nullptr)
         {
             LOG("Unimplemented interface %s", nameAndVersion);

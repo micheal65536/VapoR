@@ -11,94 +11,29 @@
 
 namespace openvr
 {
-    ClientCoreImpl* clientCoreImpl;
-    SystemImpl* systemImpl;
-    CompositorImpl* compositorImpl;
-    InputImpl* inputImpl;
-    ChaperoneImpl* chaperoneImpl;
-    //OverlayImpl* overlayImpl;
-    RenderModelsImpl* renderModelsImpl;
-    SettingsImpl* settingsImpl;
-    ScreenshotsImpl* screenshotsImpl;
-    ChaperoneSetupImpl* chaperoneSetupImpl;
-    ApplicationsImpl* applicationsImpl;
-    ExtendedDisplayImpl* extendedDisplayImpl;
+    ClientCoreImpl* clientCoreImpl = new openvr::ClientCoreImpl();
+    SystemImpl* systemImpl = nullptr;
+    CompositorImpl* compositorImpl = nullptr;
+    InputImpl* inputImpl = nullptr;
+    ChaperoneImpl* chaperoneImpl = nullptr;
+    //OverlayImpl* overlayImpl = nullptr;
+    RenderModelsImpl* renderModelsImpl = nullptr;
+    SettingsImpl* settingsImpl = nullptr;
+    ScreenshotsImpl* screenshotsImpl = nullptr;
+    ChaperoneSetupImpl* chaperoneSetupImpl = nullptr;
+    ApplicationsImpl* applicationsImpl = nullptr;
+    ExtendedDisplayImpl* extendedDisplayImpl = nullptr;
 
     std::map<std::string, void*> createdInterfaces;
 }
 
 extern "C"
 {
-    void* VRClientCoreFactory(const char* interfaceName, int* returnCode)
+    void* VRClientCoreFactory(const char* interfaceName, openvr::InitError* error)
     {
         TRACE_F("%s", interfaceName);
-        *returnCode = 0;
-        openvr::clientCoreImpl = new openvr::ClientCoreImpl();
-        return new openvr::ClientCore_003_v(); // TODO: do we need to support FnTable style here?
+        return openvr::clientCoreImpl->getGenericInterface(interfaceName, error);
     }
-
-    /*uint32_t VR_InitInternal(openvr::InitError* error, openvr::ApplicationType applicationType)
-    {
-        STUB();
-    }
-
-    uint32_t VR_InitInternal2(openvr::InitError* error, openvr::ApplicationType applicationType, const char* startupInfo)
-    {
-        STUB();
-    }
-
-    uint32_t VR_GetInitToken()
-    {
-        STUB();
-    }
-
-    void VR_ShutdownInternal()
-    {
-        STUB();
-    }
-
-    bool VR_IsInterfaceVersionValid(const char* nameAndVersion)
-    {
-        STUB_F("%s", nameAndVersion);
-        return true;
-    }
-
-    void* VR_GetGenericInterface(const char* nameAndVersion, openvr::InitError* error)
-    {
-        STUB_F("%s", nameAndVersion);
-    }
-
-    bool VR_IsHmdPresent()
-    {
-        TRACE();
-        return true;
-    }
-
-    bool VR_IsRuntimeInstalled()
-    {
-        TRACE();
-        return true;
-    }
-
-    const char* VR_RuntimePath()
-    {
-        STUB();
-    }
-
-    char* VR_GetStringForHmdError(int error)
-    {
-        STUB();
-    }
-
-    const char* VR_GetVRInitErrorAsEnglishDescription(openvr::InitError error)
-    {
-        STUB();
-    }
-
-    const char* VR_GetVRInitErrorAsSymbol(openvr::InitError error)
-    {
-        STUB();
-    }*/
 
     // required for Proton to work
     uint32_t HmdSystemFactory()
