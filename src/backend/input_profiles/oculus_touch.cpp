@@ -6,7 +6,8 @@
 #include <numbers>
 
 using namespace vapor;
-using namespace vapor::input_profiles;
+using namespace vapor::input_profile;
+using namespace vapor::input_profile::profiles;
 
 static const std::vector<OpenXRInputDescription> openXRInputs = (std::vector<OpenXRInputDescription>) {
     {.path = "/user/hand/left/input/aim/pose", .type = OpenXRInputType::POSE},

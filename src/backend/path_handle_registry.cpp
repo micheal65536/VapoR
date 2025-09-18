@@ -4,17 +4,14 @@
 
 #include "log/log.h"
 
-namespace openvr
+namespace vapor
 {
-    namespace input
-    {
-        PathHandleRegistry pathHandleRegistry;
-    }
+    PathHandleRegistry pathHandleRegistry;
 }
 
 static std::atomic<uint64_t> nextHandle = 1;
 
-using namespace openvr::input;
+using namespace vapor;
 
 uint64_t PathHandleRegistry::getHandle(const std::string& path)
 {

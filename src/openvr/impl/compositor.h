@@ -6,7 +6,7 @@
 #include <vulkan/vulkan.h>
 #include "client_core.h"
 
-#include "backend/input.h"
+#include "backend/pose_set.h"
 #include "render/image_capture_helper.h"
 
 namespace openvr

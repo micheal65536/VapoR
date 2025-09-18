@@ -1,6 +1,6 @@
 #pragma once
 
-#include "input.h"
+#include "pose_set.h"
 #include "openvr/types_event.h"
 
 #include <list>

@@ -2,11 +2,10 @@
 #include "log/log.h"
 #include "log/stub.h"
 
-#include "input/action_manager.h"
-#include "input/input_devices.h"
-#include "input/input_source_utils.h"
-#include "input/path_handle_registry.h"
+#include "backend/input/action_manager.h"
+#include "backend/input/input_devices.h"
 #include "backend/input_profile.h"
+#include "backend/path_handle_registry.h"
 #include "utils/time.h"
 #include "utils/pose.h"
 
@@ -22,7 +21,8 @@ InputImpl::InputImpl(ClientCoreImpl& clientCore): clientCore(clientCore)
 
 InputError InputImpl::setActionManifestPath(const char* path)
 {
-    input::ActionManager* actionManager = new input::ActionManager();
+    // TODO: move impl to backend
+    vapor::input::ActionManager* actionManager = new vapor::input::ActionManager();
     if (!actionManager->populateFromJSON(path))
     {
         LOG("Failed to read actions from %s", path);
@@ -40,7 +40,7 @@ InputError InputImpl::setActionManifestPath(const char* path)
             LOG("Failed to load custom binding, trying default binding");
             actionManager->loadDefaultBindingForControllerProfile(this->clientCore.backend->inputProfile);
         }
-        this->clientCore.actionManager = actionManager;
+        this->clientCore.backend->actionManager = actionManager; //
         return InputError::INPUT_ERROR_NONE;
     }
 }
@@ -48,29 +48,30 @@ InputError InputImpl::setActionManifestPath(const char* path)
 InputError InputImpl::getActionSetHandle(const char* actionSetName, uint64_t* handle)
 {
     TRACE_F("%s", actionSetName);
-    *handle = input::pathHandleRegistry.getHandle(actionSetName);
+    *handle = vapor::pathHandleRegistry.getHandle(actionSetName);
     return InputError::INPUT_ERROR_NONE;
 }
 
 InputError InputImpl::getActionHandle(const char* actionName, uint64_t* handle)
 {
     TRACE_F("%s", actionName);
-    *handle = input::pathHandleRegistry.getHandle(actionName);
+    *handle = vapor::pathHandleRegistry.getHandle(actionName);
     return InputError::INPUT_ERROR_NONE;
 }
 
 InputError InputImpl::getInputSourceHandle(const char* inputSourcePath, uint64_t* handle)
 {
     TRACE_F("%s", inputSourcePath);
-    *handle = input::pathHandleRegistry.getHandle(inputSourcePath);
+    *handle = vapor::pathHandleRegistry.getHandle(inputSourcePath);
     return InputError::INPUT_ERROR_NONE;
 }
 
 InputError InputImpl::updateActionState(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount)
 {
-    if (this->clientCore.actionManager != nullptr)
+    // TODO: move impl to backend
+    if (this->clientCore.backend->actionManager != nullptr)
     {
-        this->clientCore.actionManager->update(actionSets, actionSetSize, actionSetsCount, this->clientCore.backend->frameStates.getFrame(0).inputStates.data(), this->clientCore.backend->frameStates.getFrameTime(0));
+        this->clientCore.backend->actionManager->update(actionSets, actionSetSize, actionSetsCount, this->clientCore.backend->frameStates.getFrame(0).inputStates.data(), this->clientCore.backend->frameStates.getFrameTime(0));
         return InputError::INPUT_ERROR_NONE;
     }
     else
@@ -83,31 +84,31 @@ InputError InputImpl::getDigitalActionData(uint64_t action, InputDigitalActionDa
 {
     TRACE_F("%d %d", action, restrictToDevice);
 
-    const input::Action* action_ = this->clientCore.actionManager != nullptr ? this->clientCore.actionManager->findAction(input::pathHandleRegistry.getPath(action)) : nullptr;
+    const vapor::input::Action* action_ = this->clientCore.backend->actionManager != nullptr ? this->clientCore.backend->actionManager->findAction(vapor::pathHandleRegistry.getPath(action)) : nullptr;
     if (action_ == nullptr)
     {
         return InputError::INPUT_ERROR_INVALID_HANDLE;
     }
-    if (action_->type != input::InputType::DIGITAL)
+    if (action_->type != vapor::input::InputType::DIGITAL)
     {
         return InputError::INPUT_ERROR_WRONG_TYPE;
     }
-    input::Device device = restrictToDevice != 0 ? input::getDeviceFromInputSourcePath(input::pathHandleRegistry.getPath(restrictToDevice), false) : input::Device::INVALID;
+    vapor::input::Device device = restrictToDevice != 0 ? vapor::input::getDeviceFromInputSourcePath(vapor::pathHandleRegistry.getPath(restrictToDevice), false) : vapor::input::Device::INVALID;
 
-    const input::InputState* inputState = nullptr;
-    const input::InputState* inputStatePrevious = nullptr;
-    for (const input::Action::Source& source: action_->sources)
+    const vapor::input::InputState* inputState = nullptr;
+    const vapor::input::InputState* inputStatePrevious = nullptr;
+    for (const vapor::input::Action::Source& source: action_->sources)
     {
         if (restrictToDevice == 0 || source.device == device)
         {
-            if (source.inputState.type == input::InputType::DIGITAL)
+            if (source.inputState.type == vapor::input::InputType::DIGITAL)
             {
                 if (inputState == nullptr || (source.inputState.data.digital && !inputState->data.digital) || (source.inputState.data.digital == inputState->data.digital && source.inputState.changeTime > inputState->changeTime))
                 {
                     inputState = &source.inputState;
                 }
             }
-            if (source.inputStatePrevious.type == input::InputType::DIGITAL)
+            if (source.inputStatePrevious.type == vapor::input::InputType::DIGITAL)
             {
                 if (inputStatePrevious == nullptr || (source.inputStatePrevious.data.digital && !inputStatePrevious->data.digital) || (source.inputStatePrevious.data.digital == inputStatePrevious->data.digital && source.inputStatePrevious.changeTime > inputStatePrevious->changeTime))
                 {
@@ -133,31 +134,31 @@ InputError InputImpl::getAnalogActionData(uint64_t action, InputAnalogActionData
 {
     TRACE_F("%d %d", action, restrictToDevice);
 
-    const input::Action* action_ = this->clientCore.actionManager != nullptr ? this->clientCore.actionManager->findAction(input::pathHandleRegistry.getPath(action)) : nullptr;
+    const vapor::input::Action* action_ = this->clientCore.backend->actionManager != nullptr ? this->clientCore.backend->actionManager->findAction(vapor::pathHandleRegistry.getPath(action)) : nullptr;
     if (action_ == nullptr)
     {
         return InputError::INPUT_ERROR_INVALID_HANDLE;
     }
-    if (action_->type != input::InputType::ANALOG)
+    if (action_->type != vapor::input::InputType::ANALOG)
     {
         return InputError::INPUT_ERROR_WRONG_TYPE;
     }
-    input::Device device = restrictToDevice != 0 ? input::getDeviceFromInputSourcePath(input::pathHandleRegistry.getPath(restrictToDevice), false) : input::Device::INVALID;
+    vapor::input::Device device = restrictToDevice != 0 ? vapor::input::getDeviceFromInputSourcePath(vapor::pathHandleRegistry.getPath(restrictToDevice), false) : vapor::input::Device::INVALID;
 
-    const input::InputState* inputState = nullptr;
-    const input::InputState* inputStatePrevious = nullptr;
-    for (const input::Action::Source& source: action_->sources)
+    const vapor::input::InputState* inputState = nullptr;
+    const vapor::input::InputState* inputStatePrevious = nullptr;
+    for (const vapor::input::Action::Source& source: action_->sources)
     {
         if (restrictToDevice == 0 || source.device == device)
         {
-            if (source.inputState.type == input::InputType::ANALOG)
+            if (source.inputState.type == vapor::input::InputType::ANALOG)
             {
                 if (inputState == nullptr || (source.inputState.data.analog > inputState->data.analog))
                 {
                     inputState = &source.inputState;
                 }
             }
-            if (source.inputStatePrevious.type == input::InputType::ANALOG)
+            if (source.inputStatePrevious.type == vapor::input::InputType::ANALOG)
             {
                 if (inputStatePrevious == nullptr || (source.inputStatePrevious.data.analog > inputStatePrevious->data.analog))
                 {
@@ -167,8 +168,8 @@ InputError InputImpl::getAnalogActionData(uint64_t action, InputAnalogActionData
         }
     }
 
-    input::InputState::Analog value = inputState != nullptr ? inputState->data.analog : (input::InputState::Analog) {0.0f, 0.0f, 0.0f};
-    input::InputState::Analog previousValue = inputStatePrevious != nullptr ? inputStatePrevious->data.analog : (input::InputState::Analog) {0.0f, 0.0f, 0.0f};
+    vapor::input::InputState::Analog value = inputState != nullptr ? inputState->data.analog : (vapor::input::InputState::Analog) {0.0f, 0.0f, 0.0f};
+    vapor::input::InputState::Analog previousValue = inputStatePrevious != nullptr ? inputStatePrevious->data.analog : (vapor::input::InputState::Analog) {0.0f, 0.0f, 0.0f};
     *actionData = {
         .active = inputState != nullptr,
         .currentOrigin = inputState != nullptr ? inputState->inputSourceHandle : 0,
@@ -190,20 +191,20 @@ InputError InputImpl::getPoseActionDataRelativeToNow(uint64_t action, TrackingUn
     TRACE_F("%d %d %f %d", action, restrictToDevice, secondsFromNow, actionDataSize);
     STUB_F("secondsFromNow not supported %f", secondsFromNow);
 
-    const input::Action* action_ = this->clientCore.actionManager != nullptr ? this->clientCore.actionManager->findAction(input::pathHandleRegistry.getPath(action)) : nullptr;
+    const vapor::input::Action* action_ = this->clientCore.backend->actionManager != nullptr ? this->clientCore.backend->actionManager->findAction(vapor::pathHandleRegistry.getPath(action)) : nullptr;
     if (action_ == nullptr)
     {
         return InputError::INPUT_ERROR_INVALID_HANDLE;
     }
-    if (action_->type != input::InputType::POSE)
+    if (action_->type != vapor::input::InputType::POSE)
     {
         return InputError::INPUT_ERROR_WRONG_TYPE;
     }
-    input::Device device = restrictToDevice != 0 ? input::getDeviceFromInputSourcePath(input::pathHandleRegistry.getPath(restrictToDevice), false) : input::Device::INVALID;
+    vapor::input::Device device = restrictToDevice != 0 ? vapor::input::getDeviceFromInputSourcePath(vapor::pathHandleRegistry.getPath(restrictToDevice), false) : vapor::input::Device::INVALID;
 
     const vapor::PoseSet* poseSet = nullptr;
     uint64_t inputSourceHandle;
-    for (const input::Action::PoseSource& poseSource: action_->poseSources)
+    for (const vapor::input::Action::PoseSource& poseSource: action_->poseSources)
     {
         if (restrictToDevice == 0 || poseSource.device == device)
         {
@@ -234,20 +235,20 @@ InputError InputImpl::getPoseActionDataForNextFrame(uint64_t action, TrackingUni
 {
     TRACE_F("%d %d %d", action, restrictToDevice, actionDataSize);
 
-    const input::Action* action_ = this->clientCore.actionManager != nullptr ? this->clientCore.actionManager->findAction(input::pathHandleRegistry.getPath(action)) : nullptr;
+    const vapor::input::Action* action_ = this->clientCore.backend->actionManager != nullptr ? this->clientCore.backend->actionManager->findAction(vapor::pathHandleRegistry.getPath(action)) : nullptr;
     if (action_ == nullptr)
     {
         return InputError::INPUT_ERROR_INVALID_HANDLE;
     }
-    if (action_->type != input::InputType::POSE)
+    if (action_->type != vapor::input::InputType::POSE)
     {
         return InputError::INPUT_ERROR_WRONG_TYPE;
     }
-    input::Device device = restrictToDevice != 0 ? input::getDeviceFromInputSourcePath(input::pathHandleRegistry.getPath(restrictToDevice), false) : input::Device::INVALID;
+    vapor::input::Device device = restrictToDevice != 0 ? vapor::input::getDeviceFromInputSourcePath(vapor::pathHandleRegistry.getPath(restrictToDevice), false) : vapor::input::Device::INVALID;
 
     const vapor::PoseSet* poseSet = nullptr;
     uint64_t inputSourceHandle;
-    for (const input::Action::PoseSource& poseSource: action_->poseSources)
+    for (const vapor::input::Action::PoseSource& poseSource: action_->poseSources)
     {
         if (restrictToDevice == 0 || poseSource.device == device)
         {
@@ -346,18 +347,18 @@ InputError InputImpl::triggerHapticVibrationAction(uint64_t action, float startS
         STUB_F("startSecondsFromNow %f not supported", startSecondsFromNow);
     }
 
-    const input::Action* action_ = this->clientCore.actionManager != nullptr ? this->clientCore.actionManager->findAction(input::pathHandleRegistry.getPath(action)) : nullptr;
+    const vapor::input::Action* action_ = this->clientCore.backend->actionManager != nullptr ? this->clientCore.backend->actionManager->findAction(vapor::pathHandleRegistry.getPath(action)) : nullptr;
     if (action_ == nullptr)
     {
         return InputError::INPUT_ERROR_INVALID_HANDLE;
     }
-    if (action_->type != input::InputType::HAPTIC)
+    if (action_->type != vapor::input::InputType::HAPTIC)
     {
         return InputError::INPUT_ERROR_WRONG_TYPE;
     }
-    input::Device device = restrictToDevice != 0 ? input::getDeviceFromInputSourcePath(input::pathHandleRegistry.getPath(restrictToDevice), false) : input::Device::INVALID;
+    vapor::input::Device device = restrictToDevice != 0 ? vapor::input::getDeviceFromInputSourcePath(vapor::pathHandleRegistry.getPath(restrictToDevice), false) : vapor::input::Device::INVALID;
 
-    for (const input::Action::HapticOutput& hapticOutput: action_->hapticOutputs)
+    for (const vapor::input::Action::HapticOutput& hapticOutput: action_->hapticOutputs)
     {
         if (restrictToDevice == 0 || hapticOutput.device == device)
         {
@@ -375,21 +376,21 @@ InputError InputImpl::getActionOrigins(uint64_t actionSet, uint64_t action, uint
 
     // CHECK: actionSet parameter seems to be ignored/unused?
 
-    const input::Action* action_ = this->clientCore.actionManager != nullptr ? this->clientCore.actionManager->findAction(input::pathHandleRegistry.getPath(action)) : nullptr;
+    const vapor::input::Action* action_ = this->clientCore.backend->actionManager != nullptr ? this->clientCore.backend->actionManager->findAction(vapor::pathHandleRegistry.getPath(action)) : nullptr;
     if (action_ == nullptr)
     {
         return InputError::INPUT_ERROR_INVALID_HANDLE;
     }
 
     int activeSourcesCount = 0;
-    for (const input::Action::Source& source: action_->sources)
+    for (const vapor::input::Action::Source& source: action_->sources)
     {
-        if (source.inputState.type != input::InputType::EMPTY)
+        if (source.inputState.type != vapor::input::InputType::EMPTY)
         {
             activeSourcesCount++;
         }
     }
-    for (const input::Action::PoseSource& poseSource: action_->poseSources)
+    for (const vapor::input::Action::PoseSource& poseSource: action_->poseSources)
     {
         if (poseSource.active)
         {
@@ -402,14 +403,14 @@ InputError InputImpl::getActionOrigins(uint64_t actionSet, uint64_t action, uint
         return InputError::INPUT_ERROR_BUFFER_TOO_SMALL;
     }
     int index = 0;
-    for (const input::Action::Source& source: action_->sources)
+    for (const vapor::input::Action::Source& source: action_->sources)
     {
-        if (source.inputState.type != input::InputType::EMPTY)
+        if (source.inputState.type != vapor::input::InputType::EMPTY)
         {
             origins[index++] = source.inputState.inputSourceHandle;
         }
     }
-    for (const input::Action::PoseSource& poseSource: action_->poseSources)
+    for (const vapor::input::Action::PoseSource& poseSource: action_->poseSources)
     {
         if (poseSource.active)
         {
@@ -435,7 +436,7 @@ InputError InputImpl::getOriginLocalizedName(uint64_t origin, char* name, uint32
 
 InputError InputImpl::getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInfo* info, uint32_t infoBufferSize)
 {
-    std::string fullPath = input::pathHandleRegistry.getPath(origin);
+    std::string fullPath = vapor::pathHandleRegistry.getPath(origin);
     if (fullPath == "")
     {
         return InputError::INPUT_ERROR_INVALID_HANDLE;
@@ -445,16 +446,16 @@ InputError InputImpl::getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInf
     STUB_F("renderModelComponentName missing");
     infoLocal.renderModelComponentName[0] = '\0'; // TODO
 
-    input::Device device = input::getDeviceFromInputSourcePath(fullPath, false);
-    if (device != input::Device::INVALID)
+    vapor::input::Device device = vapor::input::getDeviceFromInputSourcePath(fullPath, false);
+    if (device != vapor::input::Device::INVALID)
     {
         infoLocal.deviceHandle = origin;
         switch (device)
         {
-            case input::Device::HAND_LEFT:
+            case vapor::input::Device::HAND_LEFT:
                 infoLocal.trackedDeviceIndex = 1;
                 break;
-            case input::Device::HAND_RIGHT:
+            case vapor::input::Device::HAND_RIGHT:
                 infoLocal.trackedDeviceIndex = 2;
                 break;
             default:
@@ -464,18 +465,18 @@ InputError InputImpl::getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInf
     }
     else
     {
-        device = input::getDeviceFromInputSourcePath(fullPath, true);
-        if (device == input::Device::INVALID)
+        device = vapor::input::getDeviceFromInputSourcePath(fullPath, true);
+        if (device == vapor::input::Device::INVALID)
         {
             return InputError::INPUT_ERROR_INVALID_HANDLE;
         }
-        infoLocal.deviceHandle = input::pathHandleRegistry.getHandle(input::getDeviceInputSourcePath(device));
+        infoLocal.deviceHandle = vapor::pathHandleRegistry.getHandle(vapor::input::getDeviceInputSourcePath(device));
         switch (device)
         {
-            case input::Device::HAND_LEFT:
+            case vapor::input::Device::HAND_LEFT:
                 infoLocal.trackedDeviceIndex = 1;
                 break;
-            case input::Device::HAND_RIGHT:
+            case vapor::input::Device::HAND_RIGHT:
                 infoLocal.trackedDeviceIndex = 2;
                 break;
             default:
@@ -484,10 +485,10 @@ InputError InputImpl::getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInf
         }
 
         bool valid = false;
-        vapor::InputProfile* inputProfile = this->clientCore.backend->inputProfile;
+        vapor::input_profile::InputProfile* inputProfile = this->clientCore.backend->inputProfile;
         for (int i = 0; i < inputProfile->getOpenVRInputsCount(); i++)
         {
-            const vapor::OpenVRInputDescription& inputDescription = inputProfile->getOpenVRInputs()[i];
+            const vapor::input_profile::OpenVRInputDescription& inputDescription = inputProfile->getOpenVRInputs()[i];
             if (fullPath == inputDescription.path)
             {
                 valid = true;
@@ -496,7 +497,7 @@ InputError InputImpl::getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInf
         }
         for (int i = 0; i < inputProfile->getOpenVRProfileInputsCount(); i++)
         {
-            const vapor::OpenVRProfileInputDescription& profileInputDescription = inputProfile->getOpenVRProfileInputs()[i];
+            const vapor::input_profile::OpenVRProfileInputDescription& profileInputDescription = inputProfile->getOpenVRProfileInputs()[i];
             if (fullPath == profileInputDescription.path)
             {
                 valid = true;
@@ -538,7 +539,7 @@ InputError InputImpl::getComponentStateForBinding(const char* renderModelName, c
 bool InputImpl::isUsingLegacyInput()
 {
     // CHECK: are we supposed to disable legacy input state and events after action set input has been configured?
-    return this->clientCore.actionManager == nullptr;
+    return this->clientCore.backend->actionManager == nullptr;
 }
 
 InputError InputImpl::openBindingUI(const char* appKey, uint64_t actionSet, uint64_t device, bool showOnDesktop)

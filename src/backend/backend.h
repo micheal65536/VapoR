@@ -9,6 +9,7 @@
 #include "input_profile.h"
 #include "device_property_set.h"
 #include "render_model.h"
+#include "input/action_manager.h"
 
 #include <vector>
 
@@ -29,7 +30,7 @@ namespace vapor
             int renderHeight;
             int refreshRate; // this is determined using the predictedDisplayPeriod from xrWaitFrame, it's possible that this may be unreliable or change throughout the lifetime of the application, use with extreme care
 
-            InputProfile* inputProfile;
+            input_profile::InputProfile* inputProfile;
             DevicePropertySet* devicePropertySets;
             RenderModelLoader* renderModelLoader;
             std::string* deviceRenderModelNames;
@@ -40,6 +41,8 @@ namespace vapor
             HapticQueue* hapticQueue;
 
             EventQueue eventQueue;
+
+            input::ActionManager* actionManager = nullptr;
 
             void queueResetSeatedZeroPose(bool fromSystemMenu);
             void queueResetStandingZeroPose(bool fromSystemMenu);
@@ -76,7 +79,7 @@ namespace vapor
             bool seatedZeroPoseInitialised = false;
             bool standingZeroPoseInitialised = false;
 
-            std::vector<OpenXRInputDescription> openXRInputs;
+            std::vector<input_profile::OpenXRInputDescription> openXRInputs;
             OpenXR::ActionSet* actionSet;
             std::vector<OpenXR::Action*> actions;
             std::vector<OpenXR::Space*> actionSpaces;

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "input/action_manager.h"
 #include "openvr/types.h"
 #include "backend/backend.h"
 
@@ -17,7 +16,6 @@ namespace openvr
             std::promise<bool> backendFinishedPromise;
 
             TrackingUniverseOrigin trackingSpace = TrackingUniverseOrigin::ORIGIN_STANDING;
-            input::ActionManager* actionManager = nullptr; // TODO: move this to backend
 
             //
 

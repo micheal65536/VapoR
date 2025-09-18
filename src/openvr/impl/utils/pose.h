@@ -2,7 +2,7 @@
 
 #include "../../types.h"
 
-#include "backend/input.h"
+#include "backend/pose_set.h"
 
 #include "matrix.h"
 

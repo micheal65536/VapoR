@@ -8,9 +8,12 @@
 
 #include "config/device_profile.h"
 
-#include "input.h"
+#include "input_profile.h"
 #include "input_profiles/oculus_touch.h"
 #include "input_profiles/vive_controller.h"
+
+#include "pose_set.h"
+#include "legacy_input.h"
 
 #include <GL/glx.h>
 #include <GL/glext.h>
@@ -55,11 +58,11 @@ Backend::Backend()
     }
     if (deviceProfile.inputProfileName == "oculus_touch")
     {
-        this->inputProfile = new input_profiles::OculusTouch();
+        this->inputProfile = new input_profile::profiles::OculusTouch();
     }
     else if (deviceProfile.inputProfileName == "vive_controller")
     {
-        this->inputProfile = new input_profiles::ViveController();
+        this->inputProfile = new input_profile::profiles::ViveController();
     }
     else
     {
@@ -92,8 +95,8 @@ Backend::Backend()
     }
 
     int inputsCount = this->inputProfile->getOpenXRInputsCount();
-    const OpenXRInputDescription* inputs = this->inputProfile->getOpenXRInputs();
-    this->openXRInputs = std::vector<OpenXRInputDescription>(inputs, inputs + inputsCount);
+    const input_profile::OpenXRInputDescription* inputs = this->inputProfile->getOpenXRInputs();
+    this->openXRInputs = std::vector<input_profile::OpenXRInputDescription>(inputs, inputs + inputsCount);
     this->actionSet = new OpenXR::ActionSet(*this->instance, "vapor", "VapoR", 0);
     std::vector<OpenXR::ActionSet::ActionBinding> actionSetBindings;
     for (int i = 0; i < inputsCount; i++)
@@ -101,19 +104,19 @@ Backend::Backend()
         XrActionType actionType;
         switch (inputs[i].type)
         {
-            case OpenXRInputType::BOOLEAN:
+            case input_profile::OpenXRInputType::BOOLEAN:
                 actionType = XR_ACTION_TYPE_BOOLEAN_INPUT;
                 break;
-            case OpenXRInputType::FLOAT:
+            case input_profile::OpenXRInputType::FLOAT:
                 actionType = XR_ACTION_TYPE_FLOAT_INPUT;
                 break;
-            case OpenXRInputType::VECTOR2:
+            case input_profile::OpenXRInputType::VECTOR2:
                 actionType = XR_ACTION_TYPE_VECTOR2F_INPUT;
                 break;
-            case OpenXRInputType::POSE:
+            case input_profile::OpenXRInputType::POSE:
                 actionType = XR_ACTION_TYPE_POSE_INPUT;
                 break;
-            case OpenXRInputType::HAPTIC:
+            case input_profile::OpenXRInputType::HAPTIC:
                 actionType = XR_ACTION_TYPE_VIBRATION_OUTPUT;
                 break;
         }
@@ -127,7 +130,7 @@ Backend::Backend()
     for (int i = 0; i < inputsCount; i++)
     {
         OpenXR::Space* actionSpace = nullptr;
-        if (inputs[i].type == OpenXRInputType::POSE)
+        if (inputs[i].type == input_profile::OpenXRInputType::POSE)
         {
             actionSpace = new OpenXR::Space(*this->session, *this->actions[i], "", OpenXR::IDENTITY_POSE);
         }
@@ -451,25 +454,25 @@ void Backend::step(XrTime displayTime, XrDuration displayDuration)
 
     this->session->syncActions({this->actionSet});
 
-    OpenXRInputState* openXRInputStates = new OpenXRInputState[this->openXRInputs.size()];
+    input_profile::OpenXRInputState* openXRInputStates = new input_profile::OpenXRInputState[this->openXRInputs.size()];
     for (int i = 0; i < this->openXRInputs.size(); i++)
     {
-        OpenXRInputDescription& input = this->openXRInputs[i];
+        input_profile::OpenXRInputDescription& input = this->openXRInputs[i];
         OpenXR::Action* action = this->actions[i];
-        OpenXRInputState& state = openXRInputStates[i];
+        input_profile::OpenXRInputState& state = openXRInputStates[i];
         state.type = input.type;
         switch (input.type)
         {
-            case OpenXRInputType::BOOLEAN:
+            case input_profile::OpenXRInputType::BOOLEAN:
                 state.data.b = action->getStateBool(*this->session, "", &state.changeTime);
                 break;
-            case OpenXRInputType::FLOAT:
+            case input_profile::OpenXRInputType::FLOAT:
                 state.data.f = action->getStateFloat(*this->session, "", &state.changeTime);
                 break;
-            case OpenXRInputType::VECTOR2:
+            case input_profile::OpenXRInputType::VECTOR2:
                 state.data.vec2 = action->getStateVector(*this->session, "", &state.changeTime);
                 break;
-            case OpenXRInputType::POSE:
+            case input_profile::OpenXRInputType::POSE:
                 state.data.pose.local = offsetPose(this->actionSpaces[i]->locateWithVelocity(*this->localSpace, displayTime), this->seatedZeroPose);
                 state.data.pose.localFloor = offsetPose(this->actionSpaces[i]->locateWithVelocity(*this->localFloorSpace, displayTime), this->standingZeroPose);
                 state.data.pose.localNextFrame = offsetPose(this->actionSpaces[i]->locateWithVelocity(*this->localSpace, displayTime + displayDuration), this->seatedZeroPose);
@@ -483,7 +486,7 @@ void Backend::step(XrTime displayTime, XrDuration displayDuration)
         }
     }
 
-    std::vector<OpenVRInputState> openVRInputStates;
+    std::vector<input_profile::OpenVRInputState> openVRInputStates;
     int openVRInputsCount = this->inputProfile->getOpenVRInputsCount();
     openVRInputStates.reserve(openVRInputsCount);
     for (int i = 0; i < openVRInputsCount; i++)
