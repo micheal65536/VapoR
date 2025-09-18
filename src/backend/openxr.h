@@ -4,6 +4,8 @@
 #define XR_USE_PLATFORM_XLIB
 #define GL_GLEXT_PROTOTYPES
 
+#define XR_USE_TIMESPEC
+
 #include <X11/Xlib.h>
 #include <GL/glx.h>
 

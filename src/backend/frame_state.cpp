@@ -8,7 +8,6 @@ FrameStateStore::FrameStateStore(int size)
     this->frames = new FrameState[size];
     for (int i = 0; i < size; i++)
     {
-        this->frames[i].time = 0;
         this->frames[i].index = -1;
     }
 }
@@ -42,15 +41,6 @@ FrameState FrameStateStore::getFrame(int indexAgo)
     FrameState frame = this->frames[index < 0 ? 0 : index];
     this->mutex.unlock();
     return frame;
-}
-
-long FrameStateStore::getFrameTime(int indexAgo)
-{
-    this->mutex.lock();
-    int index = this->size - indexAgo - 1;
-    long time = this->frames[index < 0 ? 0 : index].time;
-    this->mutex.unlock();
-    return time;
 }
 
 long FrameStateStore::getFrameCounter()

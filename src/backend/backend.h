@@ -12,6 +12,7 @@
 #include "input/action_manager.h"
 
 #include <vector>
+#include <ctime>
 
 namespace vapor
 {
@@ -47,9 +48,19 @@ namespace vapor
             void queueResetSeatedZeroPose(bool fromSystemMenu);
             void queueResetStandingZeroPose(bool fromSystemMenu);
 
+            inline long getCurrentXrTime()
+            {
+                struct timespec timespec;
+                clock_gettime(CLOCK_MONOTONIC, &timespec);
+                XrTime xrTime;
+                this->xrConvertTimespecTimeToTimeKHR(this->instance->handle, &timespec, &xrTime);
+                return xrTime;
+            }
+
         private:
             OpenXR::Instance* instance;
             OpenXR::Session* session;
+            PFN_xrConvertTimespecTimeToTimeKHR xrConvertTimespecTimeToTimeKHR;
 
             OpenXR::Swapchain* swapchains[2];
             OpenGL::Framebuffer* framebuffer;

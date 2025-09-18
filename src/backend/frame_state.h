@@ -13,8 +13,9 @@ namespace vapor
 {
     struct FrameState
     {
-        long time;
         long index;
+
+        long displayTime;
 
         OpenXR::ViewPair views;
 
@@ -35,7 +36,6 @@ namespace vapor
             void postFrame(FrameState frame);
 
             FrameState getFrame(int indexAgo);
-            long getFrameTime(int indexAgo);
 
             long getFrameCounter();
             void waitForNextFrame();

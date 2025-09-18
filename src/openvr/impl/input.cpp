@@ -71,7 +71,7 @@ InputError InputImpl::updateActionState(ActiveActionSet* actionSets, uint32_t ac
     // TODO: move impl to backend
     if (this->clientCore.backend->actionManager != nullptr)
     {
-        this->clientCore.backend->actionManager->update(actionSets, actionSetSize, actionSetsCount, this->clientCore.backend->frameStates.getFrame(0).inputStates.data(), this->clientCore.backend->frameStates.getFrameTime(0));
+        this->clientCore.backend->actionManager->update(actionSets, actionSetSize, actionSetsCount, this->clientCore.backend->frameStates.getFrame(0).inputStates.data(), this->clientCore.backend->getCurrentXrTime());
         return InputError::INPUT_ERROR_NONE;
     }
     else
@@ -125,7 +125,7 @@ InputError InputImpl::getDigitalActionData(uint64_t action, InputDigitalActionDa
         .currentOrigin = inputState != nullptr ? inputState->inputSourceHandle : 0,
         .state = state,
         .changed = state != previousState,
-        .updateTime = inputState != nullptr ? -utils::convertXrTimeToSecondsAgo(inputState->changeTime, this->clientCore.backend->frameStates.getFrameTime(0)) : 0.0f
+        .updateTime = inputState != nullptr ? -utils::convertXrTimeToSecondsAgo(inputState->changeTime, this->clientCore.backend->getCurrentXrTime()) : 0.0f
     };
     return InputError::INPUT_ERROR_NONE;
 }
@@ -179,7 +179,7 @@ InputError InputImpl::getAnalogActionData(uint64_t action, InputAnalogActionData
         .dx = value.x - previousValue.x,
         .dy = value.y - previousValue.y,
         .dz = value.z - previousValue.z,
-        .updateTime = inputState != nullptr ? -utils::convertXrTimeToSecondsAgo(inputState->changeTime, this->clientCore.backend->frameStates.getFrameTime(0)) : 0.0f
+        .updateTime = inputState != nullptr ? -utils::convertXrTimeToSecondsAgo(inputState->changeTime, this->clientCore.backend->getCurrentXrTime()) : 0.0f
     };
     return InputError::INPUT_ERROR_NONE;
 }

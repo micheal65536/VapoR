@@ -29,8 +29,9 @@ Backend::Backend()
     config::paths::setDataDirs();
     config::config::loadConfig();
 
-    this->instance = new OpenXR::Instance("VapoR", {});
+    this->instance = new OpenXR::Instance("VapoR", {"XR_KHR_convert_timespec_time"});
     this->session = new OpenXR::Session(*this->instance, this->instance->getSystem());
+    xrGetInstanceProcAddr(this->instance->handle, "xrConvertTimespecTimeToTimeKHR", (PFN_xrVoidFunction*) &xrConvertTimespecTimeToTimeKHR);
 
     int v;
     this->instance->getViewConfiguration(this->session->system, &this->renderWidth, &this->renderHeight, &v, &v, &v, &v);
@@ -499,8 +500,9 @@ void Backend::step(XrTime displayTime, XrDuration displayDuration)
     this->frameStates.lock();
 
     this->frameStates.postFrame(FrameState {
-        .time = displayTime,
         .index = 0,
+
+        .displayTime = displayTime,
 
         .views = this->session->locateViews(displayTime, *this->viewSpace),
 
