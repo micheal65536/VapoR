@@ -120,8 +120,11 @@ static void* getInterface(const std::string& nameAndVersion, bool create, bool* 
     *exists = true;
     if (name == "IVRClientCore")
     {
-        // TODO: support IVRClientCore_001 and IVRClientCore_002 (confirmed to exist in SteamVR)
-        if (version == "003")
+        if (version == "002")
+        {
+            return create ? (fnTable ? (void*) new ClientCore_002() : (void*) new ClientCore_002_v()) : nullptr;
+        }
+        else if (version == "003")
         {
             return create ? (fnTable ? (void*) new ClientCore_003() : (void*) new ClientCore_003_v()) : nullptr;
         }
