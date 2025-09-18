@@ -29,7 +29,7 @@ namespace vapor
 
             int renderWidth;
             int renderHeight;
-            int refreshRate; // this is determined using the predictedDisplayPeriod from xrWaitFrame, it's possible that this may be unreliable or change throughout the lifetime of the application, use with extreme care
+            int refreshRate;
 
             input_profile::InputProfile* inputProfile;
             DevicePropertySet* devicePropertySets;
@@ -61,6 +61,7 @@ namespace vapor
             OpenXR::Instance* instance;
             OpenXR::Session* session;
             PFN_xrConvertTimespecTimeToTimeKHR xrConvertTimespecTimeToTimeKHR;
+            PFN_xrGetDisplayRefreshRateFB xrGetDisplayRefreshRateFB;
 
             OpenXR::Swapchain* swapchains[2];
             OpenGL::Framebuffer* framebuffer;

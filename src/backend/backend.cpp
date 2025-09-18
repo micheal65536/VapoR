@@ -29,9 +29,10 @@ Backend::Backend()
     config::paths::setDataDirs();
     config::config::loadConfig();
 
-    this->instance = new OpenXR::Instance("VapoR", {"XR_KHR_convert_timespec_time"});
+    this->instance = new OpenXR::Instance("VapoR", {"XR_KHR_convert_timespec_time", "XR_FB_display_refresh_rate"});
     this->session = new OpenXR::Session(*this->instance, this->instance->getSystem());
-    xrGetInstanceProcAddr(this->instance->handle, "xrConvertTimespecTimeToTimeKHR", (PFN_xrVoidFunction*) &xrConvertTimespecTimeToTimeKHR);
+    xrGetInstanceProcAddr(this->instance->handle, "xrConvertTimespecTimeToTimeKHR", (PFN_xrVoidFunction*) &this->xrConvertTimespecTimeToTimeKHR);
+    xrGetInstanceProcAddr(this->instance->handle, "xrGetDisplayRefreshRateFB", (PFN_xrVoidFunction*) &this->xrGetDisplayRefreshRateFB);
 
     int v;
     this->instance->getViewConfiguration(this->session->system, &this->renderWidth, &this->renderHeight, &v, &v, &v, &v);
@@ -300,11 +301,6 @@ void Backend::queueResetStandingZeroPose(bool fromSystemMenu)
 
 //
 
-static inline int calculateRefreshRateFromPredictedDisplayDuration(XrDuration duration)
-{
-    return (int) std::lround(1000000000.0 / (double) duration);
-}
-
 static inline float extractYaw(const XrQuaternionf& orientation)
 {
     XrQuaternionf q = {
@@ -528,7 +524,10 @@ void Backend::step(XrTime displayTime, XrDuration displayDuration)
 
     LegacyInputHelper::emitChangeEvents(this->frameStates, this->eventQueue);
 
-    this->refreshRate = calculateRefreshRateFromPredictedDisplayDuration(displayDuration);
+    // TODO: dispatch property changed event for display frequency property when the refresh rate changes
+    float refreshRate;
+    this->xrGetDisplayRefreshRateFB(this->session->handle, &refreshRate);
+    this->refreshRate = std::lroundf(refreshRate);
 
     this->frameStates.unlock();
 
