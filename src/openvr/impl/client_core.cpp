@@ -282,6 +282,10 @@ static void* getInterface(const std::string& nameAndVersion, bool create, bool* 
         {
             return create ? (fnTable ? (void*) new Compositor_028() : (void*) new Compositor_028_v()) : nullptr;
         }
+        else if (version == "029")
+        {
+            return create ? (fnTable ? (void*) new Compositor_029() : (void*) new Compositor_029_v()) : nullptr;
+        }
     }
     else if (name == "IVRInput")
     {

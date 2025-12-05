@@ -72,6 +72,13 @@ namespace openvr
         float vMax;
     };
 
+    enum CompositorTextureUsage
+    {
+        COMPOSITOR_TEXTURE_USAGE_LEFT = 0,
+        COMPOSITOR_TEXTURE_USAGE_RIGHT = 1,
+        COMPOSITOR_TEXTURE_USAGE_BOTH = 2
+    };
+
     enum CompositorError
     {
         COMPOSITOR_ERROR_NONE = 0,
