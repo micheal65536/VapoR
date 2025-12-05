@@ -564,6 +564,15 @@ bool SystemImpl::pollNextEventWithPose(TrackingUniverseOrigin origin, Event_0_9_
     return haveEvent;
 }
 
+bool SystemImpl::pollNextEventWithPoseAndOverlays(TrackingUniverseOrigin origin, Event_0_9_15* event, uint32_t bufferSize, TrackedDevicePose* trackedDevicePoseOut, uint64_t* overlayHandle)
+{
+    // TODO: update after overlays implementation
+    TRACE_F("%d", overlayHandle);
+    bool haveEvent = this->pollNextEventWithPose(origin, event, bufferSize, trackedDevicePoseOut);
+    *overlayHandle = 0;
+    return haveEvent;
+}
+
 const char* SystemImpl::getEventTypeNameFromEnum(EventType type)
 {
     STUB_F("%d", type);

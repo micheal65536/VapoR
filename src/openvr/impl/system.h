@@ -50,6 +50,7 @@ namespace openvr
 
             bool pollNextEvent(Event_0_9_15* event, uint32_t bufferSize);
             bool pollNextEventWithPose(TrackingUniverseOrigin origin, Event_0_9_15* event, uint32_t bufferSize, TrackedDevicePose* trackedDevicePoseOut);
+            bool pollNextEventWithPoseAndOverlays(TrackingUniverseOrigin origin, Event_0_9_15* event, uint32_t bufferSize, TrackedDevicePose* trackedDevicePoseOut, uint64_t* overlayHandle);
             const char* getEventTypeNameFromEnum(EventType type);
 
             HiddenAreaMesh getHiddenAreaMesh(Eye eye, HiddenAreaMeshType type);

@@ -2646,4 +2646,172 @@ namespace openvr
             virtual uint32_t getAppContainerFilePaths(char* buffer, uint32_t bufferSize) { return System_022::getAppContainerFilePaths(buffer, bufferSize); }
             virtual const char* getRuntimeVersion() { return System_022::getRuntimeVersion(); }
     };
+
+    //
+
+    struct System_023
+    {
+        static void getRecommendedRenderTargetSize(uint32_t* width, uint32_t* height);
+        static Matrix44 getProjectionMatrix(Eye eye, float near, float far);
+        static void getProjectionRaw(Eye eye, float* left, float* right, float* top, float* bottom);
+        static bool computeDistortion(Eye eye, float u, float v, DistortionCoordinates* distortionCoordinates);
+        static Matrix34 getEyeToHeadTransform(Eye eye);
+
+        static bool getTimeSinceLastVsync(float* secondsSinceLastVsync, uint64_t* frameCounter);
+        static int32_t getD3D9AdapterIndex();
+        static void getDXGIOutputInfo(int32_t* adapterIndex);
+        static void getOutputDevice(uint64_t* device, TextureType textureType, VkInstance_T* vkInstance);
+
+        static bool isDisplayOnDesktop();
+        static bool setDisplayVisibility(bool visibleOnDesktop);
+
+        static void getDeviceToAbsoluteTrackingPose(TrackingUniverseOrigin origin, float predictedSecondsToPhotonsFromNow, TrackedDevicePose* trackedDevicePoses, uint32_t trackedDevicePosesCount);
+        static Matrix34 getSeatedZeroPoseToStandingAbsoluteTrackingPose();
+        static Matrix34 getRawZeroPoseToStandingAbsoluteTrackingPose();
+
+        static uint32_t getSortedTrackedDeviceIndicesOfClass(TrackedDeviceClass trackedDeviceClass, uint32_t* indexes, uint32_t indexesCount, uint32_t relativeToIndex);
+
+        static DeviceActivityLevel getTrackedDeviceActivityLevel(uint32_t index);
+
+        static void applyTransform(TrackedDevicePose* outputPose, const TrackedDevicePose* trackedDevicePose, const Matrix34* transform);
+
+        static uint32_t getTrackedDeviceIndexForControllerRole(TrackedControllerRole controllerRole);
+        static TrackedControllerRole getControllerRoleForTrackedDeviceIndex(uint32_t index);
+        static TrackedDeviceClass getTrackedDeviceClass(uint32_t index);
+        static bool isTrackedDeviceConnected(uint32_t index);
+        static bool getBoolTrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedPropertyError* error);
+        static float getFloatTrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedPropertyError* error);
+        static int32_t getInt32TrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedPropertyError* error);
+        static uint64_t getUint64TrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedPropertyError* error);
+        static Matrix34 getMatrix34TrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedPropertyError* error);
+        static uint32_t getArrayTrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedDevicePropertyType type, void* buffer, uint32_t bufferSize, TrackedPropertyError* error);
+        static uint32_t getStringTrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, char* buffer, uint32_t bufferSize, TrackedPropertyError* error);
+        static const char* getPropErrorNameFromEnum(TrackedPropertyError error);
+
+        static bool pollNextEvent(Event_0_9_15* event, uint32_t bufferSize);
+        static bool pollNextEventWithPose(TrackingUniverseOrigin origin, Event_0_9_15* event, uint32_t bufferSize, TrackedDevicePose* trackedDevicePoseOut);
+        static bool pollNextEventWithPoseAndOverlays(TrackingUniverseOrigin origin, Event_0_9_15* event, uint32_t bufferSize, TrackedDevicePose* trackedDevicePoseOut, uint64_t* overlayHandle);
+        static const char* getEventTypeNameFromEnum(EventType type);
+
+        static HiddenAreaMesh getHiddenAreaMesh(Eye eye, HiddenAreaMeshType type);
+
+        static bool getControllerState(uint32_t index, ControllerState* state, uint32_t bufferSize);
+        static bool getControllerStateWithPose(TrackingUniverseOrigin origin, uint32_t index, ControllerState* state, uint32_t bufferSize, TrackedDevicePose* pose);
+        static void triggerHapticPulse(uint32_t index, uint32_t axisId, unsigned short durationUs);
+        static const char* getButtonIdNameFromEnum(ButtonId button);
+        static const char* getControllerAxisTypeNameFromEnum(ControllerAxisType axisType);
+
+        static bool isInputAvailable();
+        static bool isSteamVRDrawingControllers();
+        static bool shouldApplicationPause();
+        static bool shouldApplicationReduceRenderingWork();
+
+        static FirmwareError performFirmwareUpdate(uint32_t deviceIndex);
+
+        static void acknowledgeQuit();
+
+        static uint32_t getAppContainerFilePaths(char* buffer, uint32_t bufferSize);
+
+        static const char* getRuntimeVersion();
+
+        void* getRecommendedRenderTargetSize_ = (void*) getRecommendedRenderTargetSize;
+        void* getProjectionMatrix_ = (void*) getProjectionMatrix;
+        void* getProjectionRaw_ = (void*) getProjectionRaw;
+        void* computeDistortion_ = (void*) computeDistortion;
+        void* getEyeToHeadTransform_ = (void*) getEyeToHeadTransform;
+        void* getTimeSinceLastVsync_ = (void*) getTimeSinceLastVsync;
+        void* getD3D9AdapterIndex_ = (void*) getD3D9AdapterIndex;
+        void* getDXGIOutputInfo_ = (void*) getDXGIOutputInfo;
+        void* getOutputDevice_ = (void*) getOutputDevice;
+        void* isDisplayOnDesktop_ = (void*) isDisplayOnDesktop;
+        void* setDisplayVisibility_ = (void*) setDisplayVisibility;
+        void* getDeviceToAbsoluteTrackingPose_ = (void*) getDeviceToAbsoluteTrackingPose;
+        void* getSeatedZeroPoseToStandingAbsoluteTrackingPose_ = (void*) getSeatedZeroPoseToStandingAbsoluteTrackingPose;
+        void* getRawZeroPoseToStandingAbsoluteTrackingPose_ = (void*) getRawZeroPoseToStandingAbsoluteTrackingPose;
+        void* getSortedTrackedDeviceIndicesOfClass_ = (void*) getSortedTrackedDeviceIndicesOfClass;
+        void* getTrackedDeviceActivityLevel_ = (void*) getTrackedDeviceActivityLevel;
+        void* applyTransform_ = (void*) applyTransform;
+        void* getTrackedDeviceIndexForControllerRole_ = (void*) getTrackedDeviceIndexForControllerRole;
+        void* getControllerRoleForTrackedDeviceIndex_ = (void*) getControllerRoleForTrackedDeviceIndex;
+        void* getTrackedDeviceClass_ = (void*) getTrackedDeviceClass;
+        void* isTrackedDeviceConnected_ = (void*) isTrackedDeviceConnected;
+        void* getBoolTrackedDeviceProperty_ = (void*) getBoolTrackedDeviceProperty;
+        void* getFloatTrackedDeviceProperty_ = (void*) getFloatTrackedDeviceProperty;
+        void* getInt32TrackedDeviceProperty_ = (void*) getInt32TrackedDeviceProperty;
+        void* getUint64TrackedDeviceProperty_ = (void*) getUint64TrackedDeviceProperty;
+        void* getMatrix34TrackedDeviceProperty_ = (void*) getMatrix34TrackedDeviceProperty;
+        void* getArrayTrackedDeviceProperty_ = (void*) getArrayTrackedDeviceProperty;
+        void* getStringTrackedDeviceProperty_ = (void*) getStringTrackedDeviceProperty;
+        void* getPropErrorNameFromEnum_ = (void*) getPropErrorNameFromEnum;
+        void* pollNextEvent_ = (void*) pollNextEvent;
+        void* pollNextEventWithPose_ = (void*) pollNextEventWithPose;
+        void* pollNextEventWithPoseAndOverlays_ = (void*) pollNextEventWithPoseAndOverlays;
+        void* getEventTypeNameFromEnum_ = (void*) getEventTypeNameFromEnum;
+        void* getHiddenAreaMesh_ = (void*) getHiddenAreaMesh;
+        void* getControllerState_ = (void*) getControllerState;
+        void* getControllerStateWithPose_ = (void*) getControllerStateWithPose;
+        void* triggerHapticPulse_ = (void*) triggerHapticPulse;
+        void* getButtonIdNameFromEnum_ = (void*) getButtonIdNameFromEnum;
+        void* getControllerAxisTypeNameFromEnum_ = (void*) getControllerAxisTypeNameFromEnum;
+        void* isInputAvailable_ = (void*) isInputAvailable;
+        void* isSteamVRDrawingControllers_ = (void*) isSteamVRDrawingControllers;
+        void* shouldApplicationPause_ = (void*) shouldApplicationPause;
+        void* shouldApplicationReduceRenderingWork_ = (void*) shouldApplicationReduceRenderingWork;
+        void* performFirmwareUpdate_ = (void*) performFirmwareUpdate;
+        void* acknowledgeQuit_ = (void*) acknowledgeQuit;
+        void* getAppContainerFilePaths_ = (void*) getAppContainerFilePaths;
+        void* getRuntimeVersion_ = (void*) getRuntimeVersion;
+    };
+
+    class System_023_v
+    {
+        public:
+            virtual void getRecommendedRenderTargetSize(uint32_t* width, uint32_t* height) { return System_023::getRecommendedRenderTargetSize(width, height); }
+            virtual Matrix44 getProjectionMatrix(Eye eye, float near, float far) { return System_023::getProjectionMatrix(eye, near, far); }
+            virtual void getProjectionRaw(Eye eye, float* left, float* right, float* top, float* bottom) { return System_023::getProjectionRaw(eye, left, right, top, bottom); }
+            virtual bool computeDistortion(Eye eye, float u, float v, DistortionCoordinates* distortionCoordinates) { return System_023::computeDistortion(eye, u, v, distortionCoordinates); }
+            virtual Matrix34 getEyeToHeadTransform(Eye eye) { return System_023::getEyeToHeadTransform(eye); }
+            virtual bool getTimeSinceLastVsync(float* secondsSinceLastVsync, uint64_t* frameCounter) { return System_023::getTimeSinceLastVsync(secondsSinceLastVsync, frameCounter); }
+            virtual int32_t getD3D9AdapterIndex() { return System_023::getD3D9AdapterIndex(); }
+            virtual void getDXGIOutputInfo(int32_t* adapterIndex) { return System_023::getDXGIOutputInfo(adapterIndex); }
+            virtual void getOutputDevice(uint64_t* device, TextureType textureType, VkInstance_T* vkInstance) { return System_023::getOutputDevice(device, textureType, vkInstance); }
+            virtual bool isDisplayOnDesktop() { return System_023::isDisplayOnDesktop(); }
+            virtual bool setDisplayVisibility(bool visibleOnDesktop) { return System_023::setDisplayVisibility(visibleOnDesktop); }
+            virtual void getDeviceToAbsoluteTrackingPose(TrackingUniverseOrigin origin, float predictedSecondsToPhotonsFromNow, TrackedDevicePose* trackedDevicePoses, uint32_t trackedDevicePosesCount) { return System_023::getDeviceToAbsoluteTrackingPose(origin, predictedSecondsToPhotonsFromNow, trackedDevicePoses, trackedDevicePosesCount); }
+            virtual Matrix34 getSeatedZeroPoseToStandingAbsoluteTrackingPose() { return System_023::getSeatedZeroPoseToStandingAbsoluteTrackingPose(); }
+            virtual Matrix34 getRawZeroPoseToStandingAbsoluteTrackingPose() { return System_023::getRawZeroPoseToStandingAbsoluteTrackingPose(); }
+            virtual uint32_t getSortedTrackedDeviceIndicesOfClass(TrackedDeviceClass trackedDeviceClass, uint32_t* indexes, uint32_t indexesCount, uint32_t relativeToIndex) { return System_023::getSortedTrackedDeviceIndicesOfClass(trackedDeviceClass, indexes, indexesCount, relativeToIndex); }
+            virtual DeviceActivityLevel getTrackedDeviceActivityLevel(uint32_t index) { return System_023::getTrackedDeviceActivityLevel(index); }
+            virtual void applyTransform(TrackedDevicePose* outputPose, const TrackedDevicePose* trackedDevicePose, const Matrix34* transform) { return System_023::applyTransform(outputPose, trackedDevicePose, transform); }
+            virtual uint32_t getTrackedDeviceIndexForControllerRole(TrackedControllerRole controllerRole) { return System_023::getTrackedDeviceIndexForControllerRole(controllerRole); }
+            virtual TrackedControllerRole getControllerRoleForTrackedDeviceIndex(uint32_t index) { return System_023::getControllerRoleForTrackedDeviceIndex(index); }
+            virtual TrackedDeviceClass getTrackedDeviceClass(uint32_t index) { return System_023::getTrackedDeviceClass(index); }
+            virtual bool isTrackedDeviceConnected(uint32_t index) { return System_023::isTrackedDeviceConnected(index); }
+            virtual bool getBoolTrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedPropertyError* error) { return System_023::getBoolTrackedDeviceProperty(index, property, error); }
+            virtual float getFloatTrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedPropertyError* error) { return System_023::getFloatTrackedDeviceProperty(index, property, error); }
+            virtual int32_t getInt32TrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedPropertyError* error) { return System_023::getInt32TrackedDeviceProperty(index, property, error); }
+            virtual uint64_t getUint64TrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedPropertyError* error) { return System_023::getUint64TrackedDeviceProperty(index, property, error); }
+            virtual Matrix34 getMatrix34TrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedPropertyError* error) { return System_023::getMatrix34TrackedDeviceProperty(index, property, error); }
+            virtual uint32_t getArrayTrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedDevicePropertyType type, void* buffer, uint32_t bufferSize, TrackedPropertyError* error) { return System_023::getArrayTrackedDeviceProperty(index, property, type, buffer, bufferSize, error); }
+            virtual uint32_t getStringTrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, char* buffer, uint32_t bufferSize, TrackedPropertyError* error) { return System_023::getStringTrackedDeviceProperty(index, property, buffer, bufferSize, error); }
+            virtual const char* getPropErrorNameFromEnum(TrackedPropertyError error) { return System_023::getPropErrorNameFromEnum(error); }
+            virtual bool pollNextEvent(Event_0_9_15* event, uint32_t bufferSize) { return System_023::pollNextEvent(event, bufferSize); }
+            virtual bool pollNextEventWithPose(TrackingUniverseOrigin origin, Event_0_9_15* event, uint32_t bufferSize, TrackedDevicePose* trackedDevicePoseOut) { return System_023::pollNextEventWithPose(origin, event, bufferSize, trackedDevicePoseOut); }
+            virtual bool pollNextEventWithPoseAndOverlays(TrackingUniverseOrigin origin, Event_0_9_15* event, uint32_t bufferSize, TrackedDevicePose* trackedDevicePoseOut, uint64_t* overlayHandle) { return System_023::pollNextEventWithPoseAndOverlays(origin, event, bufferSize, trackedDevicePoseOut, overlayHandle); }
+            virtual const char* getEventTypeNameFromEnum(EventType type) { return System_023::getEventTypeNameFromEnum(type); }
+            virtual HiddenAreaMesh getHiddenAreaMesh(Eye eye, HiddenAreaMeshType type) { return System_023::getHiddenAreaMesh(eye, type); }
+            virtual bool getControllerState(uint32_t index, ControllerState* state, uint32_t bufferSize) { return System_023::getControllerState(index, state, bufferSize); }
+            virtual bool getControllerStateWithPose(TrackingUniverseOrigin origin, uint32_t index, ControllerState* state, uint32_t bufferSize, TrackedDevicePose* pose) { return System_023::getControllerStateWithPose(origin, index, state, bufferSize, pose); }
+            virtual void triggerHapticPulse(uint32_t index, uint32_t axisId, unsigned short durationUs) { return System_023::triggerHapticPulse(index, axisId, durationUs); }
+            virtual const char* getButtonIdNameFromEnum(ButtonId button) { return System_023::getButtonIdNameFromEnum(button); }
+            virtual const char* getControllerAxisTypeNameFromEnum(ControllerAxisType axisType) { return System_023::getControllerAxisTypeNameFromEnum(axisType); }
+            virtual bool isInputAvailable() { return System_023::isInputAvailable(); }
+            virtual bool isSteamVRDrawingControllers() { return System_023::isSteamVRDrawingControllers(); }
+            virtual bool shouldApplicationPause() { return System_023::shouldApplicationPause(); }
+            virtual bool shouldApplicationReduceRenderingWork() { return System_023::shouldApplicationReduceRenderingWork(); }
+            virtual FirmwareError performFirmwareUpdate(uint32_t deviceIndex) { return System_023::performFirmwareUpdate(deviceIndex); }
+            virtual void acknowledgeQuit() { return System_023::acknowledgeQuit(); }
+            virtual uint32_t getAppContainerFilePaths(char* buffer, uint32_t bufferSize) { return System_023::getAppContainerFilePaths(buffer, bufferSize); }
+            virtual const char* getRuntimeVersion() { return System_023::getRuntimeVersion(); }
+    };
 }

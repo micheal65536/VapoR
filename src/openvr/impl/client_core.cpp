@@ -199,6 +199,10 @@ static void* getInterface(const std::string& nameAndVersion, bool create, bool* 
         {
             return create ? (fnTable ? (void*) new System_022() : (void*) new System_022_v()) : nullptr;
         }
+        else if (version == "023")
+        {
+            return create ? (fnTable ? (void*) new System_023() : (void*) new System_023_v()) : nullptr;
+        }
     }
     else if (name == "IVRCompositor")
     {
