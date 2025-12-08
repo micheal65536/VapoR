@@ -26,6 +26,7 @@ namespace openvr
             CompositorError waitGetPoses(TrackedDevicePose* renderPoses, uint32_t renderPosesCount, TrackedDevicePose* gamePoses, uint32_t gamePosesCount);
             CompositorError getLastPoses(TrackedDevicePose* renderPoses, uint32_t renderPosesCount, TrackedDevicePose* gamePoses, uint32_t gamePosesCount);
             CompositorError getLastPoseForTrackedDeviceIndex(uint32_t deviceIndex, TrackedDevicePose* outputPose, TrackedDevicePose* gamePose);
+            CompositorError getSubmitTexture(Texture* textureOut, bool* needsFlush, CompositorTextureUsage usage, const Texture* texture, const TextureBounds* bounds, int32_t submitFlags);
             CompositorError submit(Eye eye, const Texture* texture, const TextureBounds* bounds, int32_t submitFlags);
             CompositorError submitWithArrayIndex(Eye eye, const Texture* texture, uint32_t textureArrayIndex, const TextureBounds* bounds, int32_t submitFlags);
             void clearLastSubmittedFrame();

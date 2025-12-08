@@ -223,6 +223,11 @@ void Compositor_028::setTrackingSpace(TrackingUniverseOrigin origin)
     openvr::compositorImpl->setTrackingSpace(origin);
 }
 
+void Compositor_029::setTrackingSpace(TrackingUniverseOrigin origin)
+{
+    openvr::compositorImpl->setTrackingSpace(origin);
+}
+
 TrackingUniverseOrigin Compositor_005::getTrackingSpace()
 {
     return openvr::compositorImpl->getTrackingSpace();
@@ -314,6 +319,11 @@ TrackingUniverseOrigin Compositor_026::getTrackingSpace()
 }
 
 TrackingUniverseOrigin Compositor_028::getTrackingSpace()
+{
+    return openvr::compositorImpl->getTrackingSpace();
+}
+
+TrackingUniverseOrigin Compositor_029::getTrackingSpace()
 {
     return openvr::compositorImpl->getTrackingSpace();
 }
@@ -423,6 +433,11 @@ CompositorError Compositor_028::waitGetPoses(TrackedDevicePose* renderPoses, uin
     return openvr::compositorImpl->waitGetPoses(renderPoses, renderPosesCount, gamePoses, gamePosesCount);
 }
 
+CompositorError Compositor_029::waitGetPoses(TrackedDevicePose* renderPoses, uint32_t renderPosesCount, TrackedDevicePose* gamePoses, uint32_t gamePosesCount)
+{
+    return openvr::compositorImpl->waitGetPoses(renderPoses, renderPosesCount, gamePoses, gamePosesCount);
+}
+
 CompositorError Compositor_008::getLastPoses(TrackedDevicePose* renderPoses, uint32_t renderPosesCount, TrackedDevicePose* gamePoses, uint32_t gamePosesCount)
 {
     return (Compositor_008::lastError = openvr::compositorImpl->getLastPoses(renderPoses, renderPosesCount, gamePoses, gamePosesCount));
@@ -503,6 +518,11 @@ CompositorError Compositor_028::getLastPoses(TrackedDevicePose* renderPoses, uin
     return openvr::compositorImpl->getLastPoses(renderPoses, renderPosesCount, gamePoses, gamePosesCount);
 }
 
+CompositorError Compositor_029::getLastPoses(TrackedDevicePose* renderPoses, uint32_t renderPosesCount, TrackedDevicePose* gamePoses, uint32_t gamePosesCount)
+{
+    return openvr::compositorImpl->getLastPoses(renderPoses, renderPosesCount, gamePoses, gamePosesCount);
+}
+
 CompositorError Compositor_012::getLastPoseForTrackedDeviceIndex(uint32_t deviceIndex, TrackedDevicePose* outputPose, TrackedDevicePose* gamePose)
 {
     return openvr::compositorImpl->getLastPoseForTrackedDeviceIndex(deviceIndex, outputPose, gamePose);
@@ -566,6 +586,16 @@ CompositorError Compositor_026::getLastPoseForTrackedDeviceIndex(uint32_t device
 CompositorError Compositor_028::getLastPoseForTrackedDeviceIndex(uint32_t deviceIndex, TrackedDevicePose* outputPose, TrackedDevicePose* gamePose)
 {
     return openvr::compositorImpl->getLastPoseForTrackedDeviceIndex(deviceIndex, outputPose, gamePose);
+}
+
+CompositorError Compositor_029::getLastPoseForTrackedDeviceIndex(uint32_t deviceIndex, TrackedDevicePose* outputPose, TrackedDevicePose* gamePose)
+{
+    return openvr::compositorImpl->getLastPoseForTrackedDeviceIndex(deviceIndex, outputPose, gamePose);
+}
+
+CompositorError Compositor_029::getSubmitTexture(Texture* textureOut, bool* needsFlush, CompositorTextureUsage usage, const Texture* texture, const TextureBounds* bounds, int32_t submitFlags)
+{
+    return openvr::compositorImpl->getSubmitTexture(textureOut, needsFlush, usage, texture, bounds, submitFlags);
 }
 
 void Compositor_005::submit(Eye eye, void* texture, const TextureBounds* bounds)
@@ -716,7 +746,17 @@ CompositorError Compositor_028::submit(Eye eye, const Texture* texture, const Te
     return openvr::compositorImpl->submit(eye, texture, bounds, submitFlags);
 }
 
+CompositorError Compositor_029::submit(Eye eye, const Texture* texture, const TextureBounds* bounds, int32_t submitFlags)
+{
+    return openvr::compositorImpl->submit(eye, texture, bounds, submitFlags);
+}
+
 CompositorError Compositor_028::submitWithArrayIndex(Eye eye, const Texture* texture, uint32_t textureArrayIndex, const TextureBounds* bounds, int32_t submitFlags)
+{
+    return openvr::compositorImpl->submitWithArrayIndex(eye, texture, textureArrayIndex, bounds, submitFlags);
+}
+
+CompositorError Compositor_029::submitWithArrayIndex(Eye eye, const Texture* texture, uint32_t textureArrayIndex, const TextureBounds* bounds, int32_t submitFlags)
 {
     return openvr::compositorImpl->submitWithArrayIndex(eye, texture, textureArrayIndex, bounds, submitFlags);
 }
@@ -816,6 +856,11 @@ void Compositor_028::clearLastSubmittedFrame()
     openvr::compositorImpl->clearLastSubmittedFrame();
 }
 
+void Compositor_029::clearLastSubmittedFrame()
+{
+    openvr::compositorImpl->clearLastSubmittedFrame();
+}
+
 void Compositor_008::postPresentHandoff()
 {
     openvr::compositorImpl->postPresentHandoff();
@@ -892,6 +937,11 @@ void Compositor_026::postPresentHandoff()
 }
 
 void Compositor_028::postPresentHandoff()
+{
+    openvr::compositorImpl->postPresentHandoff();
+}
+
+void Compositor_029::postPresentHandoff()
 {
     openvr::compositorImpl->postPresentHandoff();
 }
@@ -991,6 +1041,11 @@ bool Compositor_028::getFrameTiming(FrameTiming_1_0_4* timing, uint32_t framesAg
     return openvr::compositorImpl->getFrameTiming(timing, framesAgo);
 }
 
+bool Compositor_029::getFrameTiming(FrameTiming_1_0_4* timing, uint32_t framesAgo)
+{
+    return openvr::compositorImpl->getFrameTiming(timing, framesAgo);
+}
+
 uint32_t Compositor_018::getFrameTimings(FrameTiming_1_0_4* timings, uint32_t nFrames)
 {
     return openvr::compositorImpl->getFrameTimings(timings, nFrames);
@@ -1027,6 +1082,11 @@ uint32_t Compositor_026::getFrameTimings(FrameTiming_1_0_4* timings, uint32_t nF
 }
 
 uint32_t Compositor_028::getFrameTimings(FrameTiming_1_0_4* timings, uint32_t nFrames)
+{
+    return openvr::compositorImpl->getFrameTimings(timings, nFrames);
+}
+
+uint32_t Compositor_029::getFrameTimings(FrameTiming_1_0_4* timings, uint32_t nFrames)
 {
     return openvr::compositorImpl->getFrameTimings(timings, nFrames);
 }
@@ -1111,6 +1171,11 @@ float Compositor_028::getFrameTimeRemaining()
     return openvr::compositorImpl->getFrameTimeRemaining();
 }
 
+float Compositor_029::getFrameTimeRemaining()
+{
+    return openvr::compositorImpl->getFrameTimeRemaining();
+}
+
 void Compositor_015::getCumulativeStats(CumulativeStats* stats, uint32_t bufferSize)
 {
     openvr::compositorImpl->getCumulativeStats(stats, bufferSize);
@@ -1157,6 +1222,11 @@ void Compositor_026::getCumulativeStats(CumulativeStats* stats, uint32_t bufferS
 }
 
 void Compositor_028::getCumulativeStats(CumulativeStats* stats, uint32_t bufferSize)
+{
+    openvr::compositorImpl->getCumulativeStats(stats, bufferSize);
+}
+
+void Compositor_029::getCumulativeStats(CumulativeStats* stats, uint32_t bufferSize)
 {
     openvr::compositorImpl->getCumulativeStats(stats, bufferSize);
 }
@@ -1286,6 +1356,11 @@ void Compositor_028::fadeToColor(float seconds, float red, float green, float bl
     openvr::compositorImpl->fadeToColor(seconds, red, green, blue, alpha, background);
 }
 
+void Compositor_029::fadeToColor(float seconds, float red, float green, float blue, float alpha, bool background)
+{
+    openvr::compositorImpl->fadeToColor(seconds, red, green, blue, alpha, background);
+}
+
 Color Compositor_018::getCurrentFadeColor(bool background)
 {
     return openvr::compositorImpl->getCurrentFadeColor(background);
@@ -1322,6 +1397,11 @@ Color Compositor_026::getCurrentFadeColor(bool background)
 }
 
 Color Compositor_028::getCurrentFadeColor(bool background)
+{
+    return openvr::compositorImpl->getCurrentFadeColor(background);
+}
+
+Color Compositor_029::getCurrentFadeColor(bool background)
 {
     return openvr::compositorImpl->getCurrentFadeColor(background);
 }
@@ -1421,6 +1501,11 @@ void Compositor_028::fadeGrid(float seconds, bool fadeGridIn)
     openvr::compositorImpl->fadeGrid(seconds, fadeGridIn);
 }
 
+void Compositor_029::fadeGrid(float seconds, bool fadeGridIn)
+{
+    openvr::compositorImpl->fadeGrid(seconds, fadeGridIn);
+}
+
 float Compositor_018::getCurrentGridAlpha()
 {
     return openvr::compositorImpl->getCurrentGridAlpha();
@@ -1457,6 +1542,11 @@ float Compositor_026::getCurrentGridAlpha()
 }
 
 float Compositor_028::getCurrentGridAlpha()
+{
+    return openvr::compositorImpl->getCurrentGridAlpha();
+}
+
+float Compositor_029::getCurrentGridAlpha()
 {
     return openvr::compositorImpl->getCurrentGridAlpha();
 }
@@ -1574,6 +1664,11 @@ CompositorError Compositor_028::setSkyboxOverride(const Texture* textures, uint3
     return openvr::compositorImpl->setSkyboxOverride(textures, texturesCount);
 }
 
+CompositorError Compositor_029::setSkyboxOverride(const Texture* textures, uint32_t texturesCount)
+{
+    return openvr::compositorImpl->setSkyboxOverride(textures, texturesCount);
+}
+
 void Compositor_008::clearSkyboxOverride()
 {
     openvr::compositorImpl->clearSkyboxOverride();
@@ -1650,6 +1745,11 @@ void Compositor_026::clearSkyboxOverride()
 }
 
 void Compositor_028::clearSkyboxOverride()
+{
+    openvr::compositorImpl->clearSkyboxOverride();
+}
+
+void Compositor_029::clearSkyboxOverride()
 {
     openvr::compositorImpl->clearSkyboxOverride();
 }
@@ -1749,6 +1849,11 @@ void Compositor_028::compositorBringToFront()
     TRACE();
 }
 
+void Compositor_029::compositorBringToFront()
+{
+    TRACE();
+}
+
 void Compositor_005::compositorGoToBack()
 {
     TRACE();
@@ -1844,6 +1949,11 @@ void Compositor_028::compositorGoToBack()
     TRACE();
 }
 
+void Compositor_029::compositorGoToBack()
+{
+    TRACE();
+}
+
 void Compositor_005::compositorQuit()
 {
     TRACE();
@@ -1935,6 +2045,11 @@ void Compositor_026::compositorQuit()
 }
 
 void Compositor_028::compositorQuit()
+{
+    TRACE();
+}
+
+void Compositor_029::compositorQuit()
 {
     TRACE();
 }
@@ -2053,6 +2168,12 @@ bool Compositor_028::isFullscreen()
     return true;
 }
 
+bool Compositor_029::isFullscreen()
+{
+    TRACE();
+    return true;
+}
+
 bool Compositor_005::computeOverlayIntersection(const OverlaySettings* settings, float aspectRatio, TrackingUniverseOrigin origin, Vector3 source, Vector3 direction, Vector2* intersectionUV, Vector3* intersectionTrackingSpace)
 {
     // TODO: requires overlay implementation
@@ -2150,6 +2271,11 @@ uint32_t Compositor_028::getCurrentSceneFocusProcess()
     return openvr::compositorImpl->getCurrentSceneFocusProcess();
 }
 
+uint32_t Compositor_029::getCurrentSceneFocusProcess()
+{
+    return openvr::compositorImpl->getCurrentSceneFocusProcess();
+}
+
 uint32_t Compositor_008::getLastFrameRenderer()
 {
     return openvr::compositorImpl->getLastFrameRenderer();
@@ -2226,6 +2352,11 @@ uint32_t Compositor_026::getLastFrameRenderer()
 }
 
 uint32_t Compositor_028::getLastFrameRenderer()
+{
+    return openvr::compositorImpl->getLastFrameRenderer();
+}
+
+uint32_t Compositor_029::getLastFrameRenderer()
 {
     return openvr::compositorImpl->getLastFrameRenderer();
 }
@@ -2338,6 +2469,12 @@ bool Compositor_028::canRenderScene()
     return true;
 }
 
+bool Compositor_029::canRenderScene()
+{
+    TRACE();
+    return true;
+}
+
 void Compositor_008::showMirrorWindow()
 {
     openvr::compositorImpl->showMirrorWindow();
@@ -2414,6 +2551,11 @@ void Compositor_026::showMirrorWindow()
 }
 
 void Compositor_028::showMirrorWindow()
+{
+    openvr::compositorImpl->showMirrorWindow();
+}
+
+void Compositor_029::showMirrorWindow()
 {
     openvr::compositorImpl->showMirrorWindow();
 }
@@ -2498,6 +2640,11 @@ void Compositor_028::hideMirrorWindow()
     openvr::compositorImpl->hideMirrorWindow();
 }
 
+void Compositor_029::hideMirrorWindow()
+{
+    openvr::compositorImpl->hideMirrorWindow();
+}
+
 bool Compositor_009::isMirrorWindowVisible()
 {
     return openvr::compositorImpl->isMirrorWindowVisible();
@@ -2569,6 +2716,11 @@ bool Compositor_026::isMirrorWindowVisible()
 }
 
 bool Compositor_028::isMirrorWindowVisible()
+{
+    return openvr::compositorImpl->isMirrorWindowVisible();
+}
+
+bool Compositor_029::isMirrorWindowVisible()
 {
     return openvr::compositorImpl->isMirrorWindowVisible();
 }
@@ -2653,6 +2805,11 @@ void Compositor_028::compositorDumpImages()
     openvr::compositorImpl->compositorDumpImages();
 }
 
+void Compositor_029::compositorDumpImages()
+{
+    openvr::compositorImpl->compositorDumpImages();
+}
+
 bool Compositor_012::shouldAppRenderWithLowResources()
 {
     return false;
@@ -2718,6 +2875,11 @@ bool Compositor_028::shouldAppRenderWithLowResources()
     return false;
 }
 
+bool Compositor_029::shouldAppRenderWithLowResources()
+{
+    return false;
+}
+
 void Compositor_013::forceInterleavedReprojectionOn(bool on)
 {
     STUB_F("%d", on);
@@ -2778,6 +2940,11 @@ void Compositor_028::forceInterleavedReprojectionOn(bool on)
     STUB_F("%d", on);
 }
 
+void Compositor_029::forceInterleavedReprojectionOn(bool on)
+{
+    STUB_F("%d", on);
+}
+
 void Compositor_014::forceReconnectProcess()
 {
     STUB();
@@ -2833,6 +3000,11 @@ void Compositor_028::forceReconnectProcess()
     STUB();
 }
 
+void Compositor_029::forceReconnectProcess()
+{
+    STUB();
+}
+
 void Compositor_014::suspendRendering(bool suspend)
 {
     openvr::compositorImpl->suspendRendering(suspend);
@@ -2884,6 +3056,11 @@ void Compositor_026::suspendRendering(bool suspend)
 }
 
 void Compositor_028::suspendRendering(bool suspend)
+{
+    openvr::compositorImpl->suspendRendering(suspend);
+}
+
+void Compositor_029::suspendRendering(bool suspend)
 {
     openvr::compositorImpl->suspendRendering(suspend);
 }
@@ -2950,6 +3127,11 @@ CompositorError Compositor_028::getMirrorTextureD3D11(Eye eye, void* deviceOrRes
     STUB();
 }
 
+CompositorError Compositor_029::getMirrorTextureD3D11(Eye eye, void* deviceOrResource, void** shaderResourceView)
+{
+    STUB();
+}
+
 void Compositor_020::releaseMirrorTextureD3D11(void* shaderResourceView)
 {
     STUB();
@@ -2976,6 +3158,11 @@ void Compositor_026::releaseMirrorTextureD3D11(void* shaderResourceView)
 }
 
 void Compositor_028::releaseMirrorTextureD3D11(void* shaderResourceView)
+{
+    STUB();
+}
+
+void Compositor_029::releaseMirrorTextureD3D11(void* shaderResourceView)
 {
     STUB();
 }
@@ -3030,6 +3217,11 @@ CompositorError Compositor_028::getMirrorTextureGL(Eye eye, GLuint* textureId, G
     return openvr::compositorImpl->getMirrorTextureGL(eye, textureId, sharedTextureHandle);
 }
 
+CompositorError Compositor_029::getMirrorTextureGL(Eye eye, GLuint* textureId, GLSharedTextureHandle** sharedTextureHandle)
+{
+    return openvr::compositorImpl->getMirrorTextureGL(eye, textureId, sharedTextureHandle);
+}
+
 bool Compositor_015::releaseSharedGLTexture(GLuint textureId, GLSharedTextureHandle* sharedTextureHandle)
 {
     return openvr::compositorImpl->releaseSharedGLTexture(textureId, sharedTextureHandle);
@@ -3076,6 +3268,11 @@ bool Compositor_026::releaseSharedGLTexture(GLuint textureId, GLSharedTextureHan
 }
 
 bool Compositor_028::releaseSharedGLTexture(GLuint textureId, GLSharedTextureHandle* sharedTextureHandle)
+{
+    return openvr::compositorImpl->releaseSharedGLTexture(textureId, sharedTextureHandle);
+}
+
+bool Compositor_029::releaseSharedGLTexture(GLuint textureId, GLSharedTextureHandle* sharedTextureHandle)
 {
     return openvr::compositorImpl->releaseSharedGLTexture(textureId, sharedTextureHandle);
 }
@@ -3130,6 +3327,11 @@ void Compositor_028::lockGLSharedTextureForAccess(GLSharedTextureHandle* sharedT
     openvr::compositorImpl->lockGLSharedTextureForAccess(sharedTextureHandle);
 }
 
+void Compositor_029::lockGLSharedTextureForAccess(GLSharedTextureHandle* sharedTextureHandle)
+{
+    openvr::compositorImpl->lockGLSharedTextureForAccess(sharedTextureHandle);
+}
+
 void Compositor_015::unlockGLSharedTextureForAccess(GLSharedTextureHandle* sharedTextureHandle)
 {
     openvr::compositorImpl->unlockGLSharedTextureForAccess(sharedTextureHandle);
@@ -3180,6 +3382,11 @@ void Compositor_028::unlockGLSharedTextureForAccess(GLSharedTextureHandle* share
     openvr::compositorImpl->unlockGLSharedTextureForAccess(sharedTextureHandle);
 }
 
+void Compositor_029::unlockGLSharedTextureForAccess(GLSharedTextureHandle* sharedTextureHandle)
+{
+    openvr::compositorImpl->unlockGLSharedTextureForAccess(sharedTextureHandle);
+}
+
 uint32_t Compositor_019::getVulkanInstanceExtensionsRequired(char* value, uint32_t bufferSize)
 {
     return openvr::compositorImpl->getVulkanInstanceExtensionsRequired(value, bufferSize);
@@ -3211,6 +3418,11 @@ uint32_t Compositor_026::getVulkanInstanceExtensionsRequired(char* value, uint32
 }
 
 uint32_t Compositor_028::getVulkanInstanceExtensionsRequired(char* value, uint32_t bufferSize)
+{
+    return openvr::compositorImpl->getVulkanInstanceExtensionsRequired(value, bufferSize);
+}
+
+uint32_t Compositor_029::getVulkanInstanceExtensionsRequired(char* value, uint32_t bufferSize)
 {
     return openvr::compositorImpl->getVulkanInstanceExtensionsRequired(value, bufferSize);
 }
@@ -3250,6 +3462,11 @@ uint32_t Compositor_028::getVulkanDeviceExtensionsRequired(VkPhysicalDevice_T* d
     return openvr::compositorImpl->getVulkanDeviceExtensionsRequired(device, value, bufferSize);
 }
 
+uint32_t Compositor_029::getVulkanDeviceExtensionsRequired(VkPhysicalDevice_T* device, char* value, uint32_t bufferSize)
+{
+    return openvr::compositorImpl->getVulkanDeviceExtensionsRequired(device, value, bufferSize);
+}
+
 void Compositor_021::setExplicitTimingMode(bool explicitTimingMode)
 {
     openvr::compositorImpl->setExplicitTimingMode(CompositorTimingMode::COMPOSITOR_TIMING_MODE_EXPLICIT_RUNTIME_PERFORMS_POST_PRESENT_HANDOFF);
@@ -3271,6 +3488,11 @@ void Compositor_026::setExplicitTimingMode(CompositorTimingMode timingMode)
 }
 
 void Compositor_028::setExplicitTimingMode(CompositorTimingMode timingMode)
+{
+    openvr::compositorImpl->setExplicitTimingMode(timingMode);
+}
+
+void Compositor_029::setExplicitTimingMode(CompositorTimingMode timingMode)
 {
     openvr::compositorImpl->setExplicitTimingMode(timingMode);
 }
@@ -3300,6 +3522,11 @@ CompositorError Compositor_028::submitExplicitTimingData()
     return openvr::compositorImpl->submitExplicitTimingData();
 }
 
+CompositorError Compositor_029::submitExplicitTimingData()
+{
+    return openvr::compositorImpl->submitExplicitTimingData();
+}
+
 bool Compositor_022::isMotionSmoothingEnabled()
 {
     TRACE();
@@ -3319,6 +3546,12 @@ bool Compositor_026::isMotionSmoothingEnabled()
 }
 
 bool Compositor_028::isMotionSmoothingEnabled()
+{
+    TRACE();
+    return false;
+}
+
+bool Compositor_029::isMotionSmoothingEnabled()
 {
     TRACE();
     return false;
@@ -3348,6 +3581,12 @@ bool Compositor_028::isMotionSmoothingSupported()
     return false;
 }
 
+bool Compositor_029::isMotionSmoothingSupported()
+{
+    TRACE();
+    return false;
+}
+
 bool Compositor_022::isCurrentSceneFocusAppLoading()
 {
     return openvr::compositorImpl->isCurrentSceneFocusAppLoading();
@@ -3368,6 +3607,11 @@ bool Compositor_028::isCurrentSceneFocusAppLoading()
     return openvr::compositorImpl->isCurrentSceneFocusAppLoading();
 }
 
+bool Compositor_029::isCurrentSceneFocusAppLoading()
+{
+    return openvr::compositorImpl->isCurrentSceneFocusAppLoading();
+}
+
 CompositorError Compositor_024::setStageOverride(const char* modelPath, const Matrix34* transform, const StageRenderSettings* renderSettings, uint32_t renderSettingsSize)
 {
     return openvr::compositorImpl->setStageOverride(modelPath, transform, renderSettings, renderSettingsSize);
@@ -3379,6 +3623,11 @@ CompositorError Compositor_026::setStageOverride(const char* modelPath, const Ma
 }
 
 CompositorError Compositor_028::setStageOverride(const char* modelPath, const Matrix34* transform, const StageRenderSettings* renderSettings, uint32_t renderSettingsSize)
+{
+    return openvr::compositorImpl->setStageOverride(modelPath, transform, renderSettings, renderSettingsSize);
+}
+
+CompositorError Compositor_029::setStageOverride(const char* modelPath, const Matrix34* transform, const StageRenderSettings* renderSettings, uint32_t renderSettingsSize)
 {
     return openvr::compositorImpl->setStageOverride(modelPath, transform, renderSettings, renderSettingsSize);
 }
@@ -3398,6 +3647,11 @@ void Compositor_028::clearStageOverride()
     openvr::compositorImpl->clearStageOverride();
 }
 
+void Compositor_029::clearStageOverride()
+{
+    openvr::compositorImpl->clearStageOverride();
+}
+
 bool Compositor_026::getCompositorBenchmarkResults(BenchmarkResults* benchmarkResults, uint32_t benchmarkResultsSize)
 {
     TRACE();
@@ -3405,6 +3659,12 @@ bool Compositor_026::getCompositorBenchmarkResults(BenchmarkResults* benchmarkRe
 }
 
 bool Compositor_028::getCompositorBenchmarkResults(BenchmarkResults* benchmarkResults, uint32_t benchmarkResultsSize)
+{
+    TRACE();
+    return false;
+}
+
+bool Compositor_029::getCompositorBenchmarkResults(BenchmarkResults* benchmarkResults, uint32_t benchmarkResultsSize)
 {
     TRACE();
     return false;
@@ -3420,12 +3680,22 @@ CompositorError Compositor_028::getLastPosePredictionIDs(uint32_t* renderPosePre
     return openvr::compositorImpl->getLastPosePredictionIDs(renderPosePredictionId, gamePosePredictionId);
 }
 
+CompositorError Compositor_029::getLastPosePredictionIDs(uint32_t* renderPosePredictionId, uint32_t* gamePosePredictionId)
+{
+    return openvr::compositorImpl->getLastPosePredictionIDs(renderPosePredictionId, gamePosePredictionId);
+}
+
 CompositorError Compositor_026::getPosesForFrame(uint32_t posePredictionId, TrackedDevicePose* poses, uint32_t posesCount)
 {
     return openvr::compositorImpl->getPosesForFrame(posePredictionId, poses, posesCount);
 }
 
 CompositorError Compositor_028::getPosesForFrame(uint32_t posePredictionId, TrackedDevicePose* poses, uint32_t posesCount)
+{
+    return openvr::compositorImpl->getPosesForFrame(posePredictionId, poses, posesCount);
+}
+
+CompositorError Compositor_029::getPosesForFrame(uint32_t posePredictionId, TrackedDevicePose* poses, uint32_t posesCount)
 {
     return openvr::compositorImpl->getPosesForFrame(posePredictionId, poses, posesCount);
 }

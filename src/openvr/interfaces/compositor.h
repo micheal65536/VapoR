@@ -2380,4 +2380,190 @@ namespace openvr
             virtual CompositorError getLastPosePredictionIDs(uint32_t* renderPosePredictionId, uint32_t* gamePosePredictionId) { return Compositor_028::getLastPosePredictionIDs(renderPosePredictionId, gamePosePredictionId); }
             virtual CompositorError getPosesForFrame(uint32_t posePredictionId, TrackedDevicePose* poses, uint32_t posesCount) { return Compositor_028::getPosesForFrame(posePredictionId, poses, posesCount); }
     };
+
+    //
+
+    struct Compositor_029
+    {
+        static void setTrackingSpace(TrackingUniverseOrigin origin);
+        static TrackingUniverseOrigin getTrackingSpace();
+
+        static CompositorError waitGetPoses(TrackedDevicePose* renderPoses, uint32_t renderPosesCount, TrackedDevicePose* gamePoses, uint32_t gamePosesCount);
+        static CompositorError getLastPoses(TrackedDevicePose* renderPoses, uint32_t renderPosesCount, TrackedDevicePose* gamePoses, uint32_t gamePosesCount);
+        static CompositorError getLastPoseForTrackedDeviceIndex(uint32_t deviceIndex, TrackedDevicePose* outputPose, TrackedDevicePose* gamePose);
+        static CompositorError getSubmitTexture(Texture* textureOut, bool* needsFlush, CompositorTextureUsage usage, const Texture* texture, const TextureBounds* bounds, int32_t submitFlags);
+        static CompositorError submit(Eye eye, const Texture* texture, const TextureBounds* bounds, int32_t submitFlags);
+        static CompositorError submitWithArrayIndex(Eye eye, const Texture* texture, uint32_t textureArrayIndex, const TextureBounds* bounds, int32_t submitFlags);
+        static void clearLastSubmittedFrame();
+        static void postPresentHandoff();
+
+        static bool getFrameTiming(FrameTiming_1_0_4* timing, uint32_t framesAgo);
+        static uint32_t getFrameTimings(FrameTiming_1_0_4* timings, uint32_t nFrames);
+        static float getFrameTimeRemaining();
+        static void getCumulativeStats(CumulativeStats* stats, uint32_t bufferSize);
+
+        static void fadeToColor(float seconds, float red, float green, float blue, float alpha, bool background);
+        static Color getCurrentFadeColor(bool background);
+        static void fadeGrid(float seconds, bool fadeGridIn);
+        static float getCurrentGridAlpha();
+
+        static CompositorError setSkyboxOverride(const Texture* textures, uint32_t texturesCount);
+        static void clearSkyboxOverride();
+
+        static void compositorBringToFront();
+        static void compositorGoToBack();
+        static void compositorQuit();
+        static bool isFullscreen();
+        static uint32_t getCurrentSceneFocusProcess();
+        static uint32_t getLastFrameRenderer();
+        static bool canRenderScene();
+
+        static void showMirrorWindow();
+        static void hideMirrorWindow();
+        static bool isMirrorWindowVisible();
+
+        static void compositorDumpImages();
+        static bool shouldAppRenderWithLowResources();
+        static void forceInterleavedReprojectionOn(bool on);
+        static void forceReconnectProcess();
+        static void suspendRendering(bool suspend);
+
+        static CompositorError getMirrorTextureD3D11(Eye eye, void* deviceOrResource, void** shaderResourceView);
+        static void releaseMirrorTextureD3D11(void* shaderResourceView);
+        static CompositorError getMirrorTextureGL(Eye eye, GLuint* textureId, GLSharedTextureHandle** sharedTextureHandle);
+        static bool releaseSharedGLTexture(GLuint textureId, GLSharedTextureHandle* sharedTextureHandle);
+        static void lockGLSharedTextureForAccess(GLSharedTextureHandle* sharedTextureHandle);
+        static void unlockGLSharedTextureForAccess(GLSharedTextureHandle* sharedTextureHandle);
+
+        static uint32_t getVulkanInstanceExtensionsRequired(char* value, uint32_t bufferSize);
+        static uint32_t getVulkanDeviceExtensionsRequired(VkPhysicalDevice_T* device, char* value, uint32_t bufferSize);
+
+        static void setExplicitTimingMode(CompositorTimingMode timingMode);
+        static CompositorError submitExplicitTimingData();
+
+        static bool isMotionSmoothingEnabled();
+        static bool isMotionSmoothingSupported();
+
+        static bool isCurrentSceneFocusAppLoading();
+
+        static CompositorError setStageOverride(const char* modelPath, const Matrix34* transform, const StageRenderSettings* renderSettings, uint32_t renderSettingsSize);
+        static void clearStageOverride();
+
+        static bool getCompositorBenchmarkResults(BenchmarkResults* benchmarkResults, uint32_t benchmarkResultsSize);
+
+        static CompositorError getLastPosePredictionIDs(uint32_t* renderPosePredictionId, uint32_t* gamePosePredictionId);
+        static CompositorError getPosesForFrame(uint32_t posePredictionId, TrackedDevicePose* poses, uint32_t posesCount);
+
+        void* setTrackingSpace_ = (void*) setTrackingSpace;
+        void* getTrackingSpace_ = (void*) getTrackingSpace;
+        void* waitGetPoses_ = (void*) waitGetPoses;
+        void* getLastPoses_ = (void*) getLastPoses;
+        void* getLastPoseForTrackedDeviceIndex_ = (void*) getLastPoseForTrackedDeviceIndex;
+        void* getSubmitTexture_ = (void*) getSubmitTexture;
+        void* submit_ = (void*) submit;
+        void* submitWithArrayIndex_ = (void*) submitWithArrayIndex;
+        void* clearLastSubmittedFrame_ = (void*) clearLastSubmittedFrame;
+        void* postPresentHandoff_ = (void*) postPresentHandoff;
+        void* getFrameTiming_ = (void*) getFrameTiming;
+        void* getFrameTimings_ = (void*) getFrameTimings;
+        void* getFrameTimeRemaining_ = (void*) getFrameTimeRemaining;
+        void* getCumulativeStats_ = (void*) getCumulativeStats;
+        void* fadeToColor_ = (void*) fadeToColor;
+        void* getCurrentFadeColor_ = (void*) getCurrentFadeColor;
+        void* fadeGrid_ = (void*) fadeGrid;
+        void* getCurrentGridAlpha_ = (void*) getCurrentGridAlpha;
+        void* setSkyboxOverride_ = (void*) setSkyboxOverride;
+        void* clearSkyboxOverride_ = (void*) clearSkyboxOverride;
+        void* compositorBringToFront_ = (void*) compositorBringToFront;
+        void* compositorGoToBack_ = (void*) compositorGoToBack;
+        void* compositorQuit_ = (void*) compositorQuit;
+        void* isFullscreen_ = (void*) isFullscreen;
+        void* getCurrentSceneFocusProcess_ = (void*) getCurrentSceneFocusProcess;
+        void* getLastFrameRenderer_ = (void*) getLastFrameRenderer;
+        void* canRenderScene_ = (void*) canRenderScene;
+        void* showMirrorWindow_ = (void*) showMirrorWindow;
+        void* hideMirrorWindow_ = (void*) hideMirrorWindow;
+        void* isMirrorWindowVisible_ = (void*) isMirrorWindowVisible;
+        void* compositorDumpImages_ = (void*) compositorDumpImages;
+        void* shouldAppRenderWithLowResources_ = (void*) shouldAppRenderWithLowResources;
+        void* forceInterleavedReprojectionOn_ = (void*) forceInterleavedReprojectionOn;
+        void* forceReconnectProcess_ = (void*) forceReconnectProcess;
+        void* suspendRendering_ = (void*) suspendRendering;
+        void* getMirrorTextureD3D11_ = (void*) getMirrorTextureD3D11;
+        void* releaseMirrorTextureD3D11_ = (void*) releaseMirrorTextureD3D11;
+        void* getMirrorTextureGL_ = (void*) getMirrorTextureGL;
+        void* releaseSharedGLTexture_ = (void*) releaseSharedGLTexture;
+        void* lockGLSharedTextureForAccess_ = (void*) lockGLSharedTextureForAccess;
+        void* unlockGLSharedTextureForAccess_ = (void*) unlockGLSharedTextureForAccess;
+        void* getVulkanInstanceExtensionsRequired_ = (void*) getVulkanInstanceExtensionsRequired;
+        void* getVulkanDeviceExtensionsRequired_ = (void*) getVulkanDeviceExtensionsRequired;
+        void* setExplicitTimingMode_ = (void*) setExplicitTimingMode;
+        void* submitExplicitTimingData_ = (void*) submitExplicitTimingData;
+        void* isMotionSmoothingEnabled_ = (void*) isMotionSmoothingEnabled;
+        void* isMotionSmoothingSupported_ = (void*) isMotionSmoothingSupported;
+        void* isCurrentSceneFocusAppLoading_ = (void*) isCurrentSceneFocusAppLoading;
+        void* setStageOverride_ = (void*) setStageOverride;
+        void* clearStageOverride_ = (void*) clearStageOverride;
+        void* getCompositorBenchmarkResults_ = (void*) getCompositorBenchmarkResults;
+        void* getLastPosePredictionIDs_ = (void*) getLastPosePredictionIDs;
+        void* getPosesForFrame_ = (void*) getPosesForFrame;
+    };
+
+    class Compositor_029_v
+    {
+        public:
+            virtual void setTrackingSpace(TrackingUniverseOrigin origin) { return Compositor_029::setTrackingSpace(origin); }
+            virtual TrackingUniverseOrigin getTrackingSpace() { return Compositor_029::getTrackingSpace(); }
+            virtual CompositorError waitGetPoses(TrackedDevicePose* renderPoses, uint32_t renderPosesCount, TrackedDevicePose* gamePoses, uint32_t gamePosesCount) { return Compositor_029::waitGetPoses(renderPoses, renderPosesCount, gamePoses, gamePosesCount); }
+            virtual CompositorError getLastPoses(TrackedDevicePose* renderPoses, uint32_t renderPosesCount, TrackedDevicePose* gamePoses, uint32_t gamePosesCount) { return Compositor_029::getLastPoses(renderPoses, renderPosesCount, gamePoses, gamePosesCount); }
+            virtual CompositorError getLastPoseForTrackedDeviceIndex(uint32_t deviceIndex, TrackedDevicePose* outputPose, TrackedDevicePose* gamePose) { return Compositor_029::getLastPoseForTrackedDeviceIndex(deviceIndex, outputPose, gamePose); }
+            virtual CompositorError getSubmitTexture(Texture* textureOut, bool* needsFlush, CompositorTextureUsage usage, const Texture* texture, const TextureBounds* bounds, int32_t submitFlags) { return Compositor_029::getSubmitTexture(textureOut, needsFlush, usage, texture, bounds, submitFlags); }
+            virtual CompositorError submit(Eye eye, const Texture* texture, const TextureBounds* bounds, int32_t submitFlags) { return Compositor_029::submit(eye, texture, bounds, submitFlags); }
+            virtual CompositorError submitWithArrayIndex(Eye eye, const Texture* texture, uint32_t textureArrayIndex, const TextureBounds* bounds, int32_t submitFlags) { return Compositor_029::submitWithArrayIndex(eye, texture, textureArrayIndex, bounds, submitFlags); }
+            virtual void clearLastSubmittedFrame() { return Compositor_029::clearLastSubmittedFrame(); }
+            virtual void postPresentHandoff() { return Compositor_029::postPresentHandoff(); }
+            virtual bool getFrameTiming(FrameTiming_1_0_4* timing, uint32_t framesAgo) { return Compositor_029::getFrameTiming(timing, framesAgo); }
+            virtual uint32_t getFrameTimings(FrameTiming_1_0_4* timings, uint32_t nFrames) { return Compositor_029::getFrameTimings(timings, nFrames); }
+            virtual float getFrameTimeRemaining() { return Compositor_029::getFrameTimeRemaining(); }
+            virtual void getCumulativeStats(CumulativeStats* stats, uint32_t bufferSize) { return Compositor_029::getCumulativeStats(stats, bufferSize); }
+            virtual void fadeToColor(float seconds, float red, float green, float blue, float alpha, bool background) { return Compositor_029::fadeToColor(seconds, red, green, blue, alpha, background); }
+            virtual Color getCurrentFadeColor(bool background) { return Compositor_029::getCurrentFadeColor(background); }
+            virtual void fadeGrid(float seconds, bool fadeGridIn) { return Compositor_029::fadeGrid(seconds, fadeGridIn); }
+            virtual float getCurrentGridAlpha() { return Compositor_029::getCurrentGridAlpha(); }
+            virtual CompositorError setSkyboxOverride(const Texture* textures, uint32_t texturesCount) { return Compositor_029::setSkyboxOverride(textures, texturesCount); }
+            virtual void clearSkyboxOverride() { return Compositor_029::clearSkyboxOverride(); }
+            virtual void compositorBringToFront() { return Compositor_029::compositorBringToFront(); }
+            virtual void compositorGoToBack() { return Compositor_029::compositorGoToBack(); }
+            virtual void compositorQuit() { return Compositor_029::compositorQuit(); }
+            virtual bool isFullscreen() { return Compositor_029::isFullscreen(); }
+            virtual uint32_t getCurrentSceneFocusProcess() { return Compositor_029::getCurrentSceneFocusProcess(); }
+            virtual uint32_t getLastFrameRenderer() { return Compositor_029::getLastFrameRenderer(); }
+            virtual bool canRenderScene() { return Compositor_029::canRenderScene(); }
+            virtual void showMirrorWindow() { return Compositor_029::showMirrorWindow(); }
+            virtual void hideMirrorWindow() { return Compositor_029::hideMirrorWindow(); }
+            virtual bool isMirrorWindowVisible() { return Compositor_029::isMirrorWindowVisible(); }
+            virtual void compositorDumpImages() { return Compositor_029::compositorDumpImages(); }
+            virtual bool shouldAppRenderWithLowResources() { return Compositor_029::shouldAppRenderWithLowResources(); }
+            virtual void forceInterleavedReprojectionOn(bool on) { return Compositor_029::forceInterleavedReprojectionOn(on); }
+            virtual void forceReconnectProcess() { return Compositor_029::forceReconnectProcess(); }
+            virtual void suspendRendering(bool suspend) { return Compositor_029::suspendRendering(suspend); }
+            virtual CompositorError getMirrorTextureD3D11(Eye eye, void* deviceOrResource, void** shaderResourceView) { return Compositor_029::getMirrorTextureD3D11(eye, deviceOrResource, shaderResourceView); }
+            virtual void releaseMirrorTextureD3D11(void* shaderResourceView) { return Compositor_029::releaseMirrorTextureD3D11(shaderResourceView); }
+            virtual CompositorError getMirrorTextureGL(Eye eye, GLuint* textureId, GLSharedTextureHandle** sharedTextureHandle) { return Compositor_029::getMirrorTextureGL(eye, textureId, sharedTextureHandle); }
+            virtual bool releaseSharedGLTexture(GLuint textureId, GLSharedTextureHandle* sharedTextureHandle) { return Compositor_029::releaseSharedGLTexture(textureId, sharedTextureHandle); }
+            virtual void lockGLSharedTextureForAccess(GLSharedTextureHandle* sharedTextureHandle) { return Compositor_029::lockGLSharedTextureForAccess(sharedTextureHandle); }
+            virtual void unlockGLSharedTextureForAccess(GLSharedTextureHandle* sharedTextureHandle) { return Compositor_029::unlockGLSharedTextureForAccess(sharedTextureHandle); }
+            virtual uint32_t getVulkanInstanceExtensionsRequired(char* value, uint32_t bufferSize) { return Compositor_029::getVulkanInstanceExtensionsRequired(value, bufferSize); }
+            virtual uint32_t getVulkanDeviceExtensionsRequired(VkPhysicalDevice_T* device, char* value, uint32_t bufferSize) { return Compositor_029::getVulkanDeviceExtensionsRequired(device, value, bufferSize); }
+            virtual void setExplicitTimingMode(CompositorTimingMode timingMode) { return Compositor_029::setExplicitTimingMode(timingMode); }
+            virtual CompositorError submitExplicitTimingData() { return Compositor_029::submitExplicitTimingData(); }
+            virtual bool isMotionSmoothingEnabled() { return Compositor_029::isMotionSmoothingEnabled(); }
+            virtual bool isMotionSmoothingSupported() { return Compositor_029::isMotionSmoothingSupported(); }
+            virtual bool isCurrentSceneFocusAppLoading() { return Compositor_029::isCurrentSceneFocusAppLoading(); }
+            virtual CompositorError setStageOverride(const char* modelPath, const Matrix34* transform, const StageRenderSettings* renderSettings, uint32_t renderSettingsSize) { return Compositor_029::setStageOverride(modelPath, transform, renderSettings, renderSettingsSize); }
+            virtual void clearStageOverride() { return Compositor_029::clearStageOverride(); }
+            virtual bool getCompositorBenchmarkResults(BenchmarkResults* benchmarkResults, uint32_t benchmarkResultsSize) { return Compositor_029::getCompositorBenchmarkResults(benchmarkResults, benchmarkResultsSize); }
+            virtual CompositorError getLastPosePredictionIDs(uint32_t* renderPosePredictionId, uint32_t* gamePosePredictionId) { return Compositor_029::getLastPosePredictionIDs(renderPosePredictionId, gamePosePredictionId); }
+            virtual CompositorError getPosesForFrame(uint32_t posePredictionId, TrackedDevicePose* poses, uint32_t posesCount) { return Compositor_029::getPosesForFrame(posePredictionId, poses, posesCount); }
+    };
 }

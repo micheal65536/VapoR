@@ -127,6 +127,11 @@ void System_022::getRecommendedRenderTargetSize(uint32_t* width, uint32_t* heigh
     openvr::systemImpl->getRecommendedRenderTargetSize(width, height);
 }
 
+void System_023::getRecommendedRenderTargetSize(uint32_t* width, uint32_t* height)
+{
+    openvr::systemImpl->getRecommendedRenderTargetSize(width, height);
+}
+
 void System_003::getEyeOutputViewport(Eye eye, uint32_t* x, uint32_t* y, uint32_t* width, uint32_t* height)
 {
     openvr::systemImpl->getRecommendedRenderTargetSize(width, height);
@@ -257,6 +262,11 @@ Matrix44 System_022::getProjectionMatrix(Eye eye, float near, float far)
     return openvr::systemImpl->getProjectionMatrix(eye, near, far);
 }
 
+Matrix44 System_023::getProjectionMatrix(Eye eye, float near, float far)
+{
+    return openvr::systemImpl->getProjectionMatrix(eye, near, far);
+}
+
 void System_003::getProjectionRaw(Eye eye, float* left, float* right, float* top, float* bottom)
 {
     openvr::systemImpl->getProjectionRaw(eye, left, right, top, bottom);
@@ -338,6 +348,11 @@ void System_021::getProjectionRaw(Eye eye, float* left, float* right, float* top
 }
 
 void System_022::getProjectionRaw(Eye eye, float* left, float* right, float* top, float* bottom)
+{
+    openvr::systemImpl->getProjectionRaw(eye, left, right, top, bottom);
+}
+
+void System_023::getProjectionRaw(Eye eye, float* left, float* right, float* top, float* bottom)
 {
     openvr::systemImpl->getProjectionRaw(eye, left, right, top, bottom);
 }
@@ -445,6 +460,11 @@ bool System_022::computeDistortion(Eye eye, float u, float v, DistortionCoordina
     return openvr::systemImpl->computeDistortion(eye, u, v, distortionCoordinates);
 }
 
+bool System_023::computeDistortion(Eye eye, float u, float v, DistortionCoordinates* distortionCoordinates)
+{
+    return openvr::systemImpl->computeDistortion(eye, u, v, distortionCoordinates);
+}
+
 Matrix34 System_003::getEyeToHeadTransform(Eye eye)
 {
     return openvr::systemImpl->getEyeToHeadTransform(eye);
@@ -530,6 +550,11 @@ Matrix34 System_022::getEyeToHeadTransform(Eye eye)
     return openvr::systemImpl->getEyeToHeadTransform(eye);
 }
 
+Matrix34 System_023::getEyeToHeadTransform(Eye eye)
+{
+    return openvr::systemImpl->getEyeToHeadTransform(eye);
+}
+
 bool System_003::getTimeSinceLastVsync(float* secondsSinceLastVsync, uint64_t* frameCounter)
 {
     return openvr::systemImpl->getTimeSinceLastVsync(secondsSinceLastVsync, frameCounter);
@@ -611,6 +636,11 @@ bool System_021::getTimeSinceLastVsync(float* secondsSinceLastVsync, uint64_t* f
 }
 
 bool System_022::getTimeSinceLastVsync(float* secondsSinceLastVsync, uint64_t* frameCounter)
+{
+    return openvr::systemImpl->getTimeSinceLastVsync(secondsSinceLastVsync, frameCounter);
+}
+
+bool System_023::getTimeSinceLastVsync(float* secondsSinceLastVsync, uint64_t* frameCounter)
 {
     return openvr::systemImpl->getTimeSinceLastVsync(secondsSinceLastVsync, frameCounter);
 }
@@ -712,6 +742,12 @@ int32_t System_021::getD3D9AdapterIndex()
 }
 
 int32_t System_022::getD3D9AdapterIndex()
+{
+    STUB();
+    return -1;
+}
+
+int32_t System_023::getD3D9AdapterIndex()
 {
     STUB();
     return -1;
@@ -819,6 +855,12 @@ void System_022::getDXGIOutputInfo(int32_t* adapterIndex)
     *adapterIndex = -1;
 }
 
+void System_023::getDXGIOutputInfo(int32_t* adapterIndex)
+{
+    STUB();
+    *adapterIndex = -1;
+}
+
 void System_016::getOutputDevice(uint64_t* device, TextureType textureType)
 {
     openvr::systemImpl->getOutputDevice(device, textureType, nullptr);
@@ -845,6 +887,11 @@ void System_021::getOutputDevice(uint64_t* device, TextureType textureType, VkIn
 }
 
 void System_022::getOutputDevice(uint64_t* device, TextureType textureType, VkInstance_T* vkInstance)
+{
+    openvr::systemImpl->getOutputDevice(device, textureType, vkInstance);
+}
+
+void System_023::getOutputDevice(uint64_t* device, TextureType textureType, VkInstance_T* vkInstance)
 {
     openvr::systemImpl->getOutputDevice(device, textureType, vkInstance);
 }
@@ -949,6 +996,11 @@ bool System_022::isDisplayOnDesktop()
     return false;
 }
 
+bool System_023::isDisplayOnDesktop()
+{
+    return false;
+}
+
 bool System_006::setDisplayVisibility(bool visibleOnDesktop)
 {
     return false;
@@ -1015,6 +1067,11 @@ bool System_021::setDisplayVisibility(bool visibleOnDesktop)
 }
 
 bool System_022::setDisplayVisibility(bool visibleOnDesktop)
+{
+    return false;
+}
+
+bool System_023::setDisplayVisibility(bool visibleOnDesktop)
 {
     return false;
 }
@@ -1100,6 +1157,11 @@ void System_021::getDeviceToAbsoluteTrackingPose(TrackingUniverseOrigin origin, 
 }
 
 void System_022::getDeviceToAbsoluteTrackingPose(TrackingUniverseOrigin origin, float predictedSecondsToPhotonsFromNow, TrackedDevicePose* trackedDevicePoses, uint32_t trackedDevicePosesCount)
+{
+    openvr::systemImpl->getDeviceToAbsoluteTrackingPose(origin, predictedSecondsToPhotonsFromNow, trackedDevicePoses, trackedDevicePosesCount);
+}
+
+void System_023::getDeviceToAbsoluteTrackingPose(TrackingUniverseOrigin origin, float predictedSecondsToPhotonsFromNow, TrackedDevicePose* trackedDevicePoses, uint32_t trackedDevicePosesCount)
 {
     openvr::systemImpl->getDeviceToAbsoluteTrackingPose(origin, predictedSecondsToPhotonsFromNow, trackedDevicePoses, trackedDevicePosesCount);
 }
@@ -1269,6 +1331,11 @@ Matrix34 System_022::getSeatedZeroPoseToStandingAbsoluteTrackingPose()
     return openvr::systemImpl->getSeatedZeroPoseToStandingAbsoluteTrackingPose();
 }
 
+Matrix34 System_023::getSeatedZeroPoseToStandingAbsoluteTrackingPose()
+{
+    return openvr::systemImpl->getSeatedZeroPoseToStandingAbsoluteTrackingPose();
+}
+
 Matrix34 System_006::getRawZeroPoseToStandingAbsoluteTrackingPose()
 {
     return openvr::systemImpl->getRawZeroPoseToStandingAbsoluteTrackingPose();
@@ -1335,6 +1402,11 @@ Matrix34 System_021::getRawZeroPoseToStandingAbsoluteTrackingPose()
 }
 
 Matrix34 System_022::getRawZeroPoseToStandingAbsoluteTrackingPose()
+{
+    return openvr::systemImpl->getRawZeroPoseToStandingAbsoluteTrackingPose();
+}
+
+Matrix34 System_023::getRawZeroPoseToStandingAbsoluteTrackingPose()
 {
     return openvr::systemImpl->getRawZeroPoseToStandingAbsoluteTrackingPose();
 }
@@ -1427,6 +1499,11 @@ uint32_t System_022::getSortedTrackedDeviceIndicesOfClass(TrackedDeviceClass tra
     return openvr::systemImpl->getSortedTrackedDeviceIndicesOfClass(trackedDeviceClass, indexes, indexesCount, relativeToIndex);
 }
 
+uint32_t System_023::getSortedTrackedDeviceIndicesOfClass(TrackedDeviceClass trackedDeviceClass, uint32_t* indexes, uint32_t indexesCount, uint32_t relativeToIndex)
+{
+    return openvr::systemImpl->getSortedTrackedDeviceIndicesOfClass(trackedDeviceClass, indexes, indexesCount, relativeToIndex);
+}
+
 DeviceActivityLevel System_006::getTrackedDeviceActivityLevel(uint32_t index)
 {
     return openvr::systemImpl->getTrackedDeviceActivityLevel(index);
@@ -1497,6 +1574,11 @@ DeviceActivityLevel System_022::getTrackedDeviceActivityLevel(uint32_t index)
     return openvr::systemImpl->getTrackedDeviceActivityLevel(index);
 }
 
+DeviceActivityLevel System_023::getTrackedDeviceActivityLevel(uint32_t index)
+{
+    return openvr::systemImpl->getTrackedDeviceActivityLevel(index);
+}
+
 void System_007::applyTransform(TrackedDevicePose* outputPose, const TrackedDevicePose& trackedDevicePose, const Matrix34& transform)
 {
     openvr::systemImpl->applyTransform(outputPose, &trackedDevicePose, &transform);
@@ -1562,6 +1644,11 @@ void System_022::applyTransform(TrackedDevicePose* outputPose, const TrackedDevi
     openvr::systemImpl->applyTransform(outputPose, trackedDevicePose, transform);
 }
 
+void System_023::applyTransform(TrackedDevicePose* outputPose, const TrackedDevicePose* trackedDevicePose, const Matrix34* transform)
+{
+    openvr::systemImpl->applyTransform(outputPose, trackedDevicePose, transform);
+}
+
 uint32_t System_010::getTrackedDeviceIndexForControllerRole(TrackedControllerRole controllerRole)
 {
     return openvr::systemImpl->getTrackedDeviceIndexForControllerRole(controllerRole);
@@ -1617,6 +1704,11 @@ uint32_t System_022::getTrackedDeviceIndexForControllerRole(TrackedControllerRol
     return openvr::systemImpl->getTrackedDeviceIndexForControllerRole(controllerRole);
 }
 
+uint32_t System_023::getTrackedDeviceIndexForControllerRole(TrackedControllerRole controllerRole)
+{
+    return openvr::systemImpl->getTrackedDeviceIndexForControllerRole(controllerRole);
+}
+
 TrackedControllerRole System_010::getControllerRoleForTrackedDeviceIndex(uint32_t index)
 {
     return openvr::systemImpl->getControllerRoleForTrackedDeviceIndex(index);
@@ -1668,6 +1760,11 @@ TrackedControllerRole System_021::getControllerRoleForTrackedDeviceIndex(uint32_
 }
 
 TrackedControllerRole System_022::getControllerRoleForTrackedDeviceIndex(uint32_t index)
+{
+    return openvr::systemImpl->getControllerRoleForTrackedDeviceIndex(index);
+}
+
+TrackedControllerRole System_023::getControllerRoleForTrackedDeviceIndex(uint32_t index)
 {
     return openvr::systemImpl->getControllerRoleForTrackedDeviceIndex(index);
 }
@@ -1757,6 +1854,11 @@ TrackedDeviceClass System_022::getTrackedDeviceClass(uint32_t index)
     return openvr::systemImpl->getTrackedDeviceClass(index);
 }
 
+TrackedDeviceClass System_023::getTrackedDeviceClass(uint32_t index)
+{
+    return openvr::systemImpl->getTrackedDeviceClass(index);
+}
+
 bool System_003::isTrackedDeviceConnected(uint32_t index)
 {
     return openvr::systemImpl->isTrackedDeviceConnected(index);
@@ -1838,6 +1940,11 @@ bool System_021::isTrackedDeviceConnected(uint32_t index)
 }
 
 bool System_022::isTrackedDeviceConnected(uint32_t index)
+{
+    return openvr::systemImpl->isTrackedDeviceConnected(index);
+}
+
+bool System_023::isTrackedDeviceConnected(uint32_t index)
 {
     return openvr::systemImpl->isTrackedDeviceConnected(index);
 }
@@ -1927,6 +2034,11 @@ bool System_022::getBoolTrackedDeviceProperty(uint32_t index, TrackedDevicePrope
     return openvr::systemImpl->getBoolTrackedDeviceProperty(index, property, error);
 }
 
+bool System_023::getBoolTrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedPropertyError* error)
+{
+    return openvr::systemImpl->getBoolTrackedDeviceProperty(index, property, error);
+}
+
 float System_003::getFloatTrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedPropertyError* error)
 {
     return openvr::systemImpl->getFloatTrackedDeviceProperty(index, property, error);
@@ -2008,6 +2120,11 @@ float System_021::getFloatTrackedDeviceProperty(uint32_t index, TrackedDevicePro
 }
 
 float System_022::getFloatTrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedPropertyError* error)
+{
+    return openvr::systemImpl->getFloatTrackedDeviceProperty(index, property, error);
+}
+
+float System_023::getFloatTrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedPropertyError* error)
 {
     return openvr::systemImpl->getFloatTrackedDeviceProperty(index, property, error);
 }
@@ -2097,6 +2214,11 @@ int32_t System_022::getInt32TrackedDeviceProperty(uint32_t index, TrackedDeviceP
     return openvr::systemImpl->getInt32TrackedDeviceProperty(index, property, error);
 }
 
+int32_t System_023::getInt32TrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedPropertyError* error)
+{
+    return openvr::systemImpl->getInt32TrackedDeviceProperty(index, property, error);
+}
+
 uint64_t System_003::getUint64TrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedPropertyError* error)
 {
     return openvr::systemImpl->getUint64TrackedDeviceProperty(index, property, error);
@@ -2178,6 +2300,11 @@ uint64_t System_021::getUint64TrackedDeviceProperty(uint32_t index, TrackedDevic
 }
 
 uint64_t System_022::getUint64TrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedPropertyError* error)
+{
+    return openvr::systemImpl->getUint64TrackedDeviceProperty(index, property, error);
+}
+
+uint64_t System_023::getUint64TrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedPropertyError* error)
 {
     return openvr::systemImpl->getUint64TrackedDeviceProperty(index, property, error);
 }
@@ -2267,6 +2394,11 @@ Matrix34 System_022::getMatrix34TrackedDeviceProperty(uint32_t index, TrackedDev
     return openvr::systemImpl->getMatrix34TrackedDeviceProperty(index, property, error);
 }
 
+Matrix34 System_023::getMatrix34TrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedPropertyError* error)
+{
+    return openvr::systemImpl->getMatrix34TrackedDeviceProperty(index, property, error);
+}
+
 uint32_t System_019::getArrayTrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedDevicePropertyType type, void* buffer, uint32_t bufferSize, TrackedPropertyError* error)
 {
     return openvr::systemImpl->getArrayTrackedDeviceProperty(index, property, type, buffer, bufferSize, error);
@@ -2283,6 +2415,11 @@ uint32_t System_021::getArrayTrackedDeviceProperty(uint32_t index, TrackedDevice
 }
 
 uint32_t System_022::getArrayTrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedDevicePropertyType type, void* buffer, uint32_t bufferSize, TrackedPropertyError* error)
+{
+    return openvr::systemImpl->getArrayTrackedDeviceProperty(index, property, type, buffer, bufferSize, error);
+}
+
+uint32_t System_023::getArrayTrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, TrackedDevicePropertyType type, void* buffer, uint32_t bufferSize, TrackedPropertyError* error)
 {
     return openvr::systemImpl->getArrayTrackedDeviceProperty(index, property, type, buffer, bufferSize, error);
 }
@@ -2372,6 +2509,11 @@ uint32_t System_022::getStringTrackedDeviceProperty(uint32_t index, TrackedDevic
     return openvr::systemImpl->getStringTrackedDeviceProperty(index, property, buffer, bufferSize, error);
 }
 
+uint32_t System_023::getStringTrackedDeviceProperty(uint32_t index, TrackedDeviceProperty property, char* buffer, uint32_t bufferSize, TrackedPropertyError* error)
+{
+    return openvr::systemImpl->getStringTrackedDeviceProperty(index, property, buffer, bufferSize, error);
+}
+
 const char* System_003::getPropErrorNameFromEnum(TrackedPropertyError error)
 {
     return openvr::systemImpl->getPropErrorNameFromEnum(error);
@@ -2453,6 +2595,11 @@ const char* System_021::getPropErrorNameFromEnum(TrackedPropertyError error)
 }
 
 const char* System_022::getPropErrorNameFromEnum(TrackedPropertyError error)
+{
+    return openvr::systemImpl->getPropErrorNameFromEnum(error);
+}
+
+const char* System_023::getPropErrorNameFromEnum(TrackedPropertyError error)
 {
     return openvr::systemImpl->getPropErrorNameFromEnum(error);
 }
@@ -2584,6 +2731,11 @@ bool System_022::pollNextEvent(Event_0_9_15* event, uint32_t bufferSize)
     return openvr::systemImpl->pollNextEvent(event, bufferSize);
 }
 
+bool System_023::pollNextEvent(Event_0_9_15* event, uint32_t bufferSize)
+{
+    return openvr::systemImpl->pollNextEvent(event, bufferSize);
+}
+
 bool System_003::pollNextEventWithPose(TrackingUniverseOrigin origin, Event_0_9_0* event, TrackedDevicePose* trackedDevicePoseOut)
 {
     Event_0_9_15 e;
@@ -2711,6 +2863,16 @@ bool System_022::pollNextEventWithPose(TrackingUniverseOrigin origin, Event_0_9_
     return openvr::systemImpl->pollNextEventWithPose(origin, event, bufferSize, trackedDevicePoseOut);
 }
 
+bool System_023::pollNextEventWithPose(TrackingUniverseOrigin origin, Event_0_9_15* event, uint32_t bufferSize, TrackedDevicePose* trackedDevicePoseOut)
+{
+    return openvr::systemImpl->pollNextEventWithPose(origin, event, bufferSize, trackedDevicePoseOut);
+}
+
+bool System_023::pollNextEventWithPoseAndOverlays(TrackingUniverseOrigin origin, Event_0_9_15* event, uint32_t bufferSize, TrackedDevicePose* trackedDevicePoseOut, uint64_t* overlayHandle)
+{
+    return openvr::systemImpl->pollNextEventWithPoseAndOverlays(origin, event, bufferSize, trackedDevicePoseOut, overlayHandle);
+}
+
 const char* System_003::getEventTypeNameFromEnum(EventType type)
 {
     return openvr::systemImpl->getEventTypeNameFromEnum(type);
@@ -2792,6 +2954,11 @@ const char* System_021::getEventTypeNameFromEnum(EventType type)
 }
 
 const char* System_022::getEventTypeNameFromEnum(EventType type)
+{
+    return openvr::systemImpl->getEventTypeNameFromEnum(type);
+}
+
+const char* System_023::getEventTypeNameFromEnum(EventType type)
 {
     return openvr::systemImpl->getEventTypeNameFromEnum(type);
 }
@@ -2881,6 +3048,11 @@ HiddenAreaMesh System_022::getHiddenAreaMesh(Eye eye, HiddenAreaMeshType type)
     return openvr::systemImpl->getHiddenAreaMesh(eye, type);
 }
 
+HiddenAreaMesh System_023::getHiddenAreaMesh(Eye eye, HiddenAreaMeshType type)
+{
+    return openvr::systemImpl->getHiddenAreaMesh(eye, type);
+}
+
 bool System_003::getControllerState(uint32_t index, ControllerState* state)
 {
     return openvr::systemImpl->getControllerState(index, state, sizeof(ControllerState));
@@ -2962,6 +3134,11 @@ bool System_021::getControllerState(uint32_t index, ControllerState* state, uint
 }
 
 bool System_022::getControllerState(uint32_t index, ControllerState* state, uint32_t bufferSize)
+{
+    return openvr::systemImpl->getControllerState(index, state, bufferSize);
+}
+
+bool System_023::getControllerState(uint32_t index, ControllerState* state, uint32_t bufferSize)
 {
     return openvr::systemImpl->getControllerState(index, state, bufferSize);
 }
@@ -3051,6 +3228,11 @@ bool System_022::getControllerStateWithPose(TrackingUniverseOrigin origin, uint3
     return openvr::systemImpl->getControllerStateWithPose(origin, index, state, bufferSize, pose);
 }
 
+bool System_023::getControllerStateWithPose(TrackingUniverseOrigin origin, uint32_t index, ControllerState* state, uint32_t bufferSize, TrackedDevicePose* pose)
+{
+    return openvr::systemImpl->getControllerStateWithPose(origin, index, state, bufferSize, pose);
+}
+
 void System_003::triggerHapticPulse(uint32_t index, uint32_t axisId, unsigned short durationUs)
 {
     return openvr::systemImpl->triggerHapticPulse(index, axisId, durationUs);
@@ -3132,6 +3314,11 @@ void System_021::triggerHapticPulse(uint32_t index, uint32_t axisId, unsigned sh
 }
 
 void System_022::triggerHapticPulse(uint32_t index, uint32_t axisId, unsigned short durationUs)
+{
+    return openvr::systemImpl->triggerHapticPulse(index, axisId, durationUs);
+}
+
+void System_023::triggerHapticPulse(uint32_t index, uint32_t axisId, unsigned short durationUs)
 {
     return openvr::systemImpl->triggerHapticPulse(index, axisId, durationUs);
 }
@@ -3221,6 +3408,11 @@ const char* System_022::getButtonIdNameFromEnum(ButtonId button)
     return openvr::systemImpl->getButtonIdNameFromEnum(button);
 }
 
+const char* System_023::getButtonIdNameFromEnum(ButtonId button)
+{
+    return openvr::systemImpl->getButtonIdNameFromEnum(button);
+}
+
 const char* System_003::getControllerAxisTypeNameFromEnum(ControllerAxisType axisType)
 {
     return openvr::systemImpl->getControllerAxisTypeNameFromEnum(axisType);
@@ -3302,6 +3494,11 @@ const char* System_021::getControllerAxisTypeNameFromEnum(ControllerAxisType axi
 }
 
 const char* System_022::getControllerAxisTypeNameFromEnum(ControllerAxisType axisType)
+{
+    return openvr::systemImpl->getControllerAxisTypeNameFromEnum(axisType);
+}
+
+const char* System_023::getControllerAxisTypeNameFromEnum(ControllerAxisType axisType)
 {
     return openvr::systemImpl->getControllerAxisTypeNameFromEnum(axisType);
 }
@@ -3558,6 +3755,12 @@ bool System_022::isInputAvailable()
     return true;
 }
 
+bool System_023::isInputAvailable()
+{
+    TRACE();
+    return true;
+}
+
 bool System_019::isSteamVRDrawingControllers()
 {
     return false;
@@ -3574,6 +3777,11 @@ bool System_021::isSteamVRDrawingControllers()
 }
 
 bool System_022::isSteamVRDrawingControllers()
+{
+    return false;
+}
+
+bool System_023::isSteamVRDrawingControllers()
 {
     return false;
 }
@@ -3602,6 +3810,12 @@ bool System_022::shouldApplicationPause()
     return false;
 }
 
+bool System_023::shouldApplicationPause()
+{
+    TRACE();
+    return false;
+}
+
 bool System_019::shouldApplicationReduceRenderingWork()
 {
     return false;
@@ -3618,6 +3832,11 @@ bool System_021::shouldApplicationReduceRenderingWork()
 }
 
 bool System_022::shouldApplicationReduceRenderingWork()
+{
+    return false;
+}
+
+bool System_023::shouldApplicationReduceRenderingWork()
 {
     return false;
 }
@@ -3790,6 +4009,12 @@ FirmwareError System_022::performFirmwareUpdate(uint32_t deviceIndex)
     return FirmwareError::FIRMWARE_ERROR_FAIL;
 }
 
+FirmwareError System_023::performFirmwareUpdate(uint32_t deviceIndex)
+{
+    STUB();
+    return FirmwareError::FIRMWARE_ERROR_FAIL;
+}
+
 void System_009::acknowledgeQuit()
 {
     openvr::systemImpl->acknowledgeQuit();
@@ -3846,6 +4071,11 @@ void System_021::acknowledgeQuit()
 }
 
 void System_022::acknowledgeQuit()
+{
+    openvr::systemImpl->acknowledgeQuit();
+}
+
+void System_023::acknowledgeQuit()
 {
     openvr::systemImpl->acknowledgeQuit();
 }
@@ -3935,6 +4165,11 @@ uint32_t System_022::getAppContainerFilePaths(char* buffer, uint32_t bufferSize)
     return openvr::systemImpl->getAppContainerFilePaths(buffer, bufferSize);
 }
 
+uint32_t System_023::getAppContainerFilePaths(char* buffer, uint32_t bufferSize)
+{
+    return openvr::systemImpl->getAppContainerFilePaths(buffer, bufferSize);
+}
+
 const char* System_020::getRuntimeVersion()
 {
     return openvr::systemImpl->getRuntimeVersion();
@@ -3946,6 +4181,11 @@ const char* System_021::getRuntimeVersion()
 }
 
 const char* System_022::getRuntimeVersion()
+{
+    return openvr::systemImpl->getRuntimeVersion();
+}
+
+const char* System_023::getRuntimeVersion()
 {
     return openvr::systemImpl->getRuntimeVersion();
 }

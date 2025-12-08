@@ -135,6 +135,11 @@ CompositorError CompositorImpl::getLastPoseForTrackedDeviceIndex(uint32_t device
     return CompositorError::COMPOSITOR_ERROR_NONE;
 }
 
+CompositorError CompositorImpl::getSubmitTexture(Texture* textureOut, bool* needsFlush, CompositorTextureUsage usage, const Texture* texture, const TextureBounds* bounds, int32_t submitFlags)
+{
+    STUB_F("%d %d %d %d", usage, texture, bounds, submitFlags);
+}
+
 CompositorError CompositorImpl::submit(Eye eye, const Texture* texture, const TextureBounds* bounds, int32_t submitFlags)
 {
     TRACE_F("%d %d %d %d", eye, texture->type, texture->colorSpace, submitFlags);
