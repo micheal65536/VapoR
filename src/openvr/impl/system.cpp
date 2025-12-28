@@ -85,6 +85,7 @@ void SystemImpl::getOutputDevice(uint64_t* device, TextureType textureType, VkIn
 
 void SystemImpl::getDeviceToAbsoluteTrackingPose(TrackingUniverseOrigin origin, float predictedSecondsToPhotonsFromNow, TrackedDevicePose* trackedDevicePoses, uint32_t trackedDevicePosesCount)
 {
+    // TODO
     STUB();
 }
 
@@ -581,7 +582,8 @@ const char* SystemImpl::getEventTypeNameFromEnum(EventType type)
 
 HiddenAreaMesh SystemImpl::getHiddenAreaMesh(Eye eye, HiddenAreaMeshType type)
 {
-    TRACE();
+    // TODO: check if returning null vertices is acceptable here (OpenVR header says that this is acceptable, actually check what SteamVR does when no hidden area mesh is provided)
+    TRACE_F("%d %d", eye, type);
     return HiddenAreaMesh {
         .vertices = nullptr,
         .triangleCount = 0

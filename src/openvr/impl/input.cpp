@@ -516,6 +516,7 @@ InputError InputImpl::getOriginTrackedDeviceInfo(uint64_t origin, InputOriginInf
 
 InputError InputImpl::getActionBindingInfo(uint64_t action, InputBindingInfo* bindings, uint32_t bindingInfoSize, uint32_t bindingsBufferCount, uint32_t* returnedBindingsCount)
 {
+    // TODO: this one should be fairly easy since it seems to just match the action modes/outputs/paths that we've reverse engineered
     STUB();
     *returnedBindingsCount = 0;
     return InputError::INPUT_ERROR_NONE;
@@ -539,6 +540,7 @@ InputError InputImpl::getComponentStateForBinding(const char* renderModelName, c
 bool InputImpl::isUsingLegacyInput()
 {
     // CHECK: are we supposed to disable legacy input state and events after action set input has been configured?
+    // TODO: what's supposed to happen is that we immediately stop updating the legacy input state once an action manifest is provided, the last known legacy input state becomes frozen and no change events are dispatched for this
     return this->clientCore.backend->actionManager == nullptr;
 }
 

@@ -493,6 +493,9 @@ void Backend::step(XrTime displayTime, XrDuration displayDuration)
 
     //
 
+    // TODO: reimplement legacy input handling using another action set
+    // TODO: what's supposed to happen is that we immediately stop updating the legacy input state once an action manifest is provided, the last known legacy input state becomes frozen and no change events are dispatched for this
+
     this->frameStates.lock();
 
     this->frameStates.postFrame(FrameState {
