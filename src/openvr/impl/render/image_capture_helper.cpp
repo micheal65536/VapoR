@@ -16,7 +16,9 @@
 using namespace openvr::render;
 using namespace openvr;
 
-GLImageCaptureHelper::GLImageCaptureHelper(int width, int height, vapor::FrameQueue::Memory* memory)
+//
+
+GLImageCaptureHelper::GLImageCaptureHelper(int width, int height)
 {
     this->width = width;
     this->height = height;
@@ -115,7 +117,6 @@ GLImageCaptureHelper::GLImageCaptureHelper(int width, int height, vapor::FrameQu
         dstMemory[i] = vulkan->allocateMemory(memoryRequirements.size, memoryTypeIndex, true);
         vkDestroyImage(vulkan->device, image, nullptr);
 
-        memory[i].vulkanMemory = dstMemory[i];
         VkMemoryGetFdInfoKHR memoryGetFdInfo {
             .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
             .pNext = nullptr,
@@ -124,13 +125,14 @@ GLImageCaptureHelper::GLImageCaptureHelper(int width, int height, vapor::FrameQu
         };
         PFN_vkGetMemoryFdKHR vkGetMemoryFdKHR;
         vkGetMemoryFdKHR = (PFN_vkGetMemoryFdKHR) vkGetInstanceProcAddr(vulkan->instance, "vkGetMemoryFdKHR");
-        ABORT_ON_VULKAN_ERROR(vkGetMemoryFdKHR(vulkan->device, &memoryGetFdInfo, &memory[i].fd));
-        memory[i].size = memoryRequirements.size;
+        int fd1;
+        ABORT_ON_VULKAN_ERROR(vkGetMemoryFdKHR(vulkan->device, &memoryGetFdInfo, &fd1));
+        exportedBufferTextures[i] = vapor::VulkanExportedTextureHolder {.width = width, .height = height, .vulkanMemory = dstMemory[i], .fd = fd1, .size = memoryRequirements.size};
 
         int fd;
         ABORT_ON_VULKAN_ERROR(vkGetMemoryFdKHR(vulkan->device, &memoryGetFdInfo, &fd));
 
-        glImportMemoryFdEXT(dstExternalMemory[i], memory[i].size, GL_HANDLE_TYPE_OPAQUE_FD_EXT, fd);
+        glImportMemoryFdEXT(dstExternalMemory[i], memoryRequirements.size, GL_HANDLE_TYPE_OPAQUE_FD_EXT, fd);
         ABORT_ON_OPENGL_ERROR();
         glBindTexture(GL_TEXTURE_2D, dstTextures[i]);
         glTexStorageMem2DEXT(GL_TEXTURE_2D, 1, GL_RGBA8, width, height, dstExternalMemory[i], 0);
@@ -189,8 +191,10 @@ GLImageCaptureHelper::~GLImageCaptureHelper()
     vkDestroyDevice(device, nullptr);
 }
 
-CompositorError GLImageCaptureHelper::capture(GLuint srcTextureId, const TextureBounds* textureBounds, const vapor::FrameQueue::Memory* memory, int bufferIndex)
+CompositorError GLImageCaptureHelper::capture(GLuint srcTextureId, const TextureBounds* textureBounds, Eye eye)
 {
+    int bufferIndex = getCurrentBufferIndexForEye(eye);
+
     GLuint savedTexture;
     GLuint savedReadFramebuffer;
     GLuint savedDrawFramebuffer;
@@ -228,7 +232,26 @@ CompositorError GLImageCaptureHelper::capture(GLuint srcTextureId, const Texture
     return CompositorError::COMPOSITOR_ERROR_NONE;
 }
 
-VulkanImageCaptureHelper::VulkanImageCaptureHelper(int width, int height, vapor::FrameQueue::Memory* memory, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue queue, uint32_t queueFamilyIndex): common(instance, physicalDevice, device, queue, queueFamilyIndex)
+int GLImageCaptureHelper::getCurrentBufferIndexForEye(Eye eye)
+{
+    switch (eye)
+    {
+        case Eye::EYE_LEFT:
+        default:
+            return currentBufferSwap + 0;
+        case Eye::EYE_RIGHT:
+            return currentBufferSwap + 1;
+    }
+}
+
+void GLImageCaptureHelper::swapBuffers()
+{
+    currentBufferSwap = 2 - currentBufferSwap;
+}
+
+//
+
+VulkanImageCaptureHelper::VulkanImageCaptureHelper(int width, int height, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue queue, uint32_t queueFamilyIndex): common(instance, physicalDevice, device, queue, queueFamilyIndex)
 {
     this->width = width;
     this->height = height;
@@ -242,7 +265,6 @@ VulkanImageCaptureHelper::VulkanImageCaptureHelper(int width, int height, vapor:
         dstImagesMemory[i] = common.allocateMemory(memoryRequirements.size, memoryTypeIndex, true);
         ABORT_ON_VULKAN_ERROR(vkBindImageMemory(common.device, dstImages[i], dstImagesMemory[i], 0));
 
-        memory[i].vulkanMemory = dstImagesMemory[i];
         VkMemoryGetFdInfoKHR memoryGetFdInfo {
             .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
             .pNext = nullptr,
@@ -251,8 +273,9 @@ VulkanImageCaptureHelper::VulkanImageCaptureHelper(int width, int height, vapor:
         };
         PFN_vkGetMemoryFdKHR vkGetMemoryFdKHR;
         vkGetMemoryFdKHR = (PFN_vkGetMemoryFdKHR) vkGetInstanceProcAddr(common.instance, "vkGetMemoryFdKHR");
-        ABORT_ON_VULKAN_ERROR(vkGetMemoryFdKHR(common.device, &memoryGetFdInfo, &memory[i].fd));
-        memory[i].size = memoryRequirements.size;
+        int fd;
+        ABORT_ON_VULKAN_ERROR(vkGetMemoryFdKHR(common.device, &memoryGetFdInfo, &fd));
+        exportedBufferTextures[i] = vapor::VulkanExportedTextureHolder {.width = width, .height = height, .vulkanMemory = dstImagesMemory[i], .fd = fd, .size = memoryRequirements.size};
     }
 }
 
@@ -268,13 +291,15 @@ VulkanImageCaptureHelper::~VulkanImageCaptureHelper()
     }
 }
 
-CompositorError VulkanImageCaptureHelper::capture(const VulkanTextureData* textureData, const TextureBounds* textureBounds, const vapor::FrameQueue::Memory* memory, int bufferIndex)
+CompositorError VulkanImageCaptureHelper::capture(const VulkanTextureData* textureData, const TextureBounds* textureBounds, Eye eye)
 {
     if (textureData->instance != common.instance || textureData->physicalDevice != common.physicalDevice || textureData->device != common.device || textureData->queue != common.queue || textureData->queueFamilyIndex != common.queueFamilyIndex)
     {
         LOG("Texture submitted with mismatched Vulkan context");
         return CompositorError::COMPOSITOR_ERROR_TEXTURE_IS_ON_WRONG_DEVICE;
     }
+
+    int bufferIndex = getCurrentBufferIndexForEye(eye);
 
     common.beginCommandBuffer();
 
@@ -362,6 +387,25 @@ CompositorError VulkanImageCaptureHelper::capture(const VulkanTextureData* textu
 
     return CompositorError::COMPOSITOR_ERROR_NONE;
 }
+
+int VulkanImageCaptureHelper::getCurrentBufferIndexForEye(Eye eye)
+{
+    switch (eye)
+    {
+        case Eye::EYE_LEFT:
+        default:
+            return currentBufferSwap + 0;
+        case Eye::EYE_RIGHT:
+            return currentBufferSwap + 1;
+    }
+}
+
+void VulkanImageCaptureHelper::swapBuffers()
+{
+    currentBufferSwap = 2 - currentBufferSwap;
+}
+
+//
 
 VulkanCommon::VulkanCommon(VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue queue, uint32_t queueFamilyIndex)
 {

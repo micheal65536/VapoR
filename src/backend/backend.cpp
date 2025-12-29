@@ -134,7 +134,7 @@ Backend::Backend()
         this->actionSpaces.push_back(actionSpace);
     }
 
-    this->frameQueue = new FrameQueue(this->renderWidth, this->renderHeight);
+    this->frameQueue = new FrameQueue();
 
     this->hapticQueue = new HapticQueue();
 }
@@ -149,9 +149,9 @@ Backend::~Backend()
     delete this->framebuffer;
     delete this->swapchains[0];
     delete this->swapchains[1];
-    if (this->externalMemoryImported)
+    for (int i = 0; i < 4; i++)
     {
-        for (int i = 0; i < 4; i++)
+        if (this->externalMemory[i] != nullptr)
         {
             delete this->externalMemory[i];
         }
@@ -578,21 +578,28 @@ std::vector<OpenXR::Layer> Backend::render(XrTime displayTime)
 
         if (this->frameQueue->hasDisplayFrame())
         {
-            if (!this->externalMemoryImported)
+            const std::array<VulkanExportedTextureHolder, 4>* textureHolders = this->frameQueue->getBufferTextureSet();
+            if (this->frameQueue->hasBufferTextureSetChanged())
             {
                 for (int i = 0; i < 4; i++)
                 {
-                    this->externalMemory[i] = new OpenGL::ExternalMemory(this->frameQueue->memory[i].fd, this->frameQueue->memory[i].size);
-                    this->srcTextures[i]->attachExternalMemory(this->renderWidth, this->renderHeight, GL_RGBA8, *this->externalMemory[i], 0);
+                    if (this->externalMemory[i] != nullptr)
+                    {
+                        delete this->externalMemory[i];
+                    }
+                    const VulkanExportedTextureHolder& textureHolder = (*textureHolders)[i];
+                    this->externalMemory[i] = new OpenGL::ExternalMemory(textureHolder.fd, textureHolder.size);
+                    this->srcTextures[i]->attachExternalMemory(textureHolder.width, textureHolder.height, GL_RGBA8, *this->externalMemory[i], 0);
                 }
-                this->externalMemoryImported = true;
             }
 
-            OpenGL::Texture* srcTexture = this->srcTextures[this->frameQueue->getDisplayBufferIndex(eye)];
+            int bufferIndex = this->frameQueue->getDisplayBufferIndex(eye);
+            const VulkanExportedTextureHolder& textureHolder = (*textureHolders)[bufferIndex];
+            OpenGL::Texture* srcTexture = this->srcTextures[bufferIndex];
             glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFramebuffer->id);
             glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, srcTexture->id, 0);
             ABORT_ON_OPENGL_ERROR();
-            glBlitFramebuffer(0, 0, this->renderWidth, this->renderHeight, 0, 0, this->renderWidth, this->renderHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+            glBlitFramebuffer(0, 0, textureHolder.width, textureHolder.height, 0, 0, this->renderWidth, this->renderHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
             ABORT_ON_OPENGL_ERROR();
         }
         else

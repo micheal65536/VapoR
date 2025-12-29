@@ -150,10 +150,10 @@ CompositorError CompositorImpl::submit(Eye eye, const Texture* texture, const Te
     {
         if (this->glImageCaptureHelper == nullptr)
         {
-            this->glImageCaptureHelper = new render::GLImageCaptureHelper(this->clientCore.backend->renderWidth, this->clientCore.backend->renderHeight, this->clientCore.backend->frameQueue->memory);
+            this->glImageCaptureHelper = new render::GLImageCaptureHelper(this->clientCore.backend->renderWidth, this->clientCore.backend->renderHeight);
         }
 
-        CompositorError error = this->glImageCaptureHelper->capture((GLuint) (uint64_t) texture->handle, bounds, this->clientCore.backend->frameQueue->memory, this->clientCore.backend->frameQueue->getDrawBufferIndex(eye));
+        CompositorError error = this->glImageCaptureHelper->capture((GLuint) (uint64_t) texture->handle, bounds, eye);
         if (error != CompositorError::COMPOSITOR_ERROR_NONE)
         {
             return error;
@@ -165,10 +165,10 @@ CompositorError CompositorImpl::submit(Eye eye, const Texture* texture, const Te
 
         if (this->vulkanImageCaptureHelper == nullptr)
         {
-            this->vulkanImageCaptureHelper = new render::VulkanImageCaptureHelper(this->clientCore.backend->renderWidth, this->clientCore.backend->renderHeight, this->clientCore.backend->frameQueue->memory, textureData->instance, textureData->physicalDevice, textureData->device, textureData->queue, textureData->queueFamilyIndex);
+            this->vulkanImageCaptureHelper = new render::VulkanImageCaptureHelper(this->clientCore.backend->renderWidth, this->clientCore.backend->renderHeight, textureData->instance, textureData->physicalDevice, textureData->device, textureData->queue, textureData->queueFamilyIndex);
         }
 
-        CompositorError error = this->vulkanImageCaptureHelper->capture(textureData, bounds, this->clientCore.backend->frameQueue->memory, this->clientCore.backend->frameQueue->getDrawBufferIndex(eye));
+        CompositorError error = this->vulkanImageCaptureHelper->capture(textureData, bounds, eye);
         if (error != CompositorError::COMPOSITOR_ERROR_NONE)
         {
             return error;
@@ -204,9 +204,15 @@ void CompositorImpl::present()
     if (!this->presented)
     {
         TRACE();
-        if (this->glImageCaptureHelper != nullptr || this->vulkanImageCaptureHelper != nullptr) // TODO: clean this up - we check this here because if these are null then there's no frame submitted yet and backend will crash trying to get the shared memory
+        if (this->glImageCaptureHelper != nullptr)
         {
-            this->clientCore.backend->frameQueue->swapBuffers(this->lastFrameViews);
+            this->clientCore.backend->frameQueue->swapBuffers(&this->glImageCaptureHelper->exportedBufferTextures, this->glImageCaptureHelper->getCurrentBufferIndexForEye(Eye::EYE_LEFT), this->glImageCaptureHelper->getCurrentBufferIndexForEye(Eye::EYE_RIGHT), this->lastFrameViews);
+            this->glImageCaptureHelper->swapBuffers();
+        }
+        else if (this->vulkanImageCaptureHelper != nullptr)
+        {
+            this->clientCore.backend->frameQueue->swapBuffers(&this->vulkanImageCaptureHelper->exportedBufferTextures, this->vulkanImageCaptureHelper->getCurrentBufferIndexForEye(Eye::EYE_LEFT), this->vulkanImageCaptureHelper->getCurrentBufferIndexForEye(Eye::EYE_RIGHT), this->lastFrameViews);
+            this->vulkanImageCaptureHelper->swapBuffers();
         }
         this->presented = true;
     }

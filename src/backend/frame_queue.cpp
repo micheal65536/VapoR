@@ -2,24 +2,32 @@
 
 using namespace vapor;
 
-FrameQueue::FrameQueue(int frameWidth, int frameHeight)
+bool FrameQueue::hasBufferTextureSetChanged()
 {
-    bufferSwap = 0;
+    if (hasBufferTextureSetChangedFlag)
+    {
+        hasBufferTextureSetChangedFlag = false;
+        return true;
+    }
+    return false;
 }
 
-FrameQueue::~FrameQueue()
+const std::array<VulkanExportedTextureHolder, 4>* FrameQueue::getBufferTextureSet() const
 {
-    // empty
-}
-
-int FrameQueue::getDrawBufferIndex(int eyeIndex) const
-{
-    return bufferSwap + eyeIndex;
+    return bufferTextureSet;
 }
 
 int FrameQueue::getDisplayBufferIndex(int eyeIndex) const
 {
-    return (2 - bufferSwap) + eyeIndex;
+    switch (eyeIndex)
+    {
+        case 0:
+            return leftEyeDisplayBufferIndex;
+        case 1:
+            return rightEyeDisplayBufferIndex;
+        default:
+            return 0;
+    }
 }
 
 const OpenXR::ViewPair& FrameQueue::getDisplayViews() const
@@ -29,15 +37,24 @@ const OpenXR::ViewPair& FrameQueue::getDisplayViews() const
 
 bool FrameQueue::hasDisplayFrame() const
 {
-    return displayFrameSubmitted;
+    return bufferTextureSet != nullptr;
 }
 
-void FrameQueue::swapBuffers(const OpenXR::ViewPair& views)
+void FrameQueue::swapBuffers(const std::array<VulkanExportedTextureHolder, 4>* bufferTextureSet, int leftEyeBufferIndex, int rightEyeBufferIndex, const OpenXR::ViewPair& views)
 {
     swapMutex.lock();
+
+    if (bufferTextureSet != this->bufferTextureSet) // TODO: need more rigorous way to determine if buffer set has changed
+    {
+        this->bufferTextureSet = bufferTextureSet;
+        hasBufferTextureSetChangedFlag = true;
+    }
+
+    leftEyeDisplayBufferIndex = leftEyeBufferIndex;
+    rightEyeDisplayBufferIndex = rightEyeBufferIndex;
+
     displayViews = views;
-    displayFrameSubmitted = true;
-    bufferSwap = 2 - bufferSwap;
+
     swapMutex.unlock();
 }
 

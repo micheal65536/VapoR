@@ -67,8 +67,7 @@ namespace vapor
             OpenGL::Framebuffer* framebuffer;
             OpenGL::Texture* srcTextures[4];
             OpenGL::Framebuffer* srcFramebuffer;
-            OpenGL::ExternalMemory* externalMemory[4];
-            bool externalMemoryImported = false;
+            OpenGL::ExternalMemory* externalMemory[4] = {nullptr, nullptr, nullptr, nullptr};
 
             OpenXR::Space* viewSpace;
             OpenXR::Space* localSpace;

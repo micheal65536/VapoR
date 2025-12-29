@@ -5,7 +5,10 @@
 #include <GL/gl.h>
 #include <vulkan/vulkan.h>
 #include "openvr/types_render.h"
-#include "backend/frame_queue.h"
+#include "openvr/types_misc.h"
+#include "backend/vulkan_exported_texture_holder.h"
+
+#include <array>
 
 namespace openvr
 {
@@ -42,10 +45,14 @@ namespace openvr
         class GLImageCaptureHelper
         {
             public:
-                GLImageCaptureHelper(int width, int height, vapor::FrameQueue::Memory* memory);
+                GLImageCaptureHelper(int width, int height);
                 ~GLImageCaptureHelper();
 
-                CompositorError capture(GLuint srcTextureId, const TextureBounds* textureBounds, const vapor::FrameQueue::Memory* memory, int bufferIndex);
+                CompositorError capture(GLuint srcTextureId, const TextureBounds* textureBounds, Eye eye);
+                int getCurrentBufferIndexForEye(Eye eye);
+                void swapBuffers();
+
+                std::array<vapor::VulkanExportedTextureHolder, 4> exportedBufferTextures;
 
             private:
                 int width;
@@ -53,6 +60,7 @@ namespace openvr
 
                 VulkanCommon* vulkan;
                 VkDeviceMemory dstMemory[4];
+                int currentBufferSwap = 0;
 
                 GLuint srcFramebuffer;
                 GLuint srcRenderbuffers[2];
@@ -65,10 +73,14 @@ namespace openvr
         class VulkanImageCaptureHelper
         {
             public:
-                VulkanImageCaptureHelper(int width, int height, vapor::FrameQueue::Memory* memory, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue queue, uint32_t queueFamilyIndex);
+                VulkanImageCaptureHelper(int width, int height, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue queue, uint32_t queueFamilyIndex);
                 ~VulkanImageCaptureHelper();
  
-                CompositorError capture(const VulkanTextureData* textureData, const TextureBounds* textureBounds, const vapor::FrameQueue::Memory* memory, int bufferIndex);
+                CompositorError capture(const VulkanTextureData* textureData, const TextureBounds* textureBounds, Eye eye);
+                int getCurrentBufferIndexForEye(Eye eye);
+                void swapBuffers();
+
+                std::array<vapor::VulkanExportedTextureHolder, 4> exportedBufferTextures;
 
             private:
                 int width;
@@ -78,6 +90,7 @@ namespace openvr
 
                 VkImage dstImages[4];
                 VkDeviceMemory dstImagesMemory[4];
+                int currentBufferSwap = 0;
 
                 VkImage tmpImage = VK_NULL_HANDLE;
                 VkDeviceMemory tmpImageMemory = VK_NULL_HANDLE;
