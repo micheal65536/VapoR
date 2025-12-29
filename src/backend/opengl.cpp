@@ -1,5 +1,8 @@
 #include "opengl.h"
 
+#include <GL/glx.h>
+#include <GL/glext.h>
+
 using namespace OpenGL;
 
 Texture::Texture()
@@ -22,6 +25,24 @@ void Texture::image(int width, int height, GLenum format, GLenum type, GLint int
     ABORT_ON_OPENGL_ERROR();
 
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, data);
+    ABORT_ON_OPENGL_ERROR();
+
+    if (savedTextureId != this->id)
+    {
+        glBindTexture(GL_TEXTURE_2D, savedTextureId);
+        ABORT_ON_OPENGL_ERROR();
+    }
+}
+
+void Texture::attachExternalMemory(int width, int height, GLenum internalFormat, const ExternalMemory& externalMemory, uint64_t memoryOffset)
+{
+    GLuint savedTextureId;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, (GLint*) &savedTextureId);
+    glBindTexture(GL_TEXTURE_2D, this->id);
+    ABORT_ON_OPENGL_ERROR();
+
+    PFNGLTEXSTORAGEMEM2DEXTPROC glTexStorageMem2DEXT = (PFNGLTEXSTORAGEMEM2DEXTPROC) glXGetProcAddress((const GLubyte*) "glTexStorageMem2DEXT");
+    glTexStorageMem2DEXT(GL_TEXTURE_2D, 1, internalFormat, width, height, externalMemory.id, memoryOffset);
     ABORT_ON_OPENGL_ERROR();
 
     if (savedTextureId != this->id)
@@ -77,4 +98,22 @@ void Framebuffer::bindTexture(GLuint textureId)
         glBindFramebuffer(GL_FRAMEBUFFER, savedFramebufferId);
         ABORT_ON_OPENGL_ERROR();
     }
+}
+
+ExternalMemory::ExternalMemory(int fd, int size): size(size)
+{
+    PFNGLCREATEMEMORYOBJECTSEXTPROC glCreateMemoryObjectsEXT = (PFNGLCREATEMEMORYOBJECTSEXTPROC) glXGetProcAddress((const GLubyte*) "glCreateMemoryObjectsEXT");
+    glCreateMemoryObjectsEXT(1, &this->id);
+    ABORT_ON_OPENGL_ERROR();
+
+    PFNGLIMPORTMEMORYFDEXTPROC glImportMemoryFdEXT = (PFNGLIMPORTMEMORYFDEXTPROC) glXGetProcAddress((const GLubyte*) "glImportMemoryFdEXT");
+    glImportMemoryFdEXT(this->id, size, GL_HANDLE_TYPE_OPAQUE_FD_EXT, fd);
+    ABORT_ON_OPENGL_ERROR();
+}
+
+ExternalMemory::~ExternalMemory()
+{
+    PFNGLDELETEMEMORYOBJECTSEXTPROC glDeleteMemoryObjectsEXT = (PFNGLDELETEMEMORYOBJECTSEXTPROC) glXGetProcAddress((const GLubyte*) "glDeleteMemoryObjectsEXT");
+    glDeleteMemoryObjectsEXT(1, &this->id);
+    ABORT_ON_OPENGL_ERROR();
 }

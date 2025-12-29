@@ -15,9 +15,6 @@
 #include "pose_set.h"
 #include "legacy_input.h"
 
-#include <GL/glx.h>
-#include <GL/glext.h>
-
 #include <string>
 #include <cmath>
 #include <cstring>
@@ -44,8 +41,6 @@ Backend::Backend()
         this->srcTextures[i] = new OpenGL::Texture();
     }
     this->srcFramebuffer = new OpenGL::Framebuffer(this->renderWidth, this->renderHeight);
-    PFNGLCREATEMEMORYOBJECTSEXTPROC glCreateMemoryObjectsEXT = (PFNGLCREATEMEMORYOBJECTSEXTPROC) glXGetProcAddress((const GLubyte*) "glCreateMemoryObjectsEXT");
-    glCreateMemoryObjectsEXT(4, this->externalMemory);
     ABORT_ON_OPENGL_ERROR();
 
     this->viewSpace = new OpenXR::Space(*this->session, XR_REFERENCE_SPACE_TYPE_VIEW, OpenXR::IDENTITY_POSE);
@@ -154,9 +149,13 @@ Backend::~Backend()
     delete this->framebuffer;
     delete this->swapchains[0];
     delete this->swapchains[1];
-    PFNGLDELETEMEMORYOBJECTSEXTPROC glDeleteMemoryObjectsEXT = (PFNGLDELETEMEMORYOBJECTSEXTPROC) glXGetProcAddress((const GLubyte*) "glDeleteMemoryObjectsEXT");
-    glDeleteMemoryObjectsEXT(4, this->externalMemory);
-    ABORT_ON_OPENGL_ERROR();
+    if (this->externalMemoryImported)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            delete this->externalMemory[i];
+        }
+    }
 
     delete this->viewSpace;
     delete this->localSpace;
@@ -581,17 +580,11 @@ std::vector<OpenXR::Layer> Backend::render(XrTime displayTime)
         {
             if (!this->externalMemoryImported)
             {
-                PFNGLIMPORTMEMORYFDEXTPROC glImportMemoryFdEXT = (PFNGLIMPORTMEMORYFDEXTPROC) glXGetProcAddress((const GLubyte*) "glImportMemoryFdEXT");
-                PFNGLTEXSTORAGEMEM2DEXTPROC glTexStorageMem2DEXT = (PFNGLTEXSTORAGEMEM2DEXTPROC) glXGetProcAddress((const GLubyte*) "glTexStorageMem2DEXT");
                 for (int i = 0; i < 4; i++)
                 {
-                    glImportMemoryFdEXT(this->externalMemory[i], this->frameQueue->memory[i].size, GL_HANDLE_TYPE_OPAQUE_FD_EXT, this->frameQueue->memory[i].fd);
-                    ABORT_ON_OPENGL_ERROR();
-                    glBindTexture(GL_TEXTURE_2D, this->srcTextures[i]->id);
-                    glTexStorageMem2DEXT(GL_TEXTURE_2D, 1, GL_RGBA8, this->renderWidth, this->renderHeight, this->externalMemory[i], 0);
-                    ABORT_ON_OPENGL_ERROR();
+                    this->externalMemory[i] = new OpenGL::ExternalMemory(this->frameQueue->memory[i].fd, this->frameQueue->memory[i].size);
+                    this->srcTextures[i]->attachExternalMemory(this->renderWidth, this->renderHeight, GL_RGBA8, *this->externalMemory[i], 0);
                 }
-                glBindTexture(GL_TEXTURE_2D, 0);
                 this->externalMemoryImported = true;
             }
 

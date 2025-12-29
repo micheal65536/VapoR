@@ -3,6 +3,8 @@
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 
+#include <cstdint>
+
 #include "log/abort.h"
 
 #define ABORT_ON_OPENGL_ERROR(x) \
@@ -17,6 +19,8 @@
 
 namespace OpenGL
 {
+    class ExternalMemory;
+
     class Texture
     {
         public:
@@ -24,6 +28,7 @@ namespace OpenGL
             ~Texture();
 
             void image(int width, int height, GLenum format, GLenum type, GLint internalFormat, const void* data);
+            void attachExternalMemory(int width, int height, GLenum internalFormat, const ExternalMemory& externalMemory, uint64_t memoryOffset);
 
             GLuint id;
     };
@@ -42,5 +47,16 @@ namespace OpenGL
         private:
             GLuint colorRenderbufferId;
             GLuint depthRenderbufferId;
+    };
+
+    class ExternalMemory
+    {
+        public:
+            ExternalMemory(int fd, int size);
+            ~ExternalMemory();
+
+            GLuint id;
+
+            const int size;
     };
 }
