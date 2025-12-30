@@ -15,6 +15,8 @@
 #include "pose_set.h"
 #include "legacy_input.h"
 
+#include "image_capture/image_capture.h"
+
 #include <string>
 #include <cmath>
 #include <cstring>
@@ -38,7 +40,7 @@ Backend::Backend()
     this->framebuffer = new OpenGL::Framebuffer(this->renderWidth, this->renderHeight);
     for (int i = 0; i < 4; i++)
     {
-        this->srcTextures[i] = new OpenGL::Texture();
+        this->srcTextures[i % 2][i / 2] = new OpenGL::Texture();
     }
     this->srcFramebuffer = new OpenGL::Framebuffer(this->renderWidth, this->renderHeight);
     ABORT_ON_OPENGL_ERROR();
@@ -144,16 +146,16 @@ Backend::~Backend()
     delete this->srcFramebuffer;
     for (int i = 0; i < 4; i++)
     {
-        delete this->srcTextures[i];
+        delete this->srcTextures[i % 2][i / 2];
     }
     delete this->framebuffer;
     delete this->swapchains[0];
     delete this->swapchains[1];
     for (int i = 0; i < 4; i++)
     {
-        if (this->externalMemory[i] != nullptr)
+        if (this->externalMemory[i % 2][i / 2] != nullptr)
         {
-            delete this->externalMemory[i];
+            delete this->externalMemory[i % 2][i / 2];
         }
     }
 
@@ -560,7 +562,8 @@ void Backend::step(XrTime displayTime, XrDuration displayDuration)
 
 std::vector<OpenXR::Layer> Backend::render(XrTime displayTime)
 {
-    this->frameQueue->lockBufferSwap();
+    image_capture::lockBufferSwap();
+    this->frameQueue->lockFrame();
 
     glViewport(0, 0, this->renderWidth, this->renderHeight);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer->id);
@@ -578,28 +581,30 @@ std::vector<OpenXR::Layer> Backend::render(XrTime displayTime)
 
         if (this->frameQueue->hasDisplayFrame())
         {
-            const std::array<VulkanExportedTextureHolder, 4>* textureHolders = this->frameQueue->getBufferTextureSet();
-            if (this->frameQueue->hasBufferTextureSetChanged())
+            if (this->frameQueue->haveBuffersChanged())
             {
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i < 2; i++)
                 {
-                    if (this->externalMemory[i] != nullptr)
+                    const image_capture::ImageCaptureBuffer* buffer = this->frameQueue->getCaptureBufferForEye(i);
+                    std::array<OpenGL::ExternalMemory*, 2> externalMemory = buffer->importOpenGLMemory();
+                    for (int j = 0; j < 2; j++)
                     {
-                        delete this->externalMemory[i];
+                        if (this->externalMemory[i][j] != nullptr)
+                        {
+                            delete this->externalMemory[i][j];
+                        }
+                        this->externalMemory[i][j] = externalMemory[j];
+                        this->srcTextures[i][j]->attachExternalMemory(buffer->width, buffer->height, GL_RGBA8, *externalMemory[j], 0);
                     }
-                    const VulkanExportedTextureHolder& textureHolder = (*textureHolders)[i];
-                    this->externalMemory[i] = new OpenGL::ExternalMemory(textureHolder.fd, textureHolder.size);
-                    this->srcTextures[i]->attachExternalMemory(textureHolder.width, textureHolder.height, GL_RGBA8, *this->externalMemory[i], 0);
                 }
             }
 
-            int bufferIndex = this->frameQueue->getDisplayBufferIndex(eye);
-            const VulkanExportedTextureHolder& textureHolder = (*textureHolders)[bufferIndex];
-            OpenGL::Texture* srcTexture = this->srcTextures[bufferIndex];
+            const image_capture::ImageCaptureBuffer* buffer = this->frameQueue->getCaptureBufferForEye(eye);
+            OpenGL::Texture* srcTexture = this->srcTextures[eye][buffer->getCurrentDisplayBufferIndex()];
             glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFramebuffer->id);
             glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, srcTexture->id, 0);
             ABORT_ON_OPENGL_ERROR();
-            glBlitFramebuffer(0, 0, textureHolder.width, textureHolder.height, 0, 0, this->renderWidth, this->renderHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+            glBlitFramebuffer(0, 0, buffer->width, buffer->height, 0, 0, this->renderWidth, this->renderHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
             ABORT_ON_OPENGL_ERROR();
         }
         else
@@ -636,7 +641,8 @@ std::vector<OpenXR::Layer> Backend::render(XrTime displayTime)
         }
     };
 
-    this->frameQueue->unlockBufferSwap();
+    this->frameQueue->unlockFrame();
+    image_capture::unlockBufferSwap();
 
     return layers;
 }

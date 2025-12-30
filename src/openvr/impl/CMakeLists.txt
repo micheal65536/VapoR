@@ -11,5 +11,4 @@ target_sources(vrclient PRIVATE
     applications.cpp
     extended_display.cpp
     #fake.cpp
-    render/image_capture_helper.cpp
 )

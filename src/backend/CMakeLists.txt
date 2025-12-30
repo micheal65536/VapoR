@@ -12,5 +12,6 @@ target_sources(vrclient PRIVATE
     openxr.cpp
 )
 add_subdirectory(input)
+add_subdirectory(image_capture)
 
 add_subdirectory(input_profiles)

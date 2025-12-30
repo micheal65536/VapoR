@@ -1,32 +1,28 @@
 #include "frame_queue.h"
 
+#include "log/abort.h"
+
 using namespace vapor;
 
-bool FrameQueue::hasBufferTextureSetChanged()
+bool FrameQueue::haveBuffersChanged()
 {
-    if (hasBufferTextureSetChangedFlag)
+    if (haveBuffersChangedFlag)
     {
-        hasBufferTextureSetChangedFlag = false;
+        haveBuffersChangedFlag = false;
         return true;
     }
     return false;
 }
 
-const std::array<VulkanExportedTextureHolder, 4>* FrameQueue::getBufferTextureSet() const
-{
-    return bufferTextureSet;
-}
-
-int FrameQueue::getDisplayBufferIndex(int eyeIndex) const
+const image_capture::ImageCaptureBuffer* FrameQueue::getCaptureBufferForEye(int eyeIndex) const
 {
     switch (eyeIndex)
     {
         case 0:
-            return leftEyeDisplayBufferIndex;
-        case 1:
-            return rightEyeDisplayBufferIndex;
         default:
-            return 0;
+            return leftCaptureBuffer;
+        case 1:
+            return rightCaptureBuffer;
     }
 }
 
@@ -37,33 +33,37 @@ const OpenXR::ViewPair& FrameQueue::getDisplayViews() const
 
 bool FrameQueue::hasDisplayFrame() const
 {
-    return bufferTextureSet != nullptr;
+    return leftCaptureBuffer != nullptr && rightCaptureBuffer != nullptr;
 }
 
-void FrameQueue::swapBuffers(const std::array<VulkanExportedTextureHolder, 4>* bufferTextureSet, int leftEyeBufferIndex, int rightEyeBufferIndex, const OpenXR::ViewPair& views)
+void FrameQueue::putFrame(const image_capture::ImageCaptureBuffer* leftCaptureBuffer, const image_capture::ImageCaptureBuffer* rightCaptureBuffer, const OpenXR::ViewPair& views)
 {
-    swapMutex.lock();
+    mutex.lock();
 
-    if (bufferTextureSet != this->bufferTextureSet) // TODO: need more rigorous way to determine if buffer set has changed
+    bool leftBufferChanged = (leftCaptureBuffer != this->leftCaptureBuffer || (leftCaptureBuffer != nullptr && *leftCaptureBuffer != *this->leftCaptureBuffer));
+    bool rightBufferChanged = (rightCaptureBuffer != this->rightCaptureBuffer || (rightCaptureBuffer != nullptr && *rightCaptureBuffer != *this->rightCaptureBuffer));
+    if (leftBufferChanged || rightBufferChanged)
     {
-        this->bufferTextureSet = bufferTextureSet;
-        hasBufferTextureSetChangedFlag = true;
+        if (!leftBufferChanged || !rightBufferChanged)
+        {
+            ABORT();
+        }
+        this->leftCaptureBuffer = leftCaptureBuffer;
+        this->rightCaptureBuffer = rightCaptureBuffer;
+        this->haveBuffersChangedFlag = true;
     }
-
-    leftEyeDisplayBufferIndex = leftEyeBufferIndex;
-    rightEyeDisplayBufferIndex = rightEyeBufferIndex;
 
     displayViews = views;
 
-    swapMutex.unlock();
+    mutex.unlock();
 }
 
-void FrameQueue::lockBufferSwap()
+void FrameQueue::lockFrame()
 {
-    swapMutex.lock_shared();
+    mutex.lock_shared();
 }
 
-void FrameQueue::unlockBufferSwap()
+void FrameQueue::unlockFrame()
 {   
-    swapMutex.unlock_shared();
+    mutex.unlock_shared();
 }

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "vulkan_exported_texture_holder.h"
 #include "openxr.h"
+#include "image_capture/image_capture.h"
 
 #include <array>
 #include <shared_mutex>
@@ -13,23 +13,21 @@ namespace vapor
     class FrameQueue
     {
         public:
-            bool hasBufferTextureSetChanged();
-            const std::array<VulkanExportedTextureHolder, 4>* getBufferTextureSet() const;
-            int getDisplayBufferIndex(int eyeIndex) const;
+            bool haveBuffersChanged();
+            const image_capture::ImageCaptureBuffer* getCaptureBufferForEye(int eyeIndex) const;
             const OpenXR::ViewPair& getDisplayViews() const;
             bool hasDisplayFrame() const;
 
-            void swapBuffers(const std::array<VulkanExportedTextureHolder, 4>* bufferTextureSet, int leftEyeBufferIndex, int rightEyeBufferIndex, const OpenXR::ViewPair& views);
-            void lockBufferSwap();
-            void unlockBufferSwap();
+            void putFrame(const image_capture::ImageCaptureBuffer* leftCaptureBuffer, const image_capture::ImageCaptureBuffer* rightCaptureBuffer, const OpenXR::ViewPair& views);
+            void lockFrame();
+            void unlockFrame();
 
         private:
-            const std::array<VulkanExportedTextureHolder, 4>* bufferTextureSet = nullptr;
-            bool hasBufferTextureSetChangedFlag = false;
-            int leftEyeDisplayBufferIndex;
-            int rightEyeDisplayBufferIndex;
+            const image_capture::ImageCaptureBuffer* leftCaptureBuffer = nullptr;
+            const image_capture::ImageCaptureBuffer* rightCaptureBuffer = nullptr;
+            bool haveBuffersChangedFlag = false;
             OpenXR::ViewPair displayViews;
 
-            std::shared_mutex swapMutex;
+            std::shared_mutex mutex;
     };
 }

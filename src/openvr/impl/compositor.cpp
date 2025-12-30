@@ -15,13 +15,16 @@ CompositorImpl::CompositorImpl(ClientCoreImpl& clientCore): clientCore(clientCor
 
 CompositorImpl::~CompositorImpl()
 {
-    if (this->glImageCaptureHelper != nullptr)
+    for (int i = 0; i < 2; i++)
     {
-        delete this->glImageCaptureHelper;
-    }
-    if (this->vulkanImageCaptureHelper != nullptr)
-    {
-        delete this->vulkanImageCaptureHelper;
+        if (this->glImageCaptureBuffers[i] != nullptr)
+        {
+            delete this->glImageCaptureBuffers[i];
+        }
+        if (this->vulkanImageCaptureBuffers[i] != nullptr)
+        {
+            delete this->vulkanImageCaptureBuffers[i];
+        }
     }
 }
 
@@ -146,14 +149,15 @@ CompositorError CompositorImpl::submit(Eye eye, const Texture* texture, const Te
 
     // TODO: handle different submit flags (array texture etc.)
 
+    // TODO: handle source size
     if (texture->type == TextureType::TEXTURE_TYPE_OPENGL)
     {
-        if (this->glImageCaptureHelper == nullptr)
+        if (this->glImageCaptureBuffers[eye] == nullptr)
         {
-            this->glImageCaptureHelper = new render::GLImageCaptureHelper(this->clientCore.backend->renderWidth, this->clientCore.backend->renderHeight);
+            this->glImageCaptureBuffers[eye] = new vapor::image_capture::GLImageCaptureBuffer(this->clientCore.backend->renderWidth, this->clientCore.backend->renderHeight);
         }
 
-        CompositorError error = this->glImageCaptureHelper->capture((GLuint) (uint64_t) texture->handle, bounds, eye);
+        CompositorError error = this->glImageCaptureBuffers[eye]->capture((GLuint) (uint64_t) texture->handle, bounds);
         if (error != CompositorError::COMPOSITOR_ERROR_NONE)
         {
             return error;
@@ -163,12 +167,12 @@ CompositorError CompositorImpl::submit(Eye eye, const Texture* texture, const Te
     {
         const VulkanTextureData* textureData = (VulkanTextureData*) texture->handle;
 
-        if (this->vulkanImageCaptureHelper == nullptr)
+        if (this->vulkanImageCaptureBuffers[eye] == nullptr)
         {
-            this->vulkanImageCaptureHelper = new render::VulkanImageCaptureHelper(this->clientCore.backend->renderWidth, this->clientCore.backend->renderHeight, textureData->instance, textureData->physicalDevice, textureData->device, textureData->queue, textureData->queueFamilyIndex);
+            this->vulkanImageCaptureBuffers[eye] = new vapor::image_capture::VulkanImageCaptureBuffer(this->clientCore.backend->renderWidth, this->clientCore.backend->renderHeight, textureData->instance, textureData->physicalDevice, textureData->device, textureData->queue, textureData->queueFamilyIndex);
         }
 
-        CompositorError error = this->vulkanImageCaptureHelper->capture(textureData, bounds, eye);
+        CompositorError error = this->vulkanImageCaptureBuffers[eye]->capture(textureData, bounds);
         if (error != CompositorError::COMPOSITOR_ERROR_NONE)
         {
             return error;
@@ -204,16 +208,32 @@ void CompositorImpl::present()
     if (!this->presented)
     {
         TRACE();
-        if (this->glImageCaptureHelper != nullptr)
+
+        std::array<const vapor::image_capture::ImageCaptureBuffer*, 2> captureBuffers = {nullptr, nullptr};
+        for (int i = 0; i < 2; i++)
         {
-            this->clientCore.backend->frameQueue->swapBuffers(&this->glImageCaptureHelper->exportedBufferTextures, this->glImageCaptureHelper->getCurrentBufferIndexForEye(Eye::EYE_LEFT), this->glImageCaptureHelper->getCurrentBufferIndexForEye(Eye::EYE_RIGHT), this->lastFrameViews);
-            this->glImageCaptureHelper->swapBuffers();
+            vapor::image_capture::ImageCaptureBuffer* buffer = nullptr;
+            if (this->glImageCaptureBuffers[i] != nullptr)
+            {
+                buffer = this->glImageCaptureBuffers[i];
+            }
+            else if (this->vulkanImageCaptureBuffers[i] != nullptr)
+            {
+                buffer = this->vulkanImageCaptureBuffers[i];
+            }
+
+            if (buffer != nullptr)
+            {
+                buffer->swapBuffers();
+                captureBuffers[i] = buffer;
+            }
         }
-        else if (this->vulkanImageCaptureHelper != nullptr)
+
+        if (captureBuffers[0] != nullptr && captureBuffers[1] != nullptr)
         {
-            this->clientCore.backend->frameQueue->swapBuffers(&this->vulkanImageCaptureHelper->exportedBufferTextures, this->vulkanImageCaptureHelper->getCurrentBufferIndexForEye(Eye::EYE_LEFT), this->vulkanImageCaptureHelper->getCurrentBufferIndexForEye(Eye::EYE_RIGHT), this->lastFrameViews);
-            this->vulkanImageCaptureHelper->swapBuffers();
+            this->clientCore.backend->frameQueue->putFrame(captureBuffers[0], captureBuffers[1], this->lastFrameViews);
         }
+
         this->presented = true;
     }
 }
