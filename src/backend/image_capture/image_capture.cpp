@@ -7,8 +7,7 @@
 #include "log/abort.h"
 #include "config/fixes.h"
 
-#include <shared_mutex>
-#include <atomic>
+#include <mutex>
 
 #include <cstring>
 #include <cmath>
@@ -21,12 +20,11 @@ using namespace vapor::image_capture;
 
 //
 
-static std::shared_mutex swapMutex;
-static std::atomic_int nextUniqueId(1);
+static std::recursive_mutex swapMutex;
 
 ImageCaptureBuffer::ImageCaptureBuffer(int width, int height): width(width), height(height)
 {
-    uniqueId = nextUniqueId++;
+    // empty
 }
 
 int ImageCaptureBuffer::getCurrentDisplayBufferIndex() const
@@ -41,19 +39,21 @@ int ImageCaptureBuffer::getCurrentCaptureBufferIndex() const
 
 void ImageCaptureBuffer::swapBuffers()
 {
-    swapMutex.lock();
+    lockBufferSwap();
+
     currentBuffer = 1 - currentBuffer;
-    swapMutex.unlock();
+
+    unlockBufferSwap();
 }
 
 void vapor::image_capture::lockBufferSwap()
 {
-    swapMutex.lock_shared();
+    swapMutex.lock();
 }
 
 void vapor::image_capture::unlockBufferSwap()
 {
-    swapMutex.unlock_shared();
+    swapMutex.unlock();
 }
 
 std::array<OpenGL::ExternalMemory*, 2> ImageCaptureBuffer::importOpenGLMemory() const
@@ -591,4 +591,116 @@ void VulkanCommon::transitionImageLayout(VkImage image, VkImageLayout oldLayout,
         }
     };
     vkCmdPipelineBarrier(commandBuffer, srcStageMask, dstStageMask, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+}
+
+//
+
+ImageCaptureBufferManager::ImageCaptureBufferManager()
+{
+    // empty
+}
+
+ImageCaptureBufferManager::~ImageCaptureBufferManager()
+{
+    if (nextFrameImageCaptureBuffer != presentedImageCaptureBuffer)
+    {
+        delete nextFrameImageCaptureBuffer;
+    }
+    delete presentedImageCaptureBuffer;
+    delete oldImageCaptureBuffer;
+    nextFrameImageCaptureBuffer = nullptr;
+    nextFrameImageCaptureBufferApi = Api::NONE;
+    presentedImageCaptureBuffer = nullptr;
+    oldImageCaptureBuffer = nullptr;
+}
+
+openvr::CompositorError ImageCaptureBufferManager::captureOpenGL(int width, int height, GLuint srcTextureId, const openvr::TextureBounds* textureBounds)
+{
+    cleanupOldCaptureBuffer();
+
+    if (nextFrameImageCaptureBuffer == nullptr || nextFrameImageCaptureBuffer->width != width || nextFrameImageCaptureBuffer->height != height || nextFrameImageCaptureBufferApi != Api::OPENGL)
+    {
+        if (nextFrameImageCaptureBuffer != presentedImageCaptureBuffer)
+        {
+            delete nextFrameImageCaptureBuffer;
+        }
+        nextFrameImageCaptureBuffer = new GLImageCaptureBuffer(width, height);
+        nextFrameImageCaptureBufferApi = Api::OPENGL;
+    }
+
+    return ((GLImageCaptureBuffer*) nextFrameImageCaptureBuffer)->capture(srcTextureId, textureBounds);
+}
+
+openvr::CompositorError ImageCaptureBufferManager::captureVulkan(int width, int height, const openvr::VulkanTextureData* textureData, const openvr::TextureBounds* textureBounds)
+{
+    cleanupOldCaptureBuffer();
+
+    // TODO: check Vulkan properties
+    if (nextFrameImageCaptureBuffer == nullptr || nextFrameImageCaptureBuffer->width != width || nextFrameImageCaptureBuffer->height != height || nextFrameImageCaptureBufferApi != Api::VULKAN)
+    {
+        if (nextFrameImageCaptureBuffer != presentedImageCaptureBuffer)
+        {
+            delete nextFrameImageCaptureBuffer;
+        }
+        nextFrameImageCaptureBuffer = new VulkanImageCaptureBuffer(width, height, textureData->instance, textureData->physicalDevice, textureData->device, textureData->queue, textureData->queueFamilyIndex);
+        nextFrameImageCaptureBufferApi = Api::VULKAN;
+    }
+
+    return ((VulkanImageCaptureBuffer*) nextFrameImageCaptureBuffer)->capture(textureData, textureBounds);
+}
+
+void ImageCaptureBufferManager::deleteCaptureBuffer()
+{
+    if (nextFrameImageCaptureBuffer != nullptr)
+    {
+        if (nextFrameImageCaptureBuffer != presentedImageCaptureBuffer)
+        {
+            delete nextFrameImageCaptureBuffer;
+        }
+        nextFrameImageCaptureBuffer = nullptr;
+        nextFrameImageCaptureBufferApi = Api::NONE;
+    }
+}
+
+void ImageCaptureBufferManager::swapBuffers()
+{
+    lockBufferSwap();
+
+    if (nextFrameImageCaptureBuffer != nullptr)
+    {
+        nextFrameImageCaptureBuffer->swapBuffers();
+    }
+
+    if (nextFrameImageCaptureBuffer != presentedImageCaptureBuffer)
+    {
+        delete presentedImageCaptureBuffer;
+        presentedImageCaptureBuffer = nextFrameImageCaptureBuffer;
+        captureBufferChanged = true;
+    }
+
+    unlockBufferSwap();
+}
+
+bool ImageCaptureBufferManager::hasCaptureBufferChanged()
+{
+    if (captureBufferChanged)
+    {
+        captureBufferChanged = false;
+        return true;
+    }
+    return false;
+}
+
+const ImageCaptureBuffer* ImageCaptureBufferManager::getCaptureBufferForDisplay() const
+{
+    return presentedImageCaptureBuffer;
+}
+
+void ImageCaptureBufferManager::cleanupOldCaptureBuffer()
+{
+    if (oldImageCaptureBuffer != nullptr)
+    {
+        delete oldImageCaptureBuffer;
+        oldImageCaptureBuffer = nullptr;
+    }
 }

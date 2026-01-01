@@ -15,17 +15,7 @@ CompositorImpl::CompositorImpl(ClientCoreImpl& clientCore): clientCore(clientCor
 
 CompositorImpl::~CompositorImpl()
 {
-    for (int i = 0; i < 2; i++)
-    {
-        if (this->glImageCaptureBuffers[i] != nullptr)
-        {
-            delete this->glImageCaptureBuffers[i];
-        }
-        if (this->vulkanImageCaptureBuffers[i] != nullptr)
-        {
-            delete this->vulkanImageCaptureBuffers[i];
-        }
-    }
+    this->clientCore.backend->frameQueue->putClearFrame();
 }
 
 void CompositorImpl::setTrackingSpace(TrackingUniverseOrigin origin)
@@ -143,6 +133,8 @@ CompositorError CompositorImpl::getSubmitTexture(Texture* textureOut, bool* need
     STUB_F("%d %d %d %d", usage, texture, bounds, submitFlags);
 }
 
+// TODO: implement tracking of which eyes have been submitted, handle this appropriately in present and in clearLastSubmittedFrame (e.g. when do we keep the previous eye image vs presenting a blank image, do we allow submission of only 1 eye, etc.?)
+
 CompositorError CompositorImpl::submit(Eye eye, const Texture* texture, const TextureBounds* bounds, int32_t submitFlags)
 {
     TRACE_F("%d %d %d %d", eye, texture->type, texture->colorSpace, submitFlags);
@@ -150,14 +142,11 @@ CompositorError CompositorImpl::submit(Eye eye, const Texture* texture, const Te
     // TODO: handle different submit flags (array texture etc.)
 
     // TODO: handle source size
+    int width = this->clientCore.backend->renderWidth;
+    int height = this->clientCore.backend->renderHeight;
     if (texture->type == TextureType::TEXTURE_TYPE_OPENGL)
     {
-        if (this->glImageCaptureBuffers[eye] == nullptr)
-        {
-            this->glImageCaptureBuffers[eye] = new vapor::image_capture::GLImageCaptureBuffer(this->clientCore.backend->renderWidth, this->clientCore.backend->renderHeight);
-        }
-
-        CompositorError error = this->glImageCaptureBuffers[eye]->capture((GLuint) (uint64_t) texture->handle, bounds);
+        CompositorError error = imageCaptureBuffers[eye].captureOpenGL(width, height, (GLuint) (uint64_t) texture->handle, bounds);
         if (error != CompositorError::COMPOSITOR_ERROR_NONE)
         {
             return error;
@@ -166,13 +155,7 @@ CompositorError CompositorImpl::submit(Eye eye, const Texture* texture, const Te
     else if (texture->type == TextureType::TEXTURE_TYPE_VULKAN)
     {
         const VulkanTextureData* textureData = (VulkanTextureData*) texture->handle;
-
-        if (this->vulkanImageCaptureBuffers[eye] == nullptr)
-        {
-            this->vulkanImageCaptureBuffers[eye] = new vapor::image_capture::VulkanImageCaptureBuffer(this->clientCore.backend->renderWidth, this->clientCore.backend->renderHeight, textureData->instance, textureData->physicalDevice, textureData->device, textureData->queue, textureData->queueFamilyIndex);
-        }
-
-        CompositorError error = this->vulkanImageCaptureBuffers[eye]->capture(textureData, bounds);
+        CompositorError error = imageCaptureBuffers[eye].captureVulkan(width, height, textureData, bounds);
         if (error != CompositorError::COMPOSITOR_ERROR_NONE)
         {
             return error;
@@ -209,30 +192,13 @@ void CompositorImpl::present()
     {
         TRACE();
 
-        std::array<const vapor::image_capture::ImageCaptureBuffer*, 2> captureBuffers = {nullptr, nullptr};
-        for (int i = 0; i < 2; i++)
+        vapor::image_capture::lockBufferSwap();
+        for (int eye = 0; eye < 2; eye++)
         {
-            vapor::image_capture::ImageCaptureBuffer* buffer = nullptr;
-            if (this->glImageCaptureBuffers[i] != nullptr)
-            {
-                buffer = this->glImageCaptureBuffers[i];
-            }
-            else if (this->vulkanImageCaptureBuffers[i] != nullptr)
-            {
-                buffer = this->vulkanImageCaptureBuffers[i];
-            }
-
-            if (buffer != nullptr)
-            {
-                buffer->swapBuffers();
-                captureBuffers[i] = buffer;
-            }
+            imageCaptureBuffers[eye].swapBuffers();
         }
-
-        if (captureBuffers[0] != nullptr && captureBuffers[1] != nullptr)
-        {
-            this->clientCore.backend->frameQueue->putFrame(captureBuffers[0], captureBuffers[1], this->lastFrameViews);
-        }
+        this->clientCore.backend->frameQueue->putFrame(&imageCaptureBuffers[0], &imageCaptureBuffers[1], this->lastFrameViews);
+        vapor::image_capture::unlockBufferSwap();
 
         this->presented = true;
     }

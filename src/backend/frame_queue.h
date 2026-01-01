@@ -4,7 +4,6 @@
 #include "image_capture/image_capture.h"
 
 #include <array>
-#include <shared_mutex>
 
 #include <vulkan/vulkan.h>
 
@@ -13,21 +12,17 @@ namespace vapor
     class FrameQueue
     {
         public:
-            bool haveBuffersChanged();
-            const image_capture::ImageCaptureBuffer* getCaptureBufferForEye(int eyeIndex) const;
+            image_capture::ImageCaptureBufferManager* getCaptureBufferForEye(int eyeIndex) const;
             const OpenXR::ViewPair& getDisplayViews() const;
             bool hasDisplayFrame() const;
 
-            void putFrame(const image_capture::ImageCaptureBuffer* leftCaptureBuffer, const image_capture::ImageCaptureBuffer* rightCaptureBuffer, const OpenXR::ViewPair& views);
-            void lockFrame();
-            void unlockFrame();
+            void putFrame(image_capture::ImageCaptureBufferManager* leftCaptureBuffer, image_capture::ImageCaptureBufferManager* rightCaptureBuffer, const OpenXR::ViewPair& views);
+            void putClearFrame();
 
         private:
-            const image_capture::ImageCaptureBuffer* leftCaptureBuffer = nullptr;
-            const image_capture::ImageCaptureBuffer* rightCaptureBuffer = nullptr;
-            bool haveBuffersChangedFlag = false;
+            image_capture::ImageCaptureBufferManager* leftCaptureBuffer = nullptr;
+            image_capture::ImageCaptureBufferManager* rightCaptureBuffer = nullptr;
             OpenXR::ViewPair displayViews;
-
-            std::shared_mutex mutex;
+            bool hasDisplayFrameFlag = false;
     };
 }

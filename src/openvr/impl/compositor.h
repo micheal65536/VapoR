@@ -82,8 +82,7 @@ namespace openvr
             OpenXR::ViewPair lastFrameViews;
             vapor::PoseSet lastFrameDevicePoses[3];
 
-            std::array<vapor::image_capture::GLImageCaptureBuffer*, 2> glImageCaptureBuffers = {nullptr, nullptr};
-            std::array<vapor::image_capture::VulkanImageCaptureBuffer*, 2> vulkanImageCaptureBuffers = {nullptr, nullptr};
+            std::array<vapor::image_capture::ImageCaptureBufferManager, 2> imageCaptureBuffers;
 
             void present();
             bool presented = true;

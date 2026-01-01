@@ -1,20 +1,11 @@
 #include "frame_queue.h"
 
 #include "log/abort.h"
+#include "image_capture/image_capture.h"
 
 using namespace vapor;
 
-bool FrameQueue::haveBuffersChanged()
-{
-    if (haveBuffersChangedFlag)
-    {
-        haveBuffersChangedFlag = false;
-        return true;
-    }
-    return false;
-}
-
-const image_capture::ImageCaptureBuffer* FrameQueue::getCaptureBufferForEye(int eyeIndex) const
+image_capture::ImageCaptureBufferManager* FrameQueue::getCaptureBufferForEye(int eyeIndex) const
 {
     switch (eyeIndex)
     {
@@ -33,37 +24,21 @@ const OpenXR::ViewPair& FrameQueue::getDisplayViews() const
 
 bool FrameQueue::hasDisplayFrame() const
 {
-    return leftCaptureBuffer != nullptr && rightCaptureBuffer != nullptr;
+    return hasDisplayFrameFlag;
 }
 
-void FrameQueue::putFrame(const image_capture::ImageCaptureBuffer* leftCaptureBuffer, const image_capture::ImageCaptureBuffer* rightCaptureBuffer, const OpenXR::ViewPair& views)
+void FrameQueue::putFrame(image_capture::ImageCaptureBufferManager* leftCaptureBuffer, image_capture::ImageCaptureBufferManager* rightCaptureBuffer, const OpenXR::ViewPair& views)
 {
-    mutex.lock();
-
-    bool leftBufferChanged = (leftCaptureBuffer != this->leftCaptureBuffer || (leftCaptureBuffer != nullptr && *leftCaptureBuffer != *this->leftCaptureBuffer));
-    bool rightBufferChanged = (rightCaptureBuffer != this->rightCaptureBuffer || (rightCaptureBuffer != nullptr && *rightCaptureBuffer != *this->rightCaptureBuffer));
-    if (leftBufferChanged || rightBufferChanged)
-    {
-        if (!leftBufferChanged || !rightBufferChanged)
-        {
-            ABORT();
-        }
-        this->leftCaptureBuffer = leftCaptureBuffer;
-        this->rightCaptureBuffer = rightCaptureBuffer;
-        this->haveBuffersChangedFlag = true;
-    }
-
-    displayViews = views;
-
-    mutex.unlock();
+    this->leftCaptureBuffer = leftCaptureBuffer;
+    this->rightCaptureBuffer = rightCaptureBuffer;
+    this->displayViews = views;
+    hasDisplayFrameFlag = true;
 }
 
-void FrameQueue::lockFrame()
+void FrameQueue::putClearFrame()
 {
-    mutex.lock_shared();
-}
-
-void FrameQueue::unlockFrame()
-{   
-    mutex.unlock_shared();
+    leftCaptureBuffer = nullptr;
+    rightCaptureBuffer = nullptr;
+    displayViews = OpenXR::ViewPair();
+    hasDisplayFrameFlag = false;
 }
