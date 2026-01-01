@@ -567,7 +567,8 @@ std::vector<OpenXR::Layer> Backend::render(XrTime displayTime)
     glViewport(0, 0, this->renderWidth, this->renderHeight);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer->id);
 
-    OpenXR::ViewPair views = this->frameQueue->hasDisplayFrame() ? this->frameQueue->getDisplayViews() : this->session->locateViews(displayTime, *this->localSpace);
+    bool hasFrame = this->frameQueue->hasDisplayFrame();
+    OpenXR::ViewPair views = this->session->locateViews(displayTime, *this->localSpace);
 
     for (int eye = 0; eye < 2; eye++)
     {
@@ -578,27 +579,55 @@ std::vector<OpenXR::Layer> Backend::render(XrTime displayTime)
         }
         framebuffer->bindTexture(image);
 
-        image_capture::ImageCaptureBufferManager* bufferManager = this->frameQueue->getCaptureBufferForEye(eye);
-        const image_capture::ImageCaptureBuffer* buffer = bufferManager != nullptr ? bufferManager->getCaptureBufferForDisplay() : nullptr;
-        if (buffer != nullptr)
+        if (hasFrame)
         {
-            if (bufferManager->hasCaptureBufferChanged())
+            image_capture::ImageCaptureBufferManager<OpenXR::View>* bufferManager = this->frameQueue->getCaptureBufferForEye(eye);
+            const image_capture::ImageCaptureBuffer* buffer = bufferManager->getCaptureBufferForDisplay();
+            if (buffer != nullptr)
             {
-                std::array<OpenGL::ExternalMemory*, 2> externalMemory = buffer->importOpenGLMemory();
+                if (bufferManager->hasCaptureBufferChanged())
+                {
+                    std::array<OpenGL::ExternalMemory*, 2> externalMemory = buffer->importOpenGLMemory();
+                    for (int i = 0; i < 2; i++)
+                    {
+                        delete this->externalMemory[eye][i];
+                        this->externalMemory[eye][i] = externalMemory[i];
+                        this->srcTextures[eye][i]->attachExternalMemory(buffer->width, buffer->height, GL_RGBA8, *externalMemory[i], 0);
+                    }
+                }
+
+                OpenGL::Texture* srcTexture = this->srcTextures[eye][buffer->getCurrentDisplayBufferIndex()];
+                glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFramebuffer->id);
+                glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, srcTexture->id, 0);
+                ABORT_ON_OPENGL_ERROR();
+                glBlitFramebuffer(0, 0, buffer->width, buffer->height, 0, 0, this->renderWidth, this->renderHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+                ABORT_ON_OPENGL_ERROR();
+
+                const OpenXR::View& view = bufferManager->getCurrentDisplayAttachedData();
+                switch (eye)
+                {
+                    case 0:
+                        views.left = view;
+                        break;
+                    case 1:
+                        views.right = view;
+                        break;
+                }
+            }
+            else
+            {
                 for (int i = 0; i < 2; i++)
                 {
                     delete this->externalMemory[eye][i];
-                    this->externalMemory[eye][i] = externalMemory[i];
-                    this->srcTextures[eye][i]->attachExternalMemory(buffer->width, buffer->height, GL_RGBA8, *externalMemory[i], 0);
+                    this->externalMemory[eye][i] = nullptr;
                 }
-            }
+                bufferManager->hasCaptureBufferChanged(); // to clear flag
 
-            OpenGL::Texture* srcTexture = this->srcTextures[eye][buffer->getCurrentDisplayBufferIndex()];
-            glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFramebuffer->id);
-            glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, srcTexture->id, 0);
-            ABORT_ON_OPENGL_ERROR();
-            glBlitFramebuffer(0, 0, buffer->width, buffer->height, 0, 0, this->renderWidth, this->renderHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-            ABORT_ON_OPENGL_ERROR();
+                glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                //glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+                glClear(GL_COLOR_BUFFER_BIT);
+                ABORT_ON_OPENGL_ERROR();
+            }
         }
         else
         {
@@ -606,11 +635,6 @@ std::vector<OpenXR::Layer> Backend::render(XrTime displayTime)
             {
                 delete this->externalMemory[eye][i];
                 this->externalMemory[eye][i] = nullptr;
-            }
-
-            if (bufferManager != nullptr)
-            {
-                bufferManager->hasCaptureBufferChanged(); // to clear flag
             }
 
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);

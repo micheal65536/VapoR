@@ -1,7 +1,7 @@
 #pragma once
 
 #include "openxr.h"
-#include "image_capture/image_capture.h"
+#include "image_capture/image_capture_buffer_manager.h"
 
 #include <array>
 
@@ -12,17 +12,14 @@ namespace vapor
     class FrameQueue
     {
         public:
-            image_capture::ImageCaptureBufferManager* getCaptureBufferForEye(int eyeIndex) const;
-            const OpenXR::ViewPair& getDisplayViews() const;
+            image_capture::ImageCaptureBufferManager<OpenXR::View>* getCaptureBufferForEye(int eyeIndex) const;
             bool hasDisplayFrame() const;
 
-            void putFrame(image_capture::ImageCaptureBufferManager* leftCaptureBuffer, image_capture::ImageCaptureBufferManager* rightCaptureBuffer, const OpenXR::ViewPair& views);
-            void putClearFrame();
+            void setForeground(image_capture::ImageCaptureBufferManager<OpenXR::View>* leftCaptureBuffer, image_capture::ImageCaptureBufferManager<OpenXR::View>* rightCaptureBuffer);
+            void clearForeground();
 
         private:
-            image_capture::ImageCaptureBufferManager* leftCaptureBuffer = nullptr;
-            image_capture::ImageCaptureBufferManager* rightCaptureBuffer = nullptr;
-            OpenXR::ViewPair displayViews;
-            bool hasDisplayFrameFlag = false;
+            image_capture::ImageCaptureBufferManager<OpenXR::View>* leftCaptureBuffer = nullptr;
+            image_capture::ImageCaptureBufferManager<OpenXR::View>* rightCaptureBuffer = nullptr;
     };
 }

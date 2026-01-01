@@ -15,7 +15,7 @@ CompositorImpl::CompositorImpl(ClientCoreImpl& clientCore): clientCore(clientCor
 
 CompositorImpl::~CompositorImpl()
 {
-    this->clientCore.backend->frameQueue->putClearFrame();
+    this->loseFocus();
 }
 
 void CompositorImpl::setTrackingSpace(TrackingUniverseOrigin origin)
@@ -41,6 +41,10 @@ CompositorError CompositorImpl::waitGetPoses(TrackedDevicePose* renderPoses, uin
     TRACE_F("finished waiting");
 
     this->presented = false;
+    for (int eye = 0; eye < 2; eye++)
+    {
+        framesSubmitted[eye] = false;
+    }
 
     vapor::FrameState frame = this->clientCore.backend->frameStates.getFrame(0);
     this->lastFrameViews = frame.renderViews;
@@ -139,6 +143,11 @@ CompositorError CompositorImpl::submit(Eye eye, const Texture* texture, const Te
 {
     TRACE_F("%d %d %d %d", eye, texture->type, texture->colorSpace, submitFlags);
 
+    if (framesSubmitted[eye])
+    {
+        return CompositorError::COMPOSITOR_ERROR_ALREADY_SUBMITTED;
+    }
+
     // TODO: handle different submit flags (array texture etc.)
 
     // TODO: handle source size
@@ -167,6 +176,22 @@ CompositorError CompositorImpl::submit(Eye eye, const Texture* texture, const Te
         return CompositorError::COMPOSITOR_ERROR_REQUEST_FAILED;
     }
 
+    switch (eye)
+    {
+        case Eye::EYE_LEFT:
+            imageCaptureBuffers[eye].submitAttachedData(this->lastFrameViews.left);
+            break;
+        case Eye::EYE_RIGHT:
+            imageCaptureBuffers[eye].submitAttachedData(this->lastFrameViews.left);
+            break;
+    }
+
+    framesSubmitted[eye] = true;
+    if (framesSubmitted[Eye::EYE_LEFT] && framesSubmitted[Eye::EYE_RIGHT])
+    {
+        this->gainFocus();
+    }
+
     return CompositorError::COMPOSITOR_ERROR_NONE;
 }
 
@@ -178,7 +203,9 @@ CompositorError CompositorImpl::submitWithArrayIndex(Eye eye, const Texture* tex
 
 void CompositorImpl::clearLastSubmittedFrame()
 {
-    STUB();
+    TRACE();
+
+    this->loseFocus();
 }
 
 void CompositorImpl::postPresentHandoff()
@@ -186,21 +213,50 @@ void CompositorImpl::postPresentHandoff()
     this->present();
 }
 
+void CompositorImpl::gainFocus()
+{
+    vapor::image_capture::lockBufferSwap();
+    this->clientCore.backend->frameQueue->setForeground(&imageCaptureBuffers[0], &imageCaptureBuffers[1]);
+    vapor::image_capture::unlockBufferSwap();
+}
+
+void CompositorImpl::loseFocus()
+{
+    vapor::image_capture::lockBufferSwap();
+    this->clientCore.backend->frameQueue->clearForeground();
+    vapor::image_capture::unlockBufferSwap();
+}
+
 void CompositorImpl::present()
 {
+    TRACE();
+
     if (!this->presented)
     {
-        TRACE();
-
-        vapor::image_capture::lockBufferSwap();
+        bool haveFrames = true;
         for (int eye = 0; eye < 2; eye++)
         {
-            imageCaptureBuffers[eye].swapBuffers();
+            if (!framesSubmitted[eye])
+            {
+                haveFrames = false;
+            }
         }
-        this->clientCore.backend->frameQueue->putFrame(&imageCaptureBuffers[0], &imageCaptureBuffers[1], this->lastFrameViews);
-        vapor::image_capture::unlockBufferSwap();
 
-        this->presented = true;
+        if (haveFrames)
+        {
+            vapor::image_capture::lockBufferSwap();
+            for (int eye = 0; eye < 2; eye++)
+            {
+                imageCaptureBuffers[eye].swapBuffers();
+            }
+            vapor::image_capture::unlockBufferSwap();
+
+            this->presented = true;
+        }
+        else
+        {
+            TRACE_F("present with no frame");
+        }
     }
 }
 

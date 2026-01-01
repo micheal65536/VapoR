@@ -7,7 +7,8 @@
 #include "client_core.h"
 
 #include "backend/pose_set.h"
-#include "backend/image_capture/image_capture_impl.h"
+#include "backend/image_capture/image_capture_buffer_manager.h"
+#include "backend/openxr.h"
 
 namespace openvr
 {
@@ -82,8 +83,11 @@ namespace openvr
             OpenXR::ViewPair lastFrameViews;
             vapor::PoseSet lastFrameDevicePoses[3];
 
-            std::array<vapor::image_capture::ImageCaptureBufferManager, 2> imageCaptureBuffers;
+            std::array<vapor::image_capture::ImageCaptureBufferManager<OpenXR::View>, 2> imageCaptureBuffers;
+            std::array<bool, 2> framesSubmitted = {false, false};
 
+            void gainFocus();
+            void loseFocus();
             void present();
             bool presented = true;
     };

@@ -5,7 +5,7 @@
 
 using namespace vapor;
 
-image_capture::ImageCaptureBufferManager* FrameQueue::getCaptureBufferForEye(int eyeIndex) const
+image_capture::ImageCaptureBufferManager<OpenXR::View>* FrameQueue::getCaptureBufferForEye(int eyeIndex) const
 {
     switch (eyeIndex)
     {
@@ -17,28 +17,19 @@ image_capture::ImageCaptureBufferManager* FrameQueue::getCaptureBufferForEye(int
     }
 }
 
-const OpenXR::ViewPair& FrameQueue::getDisplayViews() const
-{
-    return displayViews;
-}
-
 bool FrameQueue::hasDisplayFrame() const
 {
-    return hasDisplayFrameFlag;
+    return leftCaptureBuffer != nullptr && rightCaptureBuffer != nullptr;
 }
 
-void FrameQueue::putFrame(image_capture::ImageCaptureBufferManager* leftCaptureBuffer, image_capture::ImageCaptureBufferManager* rightCaptureBuffer, const OpenXR::ViewPair& views)
+void FrameQueue::setForeground(image_capture::ImageCaptureBufferManager<OpenXR::View>* leftCaptureBuffer, image_capture::ImageCaptureBufferManager<OpenXR::View>* rightCaptureBuffer)
 {
     this->leftCaptureBuffer = leftCaptureBuffer;
     this->rightCaptureBuffer = rightCaptureBuffer;
-    this->displayViews = views;
-    hasDisplayFrameFlag = true;
 }
 
-void FrameQueue::putClearFrame()
+void FrameQueue::clearForeground()
 {
     leftCaptureBuffer = nullptr;
     rightCaptureBuffer = nullptr;
-    displayViews = OpenXR::ViewPair();
-    hasDisplayFrameFlag = false;
 }
