@@ -39,10 +39,6 @@ Backend::Backend()
     this->swapchains[0] = new OpenXR::Swapchain(*this->session, this->renderWidth, this->renderHeight, 1, GL_SRGB8_ALPHA8);
     this->swapchains[1] = new OpenXR::Swapchain(*this->session, this->renderWidth, this->renderHeight, 1, GL_SRGB8_ALPHA8);
     this->framebuffer = new OpenGL::Framebuffer(this->renderWidth, this->renderHeight);
-    for (int i = 0; i < 4; i++)
-    {
-        this->srcTextures[i % 2][i / 2] = new OpenGL::Texture();
-    }
     this->srcFramebuffer = new OpenGL::Framebuffer(this->renderWidth, this->renderHeight);
     ABORT_ON_OPENGL_ERROR();
 
@@ -149,16 +145,13 @@ Backend::~Backend()
     {
         delete this->srcTextures[i % 2][i / 2];
     }
+    for (int i = 0; i < 4; i++)
+    {
+        delete this->externalMemory[i % 2][i / 2];
+    }
     delete this->framebuffer;
     delete this->swapchains[0];
     delete this->swapchains[1];
-    for (int i = 0; i < 4; i++)
-    {
-        if (this->externalMemory[i % 2][i / 2] != nullptr)
-        {
-            delete this->externalMemory[i % 2][i / 2];
-        }
-    }
 
     delete this->viewSpace;
     delete this->localSpace;
@@ -593,7 +586,9 @@ std::vector<OpenXR::Layer> Backend::render(XrTime displayTime)
                     for (int i = 0; i < 2; i++)
                     {
                         delete this->externalMemory[eye][i];
+                        delete this->srcTextures[eye][i];
                         this->externalMemory[eye][i] = externalMemory[i];
+                        this->srcTextures[eye][i] = new OpenGL::Texture();
                         this->srcTextures[eye][i]->attachExternalMemory(buffer->width, buffer->height, GL_RGBA8, *externalMemory[i], 0);
                     }
                 }
