@@ -3,7 +3,6 @@
 #include "image_capture.h"
 #include "image_capture_impl.h"
 #include "openvr/types_render.h"
-#include "backend/opengl.h"
 
 namespace vapor
 {

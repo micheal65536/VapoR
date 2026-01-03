@@ -22,6 +22,16 @@ using namespace vapor::image_capture;
 
 static std::recursive_mutex swapMutex;
 
+void vapor::image_capture::lockBufferSwap()
+{
+    swapMutex.lock();
+}
+
+void vapor::image_capture::unlockBufferSwap()
+{
+    swapMutex.unlock();
+}
+
 ImageCaptureBuffer::ImageCaptureBuffer(int width, int height): width(width), height(height)
 {
     // empty
@@ -44,16 +54,6 @@ void ImageCaptureBuffer::swapBuffers()
     currentBuffer = 1 - currentBuffer;
 
     unlockBufferSwap();
-}
-
-void vapor::image_capture::lockBufferSwap()
-{
-    swapMutex.lock();
-}
-
-void vapor::image_capture::unlockBufferSwap()
-{
-    swapMutex.unlock();
 }
 
 std::array<OpenGL::ExternalMemory*, 2> ImageCaptureBuffer::importOpenGLMemory() const
