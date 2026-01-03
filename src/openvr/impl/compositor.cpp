@@ -153,7 +153,7 @@ CompositorError CompositorImpl::submit(Eye eye, const Texture* texture, const Te
     // TODO: handle source size
     if (texture->type == TextureType::TEXTURE_TYPE_OPENGL)
     {
-        CompositorError error = imageCaptureBuffers[eye].captureOpenGL((GLuint) (uint64_t) texture->handle, bounds);
+        CompositorError error = imageCaptureBuffers[eye].captureOpenGL((GLuint) (uint64_t) texture->handle);
         if (error != CompositorError::COMPOSITOR_ERROR_NONE)
         {
             return error;
@@ -162,7 +162,7 @@ CompositorError CompositorImpl::submit(Eye eye, const Texture* texture, const Te
     else if (texture->type == TextureType::TEXTURE_TYPE_VULKAN)
     {
         const VulkanTextureData* textureData = (VulkanTextureData*) texture->handle;
-        CompositorError error = imageCaptureBuffers[eye].captureVulkan(textureData, bounds);
+        CompositorError error = imageCaptureBuffers[eye].captureVulkan(textureData);
         if (error != CompositorError::COMPOSITOR_ERROR_NONE)
         {
             return error;
@@ -174,15 +174,17 @@ CompositorError CompositorImpl::submit(Eye eye, const Texture* texture, const Te
         return CompositorError::COMPOSITOR_ERROR_REQUEST_FAILED;
     }
 
+    const OpenXR::View* view;
     switch (eye)
     {
         case Eye::EYE_LEFT:
-            imageCaptureBuffers[eye].submitAttachedData(this->lastFrameViews.left);
+            view = &this->lastFrameViews.left;
             break;
         case Eye::EYE_RIGHT:
-            imageCaptureBuffers[eye].submitAttachedData(this->lastFrameViews.left);
+            view = &this->lastFrameViews.right;
             break;
     }
+    imageCaptureBuffers[eye].submitAttachedData({*view, bounds != nullptr ? *bounds : (TextureBounds) {.uMin = 0.0f, .vMin = 0.0f, .uMax = 1.0f, .vMax = 1.0f}});
 
     framesSubmitted[eye] = true;
     if (framesSubmitted[Eye::EYE_LEFT] && framesSubmitted[Eye::EYE_RIGHT])

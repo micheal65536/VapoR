@@ -32,7 +32,7 @@ namespace vapor
 
                 //
 
-                openvr::CompositorError captureOpenGL(GLuint srcTextureId, const openvr::TextureBounds* textureBounds)
+                openvr::CompositorError captureOpenGL(GLuint srcTextureId)
                 {
                     GLuint savedTexture;
                     glGetIntegerv(GL_TEXTURE_BINDING_2D, (GLint*) &savedTexture);
@@ -55,10 +55,10 @@ namespace vapor
                         nextFrameImageCaptureBufferApi = Api::OPENGL;
                     }
 
-                    return ((GLImageCaptureBuffer*) nextFrameImageCaptureBuffer)->capture(srcTextureId, textureBounds);
+                    return ((GLImageCaptureBuffer*) nextFrameImageCaptureBuffer)->capture(srcTextureId, 0, 0);
                 }
 
-                openvr::CompositorError captureVulkan(const openvr::VulkanTextureData* textureData, const openvr::TextureBounds* textureBounds)
+                openvr::CompositorError captureVulkan(const openvr::VulkanTextureData* textureData)
                 {
                     int width = textureData->width;
                     int height = textureData->height;
@@ -74,7 +74,7 @@ namespace vapor
                         nextFrameImageCaptureBufferApi = Api::VULKAN;
                     }
 
-                    return ((VulkanImageCaptureBuffer*) nextFrameImageCaptureBuffer)->capture(textureData, textureBounds);
+                    return ((VulkanImageCaptureBuffer*) nextFrameImageCaptureBuffer)->capture(textureData, 0, 0);
                 }
 
                 void submitAttachedData(const AttachedData& attachedData)

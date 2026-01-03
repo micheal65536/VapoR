@@ -44,7 +44,7 @@ namespace vapor
                 GLImageCaptureBuffer(int width, int height);
                 ~GLImageCaptureBuffer();
 
-                openvr::CompositorError capture(GLuint srcTextureId, const openvr::TextureBounds* textureBounds);
+                openvr::CompositorError capture(GLuint srcTextureId, int x, int y);
 
             private:
                 VulkanCommon* vulkan;
@@ -64,7 +64,7 @@ namespace vapor
                 VulkanImageCaptureBuffer(int width, int height, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue queue, uint32_t queueFamilyIndex);
                 ~VulkanImageCaptureBuffer();
  
-                openvr::CompositorError capture(const openvr::VulkanTextureData* textureData, const openvr::TextureBounds* textureBounds);
+                openvr::CompositorError capture(const openvr::VulkanTextureData* textureData, int x, int y);
 
             private:
                 VulkanCommon common;

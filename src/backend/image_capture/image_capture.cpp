@@ -238,7 +238,7 @@ GLImageCaptureBuffer::~GLImageCaptureBuffer()
     vkDestroyDevice(device, nullptr);
 }
 
-openvr::CompositorError GLImageCaptureBuffer::capture(GLuint srcTextureId, const openvr::TextureBounds* textureBounds)
+openvr::CompositorError GLImageCaptureBuffer::capture(GLuint srcTextureId, int x, int y)
 {
     GLuint savedTexture;
     GLuint savedReadFramebuffer;
@@ -255,17 +255,9 @@ openvr::CompositorError GLImageCaptureBuffer::capture(GLuint srcTextureId, const
     glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dstTextures[getCurrentCaptureBufferIndex()], 0);
     ABORT_ON_OPENGL_ERROR();
 
-    // TODO: figure out why image is sometimes flipped
-    int srcWidth, srcHeight;
     glBindTexture(GL_TEXTURE_2D, srcTextureId);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &srcWidth);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &srcHeight);
     ABORT_ON_OPENGL_ERROR();
-    int srcX1 = textureBounds != nullptr ? (int) std::roundf(srcWidth * textureBounds->uMin) : 0;
-    int srcY1 = textureBounds != nullptr ? (int) std::roundf(srcHeight * textureBounds->vMin) : 0;
-    int srcX2 = textureBounds != nullptr ? (int) std::roundf(srcWidth * textureBounds->uMax) : srcWidth;
-    int srcY2 = textureBounds != nullptr ? (int) std::roundf(srcHeight * textureBounds->vMax) : srcHeight;
-    glBlitFramebuffer(srcX1, vapor::config::fixes::flipImage ? srcY2 : srcY1, srcX2, vapor::config::fixes::flipImage ? srcY1 : srcY2, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBlitFramebuffer(x, y, x + width, y + height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
     glFinish();
     ABORT_ON_OPENGL_ERROR();
 
@@ -316,7 +308,7 @@ VulkanImageCaptureBuffer::~VulkanImageCaptureBuffer()
     }
 }
 
-openvr::CompositorError VulkanImageCaptureBuffer::capture(const openvr::VulkanTextureData* textureData, const openvr::TextureBounds* textureBounds)
+openvr::CompositorError VulkanImageCaptureBuffer::capture(const openvr::VulkanTextureData* textureData, int x, int y)
 {
     if (textureData->instance != common.instance || textureData->physicalDevice != common.physicalDevice || textureData->device != common.device || textureData->queue != common.queue || textureData->queueFamilyIndex != common.queueFamilyIndex)
     {
@@ -375,11 +367,6 @@ openvr::CompositorError VulkanImageCaptureBuffer::capture(const openvr::VulkanTe
 
     common.transitionImageLayout(dstImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 0, VK_ACCESS_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
 
-    // TODO: figure out why image is sometimes flipped
-    int srcX1 = textureBounds != nullptr ? (int) std::roundf(textureData->width * textureBounds->uMin) : 0;
-    int srcY1 = textureBounds != nullptr ? (int) std::roundf(textureData->height * textureBounds->vMin) : 0;
-    int srcX2 = textureBounds != nullptr ? (int) std::roundf(textureData->width * textureBounds->uMax) : textureData->width;
-    int srcY2 = textureBounds != nullptr ? (int) std::roundf(textureData->height * textureBounds->vMax) : textureData->height;
     VkImageBlit imageBlit {
         .srcSubresource = {
             .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -388,8 +375,8 @@ openvr::CompositorError VulkanImageCaptureBuffer::capture(const openvr::VulkanTe
             .layerCount = 1
         },
         .srcOffsets = {
-            { .x = srcX1, .y = vapor::config::fixes::flipImage ? srcY2 : srcY1, .z = 0 },
-            { .x = srcX2, .y = vapor::config::fixes::flipImage ? srcY1 : srcY2, .z = 1 }
+            { .x = x, .y = y, .z = 0 },
+            { .x = x + this->width, .y = y + this->height, .z = 1 }
         },
         .dstSubresource = {
             .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,

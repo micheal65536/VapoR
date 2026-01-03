@@ -5,6 +5,7 @@
 
 #include "config/config.h"
 #include "config/paths.h"
+#include "config/fixes.h"
 
 #include "config/device_profile.h"
 
@@ -581,8 +582,9 @@ std::vector<OpenXR::Layer> Backend::render(XrTime displayTime)
 
         if (hasFrame)
         {
-            image_capture::ImageCaptureBufferManager<OpenXR::View>* bufferManager = this->frameQueue->getCaptureBufferForEye(eye);
+            image_capture::ImageCaptureBufferManager<std::tuple<OpenXR::View, openvr::TextureBounds>>* bufferManager = this->frameQueue->getCaptureBufferForEye(eye);
             const image_capture::ImageCaptureBuffer* buffer = bufferManager->getCaptureBufferForDisplay();
+            const std::tuple<OpenXR::View, openvr::TextureBounds>& attachedData = bufferManager->getCurrentDisplayAttachedData();
             if (buffer != nullptr)
             {
                 if (bufferManager->hasCaptureBufferChanged())
@@ -600,10 +602,16 @@ std::vector<OpenXR::Layer> Backend::render(XrTime displayTime)
                 glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFramebuffer->id);
                 glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, srcTexture->id, 0);
                 ABORT_ON_OPENGL_ERROR();
-                glBlitFramebuffer(0, 0, buffer->width, buffer->height, 0, 0, this->renderWidth, this->renderHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+                // TODO: figure out why image is sometimes flipped
+                const openvr::TextureBounds& textureBounds = std::get<1>(attachedData);
+                int srcX1 = (int) std::roundf(buffer->width * textureBounds.uMin);
+                int srcY1 = (int) std::roundf(buffer->height * textureBounds.vMin);
+                int srcX2 = (int) std::roundf(buffer->width * textureBounds.uMax);
+                int srcY2 = (int) std::roundf(buffer->height * textureBounds.vMax);
+                glBlitFramebuffer(srcX1, vapor::config::fixes::flipImage ? srcY2 : srcY1, srcX2, vapor::config::fixes::flipImage ? srcY1 : srcY2, 0, 0, this->renderWidth, this->renderHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
                 ABORT_ON_OPENGL_ERROR();
 
-                const OpenXR::View& view = bufferManager->getCurrentDisplayAttachedData();
+                const OpenXR::View& view = std::get<0>(attachedData);
                 switch (eye)
                 {
                     case 0:

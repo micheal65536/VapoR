@@ -5,7 +5,7 @@
 
 using namespace vapor;
 
-image_capture::ImageCaptureBufferManager<OpenXR::View>* FrameQueue::getCaptureBufferForEye(int eyeIndex) const
+image_capture::ImageCaptureBufferManager<std::tuple<OpenXR::View, openvr::TextureBounds>>* FrameQueue::getCaptureBufferForEye(int eyeIndex) const
 {
     switch (eyeIndex)
     {
@@ -22,7 +22,7 @@ bool FrameQueue::hasDisplayFrame() const
     return leftCaptureBuffer != nullptr && rightCaptureBuffer != nullptr;
 }
 
-void FrameQueue::setForeground(image_capture::ImageCaptureBufferManager<OpenXR::View>* leftCaptureBuffer, image_capture::ImageCaptureBufferManager<OpenXR::View>* rightCaptureBuffer)
+void FrameQueue::setForeground(image_capture::ImageCaptureBufferManager<std::tuple<OpenXR::View, openvr::TextureBounds>>* leftCaptureBuffer, image_capture::ImageCaptureBufferManager<std::tuple<OpenXR::View, openvr::TextureBounds>>* rightCaptureBuffer)
 {
     this->leftCaptureBuffer = leftCaptureBuffer;
     this->rightCaptureBuffer = rightCaptureBuffer;
