@@ -12,6 +12,7 @@ namespace vapor
         void lockBufferSwap();
         void unlockBufferSwap();
 
+        // TODO: move TextureBounds to here
         class ImageCaptureBuffer
         {
             public:

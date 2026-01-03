@@ -151,11 +151,9 @@ CompositorError CompositorImpl::submit(Eye eye, const Texture* texture, const Te
     // TODO: handle different submit flags (array texture etc.)
 
     // TODO: handle source size
-    int width = this->clientCore.backend->renderWidth;
-    int height = this->clientCore.backend->renderHeight;
     if (texture->type == TextureType::TEXTURE_TYPE_OPENGL)
     {
-        CompositorError error = imageCaptureBuffers[eye].captureOpenGL(width, height, (GLuint) (uint64_t) texture->handle, bounds);
+        CompositorError error = imageCaptureBuffers[eye].captureOpenGL((GLuint) (uint64_t) texture->handle, bounds);
         if (error != CompositorError::COMPOSITOR_ERROR_NONE)
         {
             return error;
@@ -164,7 +162,7 @@ CompositorError CompositorImpl::submit(Eye eye, const Texture* texture, const Te
     else if (texture->type == TextureType::TEXTURE_TYPE_VULKAN)
     {
         const VulkanTextureData* textureData = (VulkanTextureData*) texture->handle;
-        CompositorError error = imageCaptureBuffers[eye].captureVulkan(width, height, textureData, bounds);
+        CompositorError error = imageCaptureBuffers[eye].captureVulkan(textureData, bounds);
         if (error != CompositorError::COMPOSITOR_ERROR_NONE)
         {
             return error;

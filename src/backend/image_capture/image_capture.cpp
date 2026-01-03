@@ -265,7 +265,7 @@ openvr::CompositorError GLImageCaptureBuffer::capture(GLuint srcTextureId, const
     int srcY1 = textureBounds != nullptr ? (int) std::roundf(srcHeight * textureBounds->vMin) : 0;
     int srcX2 = textureBounds != nullptr ? (int) std::roundf(srcWidth * textureBounds->uMax) : srcWidth;
     int srcY2 = textureBounds != nullptr ? (int) std::roundf(srcHeight * textureBounds->vMax) : srcHeight;
-    glBlitFramebuffer(srcX1, vapor::config::fixes::flipImage ? srcY2 : srcY1, srcX2, vapor::config::fixes::flipImage ? srcY1 : srcY2, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+    glBlitFramebuffer(srcX1, vapor::config::fixes::flipImage ? srcY2 : srcY1, srcX2, vapor::config::fixes::flipImage ? srcY1 : srcY2, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
     glFinish();
     ABORT_ON_OPENGL_ERROR();
 
@@ -402,7 +402,7 @@ openvr::CompositorError VulkanImageCaptureBuffer::capture(const openvr::VulkanTe
             { .x = this->width, .y = this->height, .z = 1 }
         }
     };
-    vkCmdBlitImage(common.commandBuffer, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageBlit, VK_FILTER_LINEAR);
+    vkCmdBlitImage(common.commandBuffer, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageBlit, VK_FILTER_NEAREST);
 
     common.transitionImageLayout(dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
 

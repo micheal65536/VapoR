@@ -600,7 +600,7 @@ std::vector<OpenXR::Layer> Backend::render(XrTime displayTime)
                 glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFramebuffer->id);
                 glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, srcTexture->id, 0);
                 ABORT_ON_OPENGL_ERROR();
-                glBlitFramebuffer(0, 0, buffer->width, buffer->height, 0, 0, this->renderWidth, this->renderHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+                glBlitFramebuffer(0, 0, buffer->width, buffer->height, 0, 0, this->renderWidth, this->renderHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
                 ABORT_ON_OPENGL_ERROR();
 
                 const OpenXR::View& view = bufferManager->getCurrentDisplayAttachedData();

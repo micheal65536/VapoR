@@ -3,6 +3,7 @@
 #include "image_capture.h"
 #include "image_capture_impl.h"
 #include "openvr/types_render.h"
+#include "backend/opengl.h"
 
 namespace vapor
 {
@@ -31,8 +32,19 @@ namespace vapor
 
                 //
 
-                openvr::CompositorError captureOpenGL(int width, int height, GLuint srcTextureId, const openvr::TextureBounds* textureBounds)
+                openvr::CompositorError captureOpenGL(GLuint srcTextureId, const openvr::TextureBounds* textureBounds)
                 {
+                    GLuint savedTexture;
+                    glGetIntegerv(GL_TEXTURE_BINDING_2D, (GLint*) &savedTexture);
+                    ABORT_ON_OPENGL_ERROR();
+                    int width, height;
+                    glBindTexture(GL_TEXTURE_2D, srcTextureId);
+                    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+                    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+                    ABORT_ON_OPENGL_ERROR();
+                    glBindTexture(GL_TEXTURE_2D, savedTexture);
+                    ABORT_ON_OPENGL_ERROR();
+
                     if (nextFrameImageCaptureBuffer == nullptr || nextFrameImageCaptureBuffer->width != width || nextFrameImageCaptureBuffer->height != height || nextFrameImageCaptureBufferApi != Api::OPENGL)
                     {
                         if (nextFrameImageCaptureBuffer != presentedImageCaptureBuffer)
@@ -46,8 +58,11 @@ namespace vapor
                     return ((GLImageCaptureBuffer*) nextFrameImageCaptureBuffer)->capture(srcTextureId, textureBounds);
                 }
 
-                openvr::CompositorError captureVulkan(int width, int height, const openvr::VulkanTextureData* textureData, const openvr::TextureBounds* textureBounds)
+                openvr::CompositorError captureVulkan(const openvr::VulkanTextureData* textureData, const openvr::TextureBounds* textureBounds)
                 {
+                    int width = textureData->width;
+                    int height = textureData->height;
+
                     // TODO: check Vulkan properties
                     if (nextFrameImageCaptureBuffer == nullptr || nextFrameImageCaptureBuffer->width != width || nextFrameImageCaptureBuffer->height != height || nextFrameImageCaptureBufferApi != Api::VULKAN)
                     {
