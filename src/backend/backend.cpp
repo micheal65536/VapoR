@@ -39,7 +39,6 @@ Backend::Backend()
     this->swapchains[0] = new OpenXR::Swapchain(*this->session, this->renderWidth, this->renderHeight, 1, GL_SRGB8_ALPHA8);
     this->swapchains[1] = new OpenXR::Swapchain(*this->session, this->renderWidth, this->renderHeight, 1, GL_SRGB8_ALPHA8);
     this->framebuffer = new OpenGL::Framebuffer(this->renderWidth, this->renderHeight);
-    this->srcFramebuffer = new OpenGL::Framebuffer(this->renderWidth, this->renderHeight);
     ABORT_ON_OPENGL_ERROR();
 
     this->viewSpace = new OpenXR::Space(*this->session, XR_REFERENCE_SPACE_TYPE_VIEW, OpenXR::IDENTITY_POSE);
@@ -140,7 +139,10 @@ Backend::Backend()
 
 Backend::~Backend()
 {
-    delete this->srcFramebuffer;
+    for (int i = 0; i < 2; i++)
+    {
+        delete this->srcFramebuffers[i];
+    }
     for (int i = 0; i < 4; i++)
     {
         delete this->srcTextures[i % 2][i / 2];
@@ -591,10 +593,12 @@ std::vector<OpenXR::Layer> Backend::render(XrTime displayTime)
                         this->srcTextures[eye][i] = new OpenGL::Texture();
                         this->srcTextures[eye][i]->attachExternalMemory(buffer->width, buffer->height, GL_RGBA8, *externalMemory[i], 0);
                     }
+                    delete this->srcFramebuffers[eye];
+                    this->srcFramebuffers[eye] = new OpenGL::Framebuffer(buffer->width, buffer->height);
                 }
 
                 OpenGL::Texture* srcTexture = this->srcTextures[eye][buffer->getCurrentDisplayBufferIndex()];
-                glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFramebuffer->id);
+                glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFramebuffers[eye]->id);
                 glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, srcTexture->id, 0);
                 ABORT_ON_OPENGL_ERROR();
                 // TODO: figure out why image is sometimes flipped

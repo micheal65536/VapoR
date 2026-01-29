@@ -65,7 +65,7 @@ namespace vapor
 
             OpenXR::Swapchain* swapchains[2];
             OpenGL::Framebuffer* framebuffer;
-            OpenGL::Framebuffer* srcFramebuffer;
+            OpenGL::Framebuffer* srcFramebuffers[2] = {nullptr, nullptr};
             OpenGL::Texture* srcTextures[2][2] = {{nullptr, nullptr}, {nullptr, nullptr}};
             OpenGL::ExternalMemory* externalMemory[2][2] = {{nullptr, nullptr}, {nullptr, nullptr}};
 
