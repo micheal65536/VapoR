@@ -137,8 +137,6 @@ CompositorError CompositorImpl::getSubmitTexture(Texture* textureOut, bool* need
     STUB_F("%d %d %d %d", usage, texture, bounds, submitFlags);
 }
 
-// TODO: implement tracking of which eyes have been submitted, handle this appropriately in present and in clearLastSubmittedFrame (e.g. when do we keep the previous eye image vs presenting a blank image, do we allow submission of only 1 eye, etc.?)
-
 CompositorError CompositorImpl::submit(Eye eye, const Texture* texture, const TextureBounds* bounds, int32_t submitFlags)
 {
     TRACE_F("%d %d %d %d", eye, texture->type, texture->colorSpace, submitFlags);
