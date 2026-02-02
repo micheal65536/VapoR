@@ -15,14 +15,7 @@ CompositorImpl::CompositorImpl(ClientCoreImpl& clientCore): clientCore(clientCor
 
 CompositorImpl::~CompositorImpl()
 {
-    if (this->glImageCaptureHelper != nullptr)
-    {
-        delete this->glImageCaptureHelper;
-    }
-    if (this->vulkanImageCaptureHelper != nullptr)
-    {
-        delete this->vulkanImageCaptureHelper;
-    }
+    this->loseFocus();
 }
 
 void CompositorImpl::setTrackingSpace(TrackingUniverseOrigin origin)
@@ -48,6 +41,10 @@ CompositorError CompositorImpl::waitGetPoses(TrackedDevicePose* renderPoses, uin
     TRACE_F("finished waiting");
 
     this->presented = false;
+    for (int eye = 0; eye < 2; eye++)
+    {
+        framesSubmitted[eye] = false;
+    }
 
     vapor::FrameState frame = this->clientCore.backend->frameStates.getFrame(0);
     this->lastFrameViews = frame.renderViews;
@@ -144,16 +141,17 @@ CompositorError CompositorImpl::submit(Eye eye, const Texture* texture, const Te
 {
     TRACE_F("%d %d %d %d", eye, texture->type, texture->colorSpace, submitFlags);
 
+    if (framesSubmitted[eye])
+    {
+        return CompositorError::COMPOSITOR_ERROR_ALREADY_SUBMITTED;
+    }
+
     // TODO: handle different submit flags (array texture etc.)
 
+    // TODO: handle source size
     if (texture->type == TextureType::TEXTURE_TYPE_OPENGL)
     {
-        if (this->glImageCaptureHelper == nullptr)
-        {
-            this->glImageCaptureHelper = new render::GLImageCaptureHelper(this->clientCore.backend->renderWidth, this->clientCore.backend->renderHeight, this->clientCore.backend->frameQueue->memory);
-        }
-
-        CompositorError error = this->glImageCaptureHelper->capture((GLuint) (uint64_t) texture->handle, bounds, this->clientCore.backend->frameQueue->memory, this->clientCore.backend->frameQueue->getDrawBufferIndex(eye));
+        CompositorError error = imageCaptureBuffers[eye].captureOpenGL((GLuint) (uint64_t) texture->handle);
         if (error != CompositorError::COMPOSITOR_ERROR_NONE)
         {
             return error;
@@ -162,13 +160,7 @@ CompositorError CompositorImpl::submit(Eye eye, const Texture* texture, const Te
     else if (texture->type == TextureType::TEXTURE_TYPE_VULKAN)
     {
         const VulkanTextureData* textureData = (VulkanTextureData*) texture->handle;
-
-        if (this->vulkanImageCaptureHelper == nullptr)
-        {
-            this->vulkanImageCaptureHelper = new render::VulkanImageCaptureHelper(this->clientCore.backend->renderWidth, this->clientCore.backend->renderHeight, this->clientCore.backend->frameQueue->memory, textureData->instance, textureData->physicalDevice, textureData->device, textureData->queue, textureData->queueFamilyIndex);
-        }
-
-        CompositorError error = this->vulkanImageCaptureHelper->capture(textureData, bounds, this->clientCore.backend->frameQueue->memory, this->clientCore.backend->frameQueue->getDrawBufferIndex(eye));
+        CompositorError error = imageCaptureBuffers[eye].captureVulkan(textureData);
         if (error != CompositorError::COMPOSITOR_ERROR_NONE)
         {
             return error;
@@ -178,6 +170,24 @@ CompositorError CompositorImpl::submit(Eye eye, const Texture* texture, const Te
     {
         STUB_F("Unsupported texture type %d", texture->type);
         return CompositorError::COMPOSITOR_ERROR_REQUEST_FAILED;
+    }
+
+    const OpenXR::View* view;
+    switch (eye)
+    {
+        case Eye::EYE_LEFT:
+            view = &this->lastFrameViews.left;
+            break;
+        case Eye::EYE_RIGHT:
+            view = &this->lastFrameViews.right;
+            break;
+    }
+    imageCaptureBuffers[eye].submitAttachedData({*view, bounds != nullptr ? *bounds : (TextureBounds) {.uMin = 0.0f, .vMin = 0.0f, .uMax = 1.0f, .vMax = 1.0f}});
+
+    framesSubmitted[eye] = true;
+    if (framesSubmitted[Eye::EYE_LEFT] && framesSubmitted[Eye::EYE_RIGHT])
+    {
+        this->gainFocus();
     }
 
     return CompositorError::COMPOSITOR_ERROR_NONE;
@@ -191,7 +201,9 @@ CompositorError CompositorImpl::submitWithArrayIndex(Eye eye, const Texture* tex
 
 void CompositorImpl::clearLastSubmittedFrame()
 {
-    STUB();
+    TRACE();
+
+    this->loseFocus();
 }
 
 void CompositorImpl::postPresentHandoff()
@@ -199,16 +211,50 @@ void CompositorImpl::postPresentHandoff()
     this->present();
 }
 
+void CompositorImpl::gainFocus()
+{
+    vapor::image_capture::lockBufferSwap();
+    this->clientCore.backend->frameQueue->setForeground(&imageCaptureBuffers[0], &imageCaptureBuffers[1]);
+    vapor::image_capture::unlockBufferSwap();
+}
+
+void CompositorImpl::loseFocus()
+{
+    vapor::image_capture::lockBufferSwap();
+    this->clientCore.backend->frameQueue->clearForeground();
+    vapor::image_capture::unlockBufferSwap();
+}
+
 void CompositorImpl::present()
 {
+    TRACE();
+
     if (!this->presented)
     {
-        TRACE();
-        if (this->glImageCaptureHelper != nullptr || this->vulkanImageCaptureHelper != nullptr) // TODO: clean this up - we check this here because if these are null then there's no frame submitted yet and backend will crash trying to get the shared memory
+        bool haveFrames = true;
+        for (int eye = 0; eye < 2; eye++)
         {
-            this->clientCore.backend->frameQueue->swapBuffers(this->lastFrameViews);
+            if (!framesSubmitted[eye])
+            {
+                haveFrames = false;
+            }
         }
-        this->presented = true;
+
+        if (haveFrames)
+        {
+            vapor::image_capture::lockBufferSwap();
+            for (int eye = 0; eye < 2; eye++)
+            {
+                imageCaptureBuffers[eye].swapBuffers();
+            }
+            vapor::image_capture::unlockBufferSwap();
+
+            this->presented = true;
+        }
+        else
+        {
+            TRACE_F("present with no frame");
+        }
     }
 }
 

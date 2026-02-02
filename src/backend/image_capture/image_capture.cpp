@@ -1,10 +1,13 @@
-#include "image_capture_helper.h"
+#include "image_capture.h"
+#include "image_capture_impl.h"
 
 #include "backend/opengl.h"
 #include "backend/vulkan.h"
 #include "log/log.h"
 #include "log/abort.h"
 #include "config/fixes.h"
+
+#include <mutex>
 
 #include <cstring>
 #include <cmath>
@@ -13,14 +16,60 @@
 #include <GL/glx.h>
 #include <GL/glext.h>
 
-using namespace openvr::render;
-using namespace openvr;
+using namespace vapor::image_capture;
 
-GLImageCaptureHelper::GLImageCaptureHelper(int width, int height, vapor::FrameQueue::Memory* memory)
+//
+
+static std::recursive_mutex swapMutex;
+
+void vapor::image_capture::lockBufferSwap()
 {
-    this->width = width;
-    this->height = height;
+    swapMutex.lock();
+}
 
+void vapor::image_capture::unlockBufferSwap()
+{
+    swapMutex.unlock();
+}
+
+ImageCaptureBuffer::ImageCaptureBuffer(int width, int height): width(width), height(height)
+{
+    // empty
+}
+
+int ImageCaptureBuffer::getCurrentDisplayBufferIndex() const
+{
+    return 1 - currentBuffer;
+}
+
+int ImageCaptureBuffer::getCurrentCaptureBufferIndex() const
+{
+    return currentBuffer;
+}
+
+void ImageCaptureBuffer::swapBuffers()
+{
+    lockBufferSwap();
+
+    currentBuffer = 1 - currentBuffer;
+
+    unlockBufferSwap();
+}
+
+std::array<OpenGL::ExternalMemory*, 2> ImageCaptureBuffer::importOpenGLMemory() const
+{
+    std::array<OpenGL::ExternalMemory*, 2> importedMemory;
+    for (int i = 0; i < 2; i++)
+    {
+        importedMemory[i] = new OpenGL::ExternalMemory(bufferTextures[i].fd, bufferTextures[i].size);
+    }
+    return importedMemory;
+}
+
+//
+
+GLImageCaptureBuffer::GLImageCaptureBuffer(int width, int height): ImageCaptureBuffer(width, height)
+{
     std::vector<const char*> instanceExtensions = (std::vector<const char*>) {
         VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME,
         VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME
@@ -98,14 +147,14 @@ GLImageCaptureHelper::GLImageCaptureHelper(int width, int height, vapor::FrameQu
     glGetIntegerv(GL_RENDERBUFFER_BINDING, (GLint*) &savedRenderbuffer);
     ABORT_ON_OPENGL_ERROR();
 
-    glGenTextures(4, dstTextures);
+    glGenTextures(2, dstTextures);
     PFNGLCREATEMEMORYOBJECTSEXTPROC glCreateMemoryObjectsEXT = (PFNGLCREATEMEMORYOBJECTSEXTPROC) glXGetProcAddress((const GLubyte*) "glCreateMemoryObjectsEXT");
-    glCreateMemoryObjectsEXT(4, dstExternalMemory);
+    glCreateMemoryObjectsEXT(2, dstExternalMemory);
     ABORT_ON_OPENGL_ERROR();
 
     PFNGLIMPORTMEMORYFDEXTPROC glImportMemoryFdEXT = (PFNGLIMPORTMEMORYFDEXTPROC) glXGetProcAddress((const GLubyte*) "glImportMemoryFdEXT");
     PFNGLTEXSTORAGEMEM2DEXTPROC glTexStorageMem2DEXT = (PFNGLTEXSTORAGEMEM2DEXTPROC) glXGetProcAddress((const GLubyte*) "glTexStorageMem2DEXT");
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 2; i++)
     {
         // TODO: can we do this (determine memory size etc.) without creating an image?
         VkImage image = vulkan->createImage(width, height, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_LAYOUT_UNDEFINED);
@@ -115,7 +164,6 @@ GLImageCaptureHelper::GLImageCaptureHelper(int width, int height, vapor::FrameQu
         dstMemory[i] = vulkan->allocateMemory(memoryRequirements.size, memoryTypeIndex, true);
         vkDestroyImage(vulkan->device, image, nullptr);
 
-        memory[i].vulkanMemory = dstMemory[i];
         VkMemoryGetFdInfoKHR memoryGetFdInfo {
             .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
             .pNext = nullptr,
@@ -124,13 +172,14 @@ GLImageCaptureHelper::GLImageCaptureHelper(int width, int height, vapor::FrameQu
         };
         PFN_vkGetMemoryFdKHR vkGetMemoryFdKHR;
         vkGetMemoryFdKHR = (PFN_vkGetMemoryFdKHR) vkGetInstanceProcAddr(vulkan->instance, "vkGetMemoryFdKHR");
-        ABORT_ON_VULKAN_ERROR(vkGetMemoryFdKHR(vulkan->device, &memoryGetFdInfo, &memory[i].fd));
-        memory[i].size = memoryRequirements.size;
+        int fd1;
+        ABORT_ON_VULKAN_ERROR(vkGetMemoryFdKHR(vulkan->device, &memoryGetFdInfo, &fd1));
+        bufferTextures[i] = vapor::image_capture::ImageCaptureBuffer::VulkanExportedTextureHolder {.width = width, .height = height, .vulkanMemory = dstMemory[i], .fd = fd1, .size = memoryRequirements.size};
 
         int fd;
         ABORT_ON_VULKAN_ERROR(vkGetMemoryFdKHR(vulkan->device, &memoryGetFdInfo, &fd));
 
-        glImportMemoryFdEXT(dstExternalMemory[i], memory[i].size, GL_HANDLE_TYPE_OPAQUE_FD_EXT, fd);
+        glImportMemoryFdEXT(dstExternalMemory[i], memoryRequirements.size, GL_HANDLE_TYPE_OPAQUE_FD_EXT, fd);
         ABORT_ON_OPENGL_ERROR();
         glBindTexture(GL_TEXTURE_2D, dstTextures[i]);
         glTexStorageMem2DEXT(GL_TEXTURE_2D, 1, GL_RGBA8, width, height, dstExternalMemory[i], 0);
@@ -166,7 +215,7 @@ GLImageCaptureHelper::GLImageCaptureHelper(int width, int height, vapor::FrameQu
     ABORT_ON_OPENGL_ERROR();
 }
 
-GLImageCaptureHelper::~GLImageCaptureHelper()
+GLImageCaptureBuffer::~GLImageCaptureBuffer()
 {
     glDeleteFramebuffers(1, &srcFramebuffer);
     glDeleteRenderbuffers(2, srcRenderbuffers);
@@ -174,12 +223,12 @@ GLImageCaptureHelper::~GLImageCaptureHelper()
     glDeleteRenderbuffers(2, dstRenderbuffers);
     ABORT_ON_OPENGL_ERROR();
 
-    glDeleteTextures(4, dstTextures);
+    glDeleteTextures(2, dstTextures);
     PFNGLDELETEMEMORYOBJECTSEXTPROC glDeleteMemoryObjectsEXT = (PFNGLDELETEMEMORYOBJECTSEXTPROC) glXGetProcAddress((const GLubyte*) "glDeleteMemoryObjectsEXT");
-    glDeleteMemoryObjectsEXT(4, dstExternalMemory);
+    glDeleteMemoryObjectsEXT(2, dstExternalMemory);
     ABORT_ON_OPENGL_ERROR();
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 2; i++)
     {
         vkFreeMemory(vulkan->device, dstMemory[i], nullptr);
     }
@@ -189,7 +238,7 @@ GLImageCaptureHelper::~GLImageCaptureHelper()
     vkDestroyDevice(device, nullptr);
 }
 
-CompositorError GLImageCaptureHelper::capture(GLuint srcTextureId, const TextureBounds* textureBounds, const vapor::FrameQueue::Memory* memory, int bufferIndex)
+openvr::CompositorError GLImageCaptureBuffer::capture(GLuint srcTextureId, int x, int y)
 {
     GLuint savedTexture;
     GLuint savedReadFramebuffer;
@@ -203,20 +252,12 @@ CompositorError GLImageCaptureHelper::capture(GLuint srcTextureId, const Texture
     glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, srcTextureId, 0);
     ABORT_ON_OPENGL_ERROR();
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dstFramebuffer);
-    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dstTextures[bufferIndex], 0);
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dstTextures[getCurrentCaptureBufferIndex()], 0);
     ABORT_ON_OPENGL_ERROR();
 
-    // TODO: figure out why image is sometimes flipped
-    int srcWidth, srcHeight;
     glBindTexture(GL_TEXTURE_2D, srcTextureId);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &srcWidth);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &srcHeight);
     ABORT_ON_OPENGL_ERROR();
-    int srcX1 = textureBounds != nullptr ? (int) std::roundf(srcWidth * textureBounds->uMin) : 0;
-    int srcY1 = textureBounds != nullptr ? (int) std::roundf(srcHeight * textureBounds->vMin) : 0;
-    int srcX2 = textureBounds != nullptr ? (int) std::roundf(srcWidth * textureBounds->uMax) : srcWidth;
-    int srcY2 = textureBounds != nullptr ? (int) std::roundf(srcHeight * textureBounds->vMax) : srcHeight;
-    glBlitFramebuffer(srcX1, vapor::config::fixes::flipImage ? srcY2 : srcY1, srcX2, vapor::config::fixes::flipImage ? srcY1 : srcY2, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+    glBlitFramebuffer(x, y, x + width, y + height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
     glFinish();
     ABORT_ON_OPENGL_ERROR();
 
@@ -225,15 +266,14 @@ CompositorError GLImageCaptureHelper::capture(GLuint srcTextureId, const Texture
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, savedDrawFramebuffer);
     ABORT_ON_OPENGL_ERROR();
 
-    return CompositorError::COMPOSITOR_ERROR_NONE;
+    return openvr::CompositorError::COMPOSITOR_ERROR_NONE;
 }
 
-VulkanImageCaptureHelper::VulkanImageCaptureHelper(int width, int height, vapor::FrameQueue::Memory* memory, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue queue, uint32_t queueFamilyIndex): common(instance, physicalDevice, device, queue, queueFamilyIndex)
-{
-    this->width = width;
-    this->height = height;
+//
 
-    for (int i = 0; i < 4; i++)
+VulkanImageCaptureBuffer::VulkanImageCaptureBuffer(int width, int height, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue queue, uint32_t queueFamilyIndex): ImageCaptureBuffer(width, height), common(instance, physicalDevice, device, queue, queueFamilyIndex)
+{
+    for (int i = 0; i < 2; i++)
     {
         dstImages[i] = common.createImage(width, height, vapor::config::fixes::createVulkanTargetInLinearColorspace ? VK_FORMAT_R8G8B8A8_UNORM : VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_LAYOUT_UNDEFINED);
         VkMemoryRequirements memoryRequirements;
@@ -242,7 +282,6 @@ VulkanImageCaptureHelper::VulkanImageCaptureHelper(int width, int height, vapor:
         dstImagesMemory[i] = common.allocateMemory(memoryRequirements.size, memoryTypeIndex, true);
         ABORT_ON_VULKAN_ERROR(vkBindImageMemory(common.device, dstImages[i], dstImagesMemory[i], 0));
 
-        memory[i].vulkanMemory = dstImagesMemory[i];
         VkMemoryGetFdInfoKHR memoryGetFdInfo {
             .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
             .pNext = nullptr,
@@ -251,29 +290,30 @@ VulkanImageCaptureHelper::VulkanImageCaptureHelper(int width, int height, vapor:
         };
         PFN_vkGetMemoryFdKHR vkGetMemoryFdKHR;
         vkGetMemoryFdKHR = (PFN_vkGetMemoryFdKHR) vkGetInstanceProcAddr(common.instance, "vkGetMemoryFdKHR");
-        ABORT_ON_VULKAN_ERROR(vkGetMemoryFdKHR(common.device, &memoryGetFdInfo, &memory[i].fd));
-        memory[i].size = memoryRequirements.size;
+        int fd;
+        ABORT_ON_VULKAN_ERROR(vkGetMemoryFdKHR(common.device, &memoryGetFdInfo, &fd));
+        bufferTextures[i] = vapor::image_capture::ImageCaptureBuffer::VulkanExportedTextureHolder {.width = width, .height = height, .vulkanMemory = dstImagesMemory[i], .fd = fd, .size = memoryRequirements.size};
     }
 }
 
-VulkanImageCaptureHelper::~VulkanImageCaptureHelper()
+VulkanImageCaptureBuffer::~VulkanImageCaptureBuffer()
 {
     vkDestroyImage(common.device, tmpImage, nullptr);
     vkFreeMemory(common.device, tmpImageMemory, nullptr);
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 2; i++)
     {
         vkDestroyImage(common.device, dstImages[i], nullptr);
         vkFreeMemory(common.device, dstImagesMemory[i], nullptr);
     }
 }
 
-CompositorError VulkanImageCaptureHelper::capture(const VulkanTextureData* textureData, const TextureBounds* textureBounds, const vapor::FrameQueue::Memory* memory, int bufferIndex)
+openvr::CompositorError VulkanImageCaptureBuffer::capture(const openvr::VulkanTextureData* textureData, int x, int y)
 {
     if (textureData->instance != common.instance || textureData->physicalDevice != common.physicalDevice || textureData->device != common.device || textureData->queue != common.queue || textureData->queueFamilyIndex != common.queueFamilyIndex)
     {
         LOG("Texture submitted with mismatched Vulkan context");
-        return CompositorError::COMPOSITOR_ERROR_TEXTURE_IS_ON_WRONG_DEVICE;
+        return openvr::CompositorError::COMPOSITOR_ERROR_TEXTURE_IS_ON_WRONG_DEVICE;
     }
 
     common.beginCommandBuffer();
@@ -323,15 +363,10 @@ CompositorError VulkanImageCaptureHelper::capture(const VulkanTextureData* textu
         srcImage = textureData->image;
     }
 
-    VkImage dstImage = dstImages[bufferIndex];
+    VkImage dstImage = dstImages[getCurrentCaptureBufferIndex()];
 
     common.transitionImageLayout(dstImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 0, VK_ACCESS_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
 
-    // TODO: figure out why image is sometimes flipped
-    int srcX1 = textureBounds != nullptr ? (int) std::roundf(textureData->width * textureBounds->uMin) : 0;
-    int srcY1 = textureBounds != nullptr ? (int) std::roundf(textureData->height * textureBounds->vMin) : 0;
-    int srcX2 = textureBounds != nullptr ? (int) std::roundf(textureData->width * textureBounds->uMax) : textureData->width;
-    int srcY2 = textureBounds != nullptr ? (int) std::roundf(textureData->height * textureBounds->vMax) : textureData->height;
     VkImageBlit imageBlit {
         .srcSubresource = {
             .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -340,8 +375,8 @@ CompositorError VulkanImageCaptureHelper::capture(const VulkanTextureData* textu
             .layerCount = 1
         },
         .srcOffsets = {
-            { .x = srcX1, .y = vapor::config::fixes::flipImage ? srcY2 : srcY1, .z = 0 },
-            { .x = srcX2, .y = vapor::config::fixes::flipImage ? srcY1 : srcY2, .z = 1 }
+            { .x = x, .y = y, .z = 0 },
+            { .x = x + this->width, .y = y + this->height, .z = 1 }
         },
         .dstSubresource = {
             .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -354,14 +389,16 @@ CompositorError VulkanImageCaptureHelper::capture(const VulkanTextureData* textu
             { .x = this->width, .y = this->height, .z = 1 }
         }
     };
-    vkCmdBlitImage(common.commandBuffer, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageBlit, VK_FILTER_LINEAR);
+    vkCmdBlitImage(common.commandBuffer, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageBlit, VK_FILTER_NEAREST);
 
     common.transitionImageLayout(dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
 
     common.endAndSubmitCommandBuffer();
 
-    return CompositorError::COMPOSITOR_ERROR_NONE;
+    return openvr::CompositorError::COMPOSITOR_ERROR_NONE;
 }
+
+//
 
 VulkanCommon::VulkanCommon(VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue queue, uint32_t queueFamilyIndex)
 {

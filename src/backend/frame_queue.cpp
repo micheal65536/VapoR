@@ -1,52 +1,35 @@
 #include "frame_queue.h"
 
+#include "log/abort.h"
+#include "image_capture/image_capture.h"
+
 using namespace vapor;
 
-FrameQueue::FrameQueue(int frameWidth, int frameHeight)
+image_capture::ImageCaptureBufferManager<std::tuple<OpenXR::View, openvr::TextureBounds>>* FrameQueue::getCaptureBufferForEye(int eyeIndex) const
 {
-    bufferSwap = 0;
-}
-
-FrameQueue::~FrameQueue()
-{
-    // empty
-}
-
-int FrameQueue::getDrawBufferIndex(int eyeIndex) const
-{
-    return bufferSwap + eyeIndex;
-}
-
-int FrameQueue::getDisplayBufferIndex(int eyeIndex) const
-{
-    return (2 - bufferSwap) + eyeIndex;
-}
-
-const OpenXR::ViewPair& FrameQueue::getDisplayViews() const
-{
-    return displayViews;
+    switch (eyeIndex)
+    {
+        case 0:
+        default:
+            return leftCaptureBuffer;
+        case 1:
+            return rightCaptureBuffer;
+    }
 }
 
 bool FrameQueue::hasDisplayFrame() const
 {
-    return displayFrameSubmitted;
+    return leftCaptureBuffer != nullptr && rightCaptureBuffer != nullptr;
 }
 
-void FrameQueue::swapBuffers(const OpenXR::ViewPair& views)
+void FrameQueue::setForeground(image_capture::ImageCaptureBufferManager<std::tuple<OpenXR::View, openvr::TextureBounds>>* leftCaptureBuffer, image_capture::ImageCaptureBufferManager<std::tuple<OpenXR::View, openvr::TextureBounds>>* rightCaptureBuffer)
 {
-    swapMutex.lock();
-    displayViews = views;
-    displayFrameSubmitted = true;
-    bufferSwap = 2 - bufferSwap;
-    swapMutex.unlock();
+    this->leftCaptureBuffer = leftCaptureBuffer;
+    this->rightCaptureBuffer = rightCaptureBuffer;
 }
 
-void FrameQueue::lockBufferSwap()
+void FrameQueue::clearForeground()
 {
-    swapMutex.lock_shared();
-}
-
-void FrameQueue::unlockBufferSwap()
-{   
-    swapMutex.unlock_shared();
+    leftCaptureBuffer = nullptr;
+    rightCaptureBuffer = nullptr;
 }

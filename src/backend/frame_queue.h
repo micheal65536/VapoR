@@ -1,9 +1,9 @@
 #pragma once
 
 #include "openxr.h"
-
-#include <cstdint>
-#include <shared_mutex>
+#include "image_capture/image_capture_buffer_manager.h"
+#include "openvr/types_render.h"
+#include <tuple>
 
 #include <vulkan/vulkan.h>
 
@@ -12,31 +12,14 @@ namespace vapor
     class FrameQueue
     {
         public:
-            struct Memory
-            {
-                VkDeviceMemory vulkanMemory;
-                int fd;
-                int size;
-            };
-
-            FrameQueue(int frameWidth, int frameHeight);
-            ~FrameQueue();
-
-            int getDrawBufferIndex(int eyeIndex) const;
-            int getDisplayBufferIndex(int eyeIndex) const;
-            const OpenXR::ViewPair& getDisplayViews() const;
+            image_capture::ImageCaptureBufferManager<std::tuple<OpenXR::View, openvr::TextureBounds>>* getCaptureBufferForEye(int eyeIndex) const;
             bool hasDisplayFrame() const;
 
-            void swapBuffers(const OpenXR::ViewPair& views);
-            void lockBufferSwap();
-            void unlockBufferSwap();
-
-            Memory memory[4];
+            void setForeground(image_capture::ImageCaptureBufferManager<std::tuple<OpenXR::View, openvr::TextureBounds>>* leftCaptureBuffer, image_capture::ImageCaptureBufferManager<std::tuple<OpenXR::View, openvr::TextureBounds>>* rightCaptureBuffer);
+            void clearForeground();
 
         private:
-            OpenXR::ViewPair displayViews;
-            bool displayFrameSubmitted = false;
-            int bufferSwap;
-            std::shared_mutex swapMutex;
+            image_capture::ImageCaptureBufferManager<std::tuple<OpenXR::View, openvr::TextureBounds>>* leftCaptureBuffer = nullptr;
+            image_capture::ImageCaptureBufferManager<std::tuple<OpenXR::View, openvr::TextureBounds>>* rightCaptureBuffer = nullptr;
     };
 }

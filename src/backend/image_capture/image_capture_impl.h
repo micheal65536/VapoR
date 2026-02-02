@@ -1,15 +1,14 @@
 #pragma once
 
-#include <cstdint>
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-#include <vulkan/vulkan.h>
-#include "openvr/types_render.h"
-#include "backend/frame_queue.h"
+#include "image_capture.h"
 
-namespace openvr
+#include "backend/opengl.h"
+#include "backend/vulkan.h"
+#include "openvr/types_render.h"
+
+namespace vapor
 {
-    namespace render
+    namespace image_capture
     {
         class VulkanCommon
         {
@@ -39,45 +38,39 @@ namespace openvr
                 void transitionImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask);
         };
 
-        class GLImageCaptureHelper
+        class GLImageCaptureBuffer: public ImageCaptureBuffer
         {
             public:
-                GLImageCaptureHelper(int width, int height, vapor::FrameQueue::Memory* memory);
-                ~GLImageCaptureHelper();
+                GLImageCaptureBuffer(int width, int height);
+                ~GLImageCaptureBuffer();
 
-                CompositorError capture(GLuint srcTextureId, const TextureBounds* textureBounds, const vapor::FrameQueue::Memory* memory, int bufferIndex);
+                openvr::CompositorError capture(GLuint srcTextureId, int x, int y);
 
             private:
-                int width;
-                int height;
-
                 VulkanCommon* vulkan;
-                VkDeviceMemory dstMemory[4];
+                VkDeviceMemory dstMemory[2];
 
                 GLuint srcFramebuffer;
                 GLuint srcRenderbuffers[2];
-                GLuint dstTextures[4];
-                GLuint dstExternalMemory[4];
+                GLuint dstTextures[2];
+                GLuint dstExternalMemory[2];
                 GLuint dstFramebuffer;
                 GLuint dstRenderbuffers[2];
         };
 
-        class VulkanImageCaptureHelper
+        class VulkanImageCaptureBuffer: public ImageCaptureBuffer
         {
             public:
-                VulkanImageCaptureHelper(int width, int height, vapor::FrameQueue::Memory* memory, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue queue, uint32_t queueFamilyIndex);
-                ~VulkanImageCaptureHelper();
+                VulkanImageCaptureBuffer(int width, int height, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue queue, uint32_t queueFamilyIndex);
+                ~VulkanImageCaptureBuffer();
  
-                CompositorError capture(const VulkanTextureData* textureData, const TextureBounds* textureBounds, const vapor::FrameQueue::Memory* memory, int bufferIndex);
+                openvr::CompositorError capture(const openvr::VulkanTextureData* textureData, int x, int y);
 
             private:
-                int width;
-                int height;
-
                 VulkanCommon common;
 
-                VkImage dstImages[4];
-                VkDeviceMemory dstImagesMemory[4];
+                VkImage dstImages[2];
+                VkDeviceMemory dstImagesMemory[2];
 
                 VkImage tmpImage = VK_NULL_HANDLE;
                 VkDeviceMemory tmpImageMemory = VK_NULL_HANDLE;
