@@ -96,6 +96,22 @@ Session::Session(const Instance& instance, XrSystemId system): instance(instance
     {
         ABORT("Failed to open X11 display");
     }
+    int visualAttribList[] = {
+        GLX_RGBA,
+        GLX_RED_SIZE, 8,
+        GLX_GREEN_SIZE, 8,
+        GLX_BLUE_SIZE, 8,
+        GLX_ALPHA_SIZE, 8,
+        GLX_DEPTH_SIZE, 24,
+        None
+    };
+    XVisualInfo* visualInfo = glXChooseVisual(this->xDisplay, DefaultScreen(this->xDisplay), visualAttribList);
+    if (!visualInfo)
+    {
+        ABORT("Failed to get X11 visual");
+    }
+    VisualID visualId = visualInfo->visualid;
+    XFree(visualInfo);
     int fbConfigsCounts;
     int configsAttribList[] = {
         GLX_X_RENDERABLE, True,
@@ -152,6 +168,7 @@ Session::Session(const Instance& instance, XrSystemId system): instance(instance
         .type = XR_TYPE_GRAPHICS_BINDING_OPENGL_XLIB_KHR,
         .next = nullptr,
         .xDisplay = this->xDisplay,
+        .visualid = visualId,
         .glxFBConfig = fbConfig,
         .glxDrawable = this->glxPbuffer,
         .glxContext = this->glxContext
