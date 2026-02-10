@@ -5,6 +5,18 @@
 #include <map>
 #include <string>
 
+#include "client_core.h"
+#include "system.h"
+#include "compositor.h"
+#include "input.h"
+#include "chaperone.h"
+#include "overlay.h"
+#include "rendermodel.h"
+#include "settings.h"
+#include "screenshot.h"
+#include "applications.h"
+#include "extended_display.h"
+
 namespace openvr
 {
     extern ClientCoreImpl* clientCoreImpl;
@@ -12,7 +24,7 @@ namespace openvr
     extern CompositorImpl* compositorImpl;
     extern InputImpl* inputImpl;
     extern ChaperoneImpl* chaperoneImpl;
-    //extern OverlayImpl* overlayImpl;
+    extern OverlayImpl* overlayImpl;
     extern RenderModelsImpl* renderModelsImpl;
     extern SettingsImpl* settingsImpl;
     extern ScreenshotsImpl* screenshotsImpl;

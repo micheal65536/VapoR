@@ -45,7 +45,7 @@ InitError ClientCoreImpl::init(ApplicationType applicationType, const char* star
         openvr::compositorImpl = new CompositorImpl(*openvr::clientCoreImpl);
         openvr::inputImpl = new InputImpl(*openvr::clientCoreImpl);
         openvr::chaperoneImpl = new ChaperoneImpl(*openvr::clientCoreImpl);
-        //openvr::overlayImpl = new OverlayImpl(*openvr::clientCoreImpl);
+        openvr::overlayImpl = new OverlayImpl(*openvr::clientCoreImpl);
         openvr::renderModelsImpl = new RenderModelsImpl(*openvr::clientCoreImpl);
         openvr::settingsImpl = new SettingsImpl(*openvr::clientCoreImpl);
         openvr::screenshotsImpl = new ScreenshotsImpl(*openvr::clientCoreImpl);
@@ -69,7 +69,7 @@ void ClientCoreImpl::cleanup()
         delete openvr::compositorImpl;
         delete openvr::inputImpl;
         delete openvr::chaperoneImpl;
-        //delete openvr::overlayImpl;
+        delete openvr::overlayImpl;
         delete openvr::renderModelsImpl;
         delete openvr::settingsImpl;
         delete openvr::screenshotsImpl;
@@ -80,7 +80,7 @@ void ClientCoreImpl::cleanup()
         openvr::compositorImpl = nullptr;
         openvr::inputImpl = nullptr;
         openvr::chaperoneImpl = nullptr;
-        //openvr::overlayImpl = nullptr;
+        openvr::overlayImpl = nullptr;
         openvr::renderModelsImpl = nullptr;
         openvr::settingsImpl = nullptr;
         openvr::screenshotsImpl = nullptr;

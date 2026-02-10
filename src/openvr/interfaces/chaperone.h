@@ -2,8 +2,6 @@
 
 #include "../types.h"
 
-#include "../impl/chaperone.h"
-
 namespace openvr
 {
     struct Chaperone_002

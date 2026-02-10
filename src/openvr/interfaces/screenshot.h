@@ -3,8 +3,6 @@
 #include "../types.h"
 #include <cstdint>
 
-#include "../impl/screenshot.h"
-
 namespace openvr
 {
     struct Screenshots_001

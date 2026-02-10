@@ -1,4 +1,6 @@
 #include "overlay.h"
+#include "../impl/init.h"
+#include "log/log.h"
 #include "log/stub.h"
 
 using namespace openvr;

@@ -5,8 +5,6 @@
 #include <GL/gl.h>
 #include <vulkan/vulkan.h>
 
-#include "../impl/compositor.h"
-
 namespace openvr
 {
     struct Compositor_005
