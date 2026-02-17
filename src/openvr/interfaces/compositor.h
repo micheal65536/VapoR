@@ -9,9 +9,6 @@ namespace openvr
 {
     struct Compositor_005
     {
-        static CompositorError lastError;
-        static DeviceType deviceType;
-
         static uint32_t getLastError(char* buffer, uint32_t bufferSize);
 
         static void setVSync(bool enabled);
@@ -105,9 +102,6 @@ namespace openvr
 
     struct Compositor_006
     {
-        static CompositorError lastError;
-        static DeviceType deviceType;
-
         static uint32_t getLastError(char* buffer, uint32_t bufferSize);
 
         static void setVSync(bool enabled);
@@ -188,8 +182,6 @@ namespace openvr
 
     struct Compositor_007
     {
-        static CompositorError lastError;
-
         static uint32_t getLastError(char* buffer, uint32_t bufferSize);
 
         static void setVSync(bool enabled);
@@ -266,8 +258,6 @@ namespace openvr
 
     struct Compositor_008
     {
-        static CompositorError lastError;
-
         static uint32_t getLastError(char* buffer, uint32_t bufferSize);
 
         static void setVSync(bool enabled);

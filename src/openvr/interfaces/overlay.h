@@ -17,8 +17,8 @@ namespace openvr
 
         static const char* getOverlayErrorNameFromEnum(OverlayError error);
 
-        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled);
-        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled);
+        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled);
+        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled);
         static OverlayError setOverlayAlpha(uint64_t handle, float alpha);
         static OverlayError getOverlayAlpha(uint64_t handle, float* alpha);
         static OverlayError setOverlayGamma(uint64_t handle, float gamma);
@@ -112,8 +112,8 @@ namespace openvr
             virtual OverlayError setHighQualityOverlay(uint64_t handle) { return Overlay_001::setHighQualityOverlay(handle); }
             virtual uint64_t getHighQualityOverlay() { return Overlay_001::getHighQualityOverlay(); }
             virtual const char* getOverlayErrorNameFromEnum(OverlayError error) { return Overlay_001::getOverlayErrorNameFromEnum(error); }
-            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled) { return Overlay_001::setOverlayFlag(handle, flag, enabled); }
-            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled) { return Overlay_001::getOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled) { return Overlay_001::setOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled) { return Overlay_001::getOverlayFlag(handle, flag, enabled); }
             virtual OverlayError setOverlayAlpha(uint64_t handle, float alpha) { return Overlay_001::setOverlayAlpha(handle, alpha); }
             virtual OverlayError getOverlayAlpha(uint64_t handle, float* alpha) { return Overlay_001::getOverlayAlpha(handle, alpha); }
             virtual OverlayError setOverlayGamma(uint64_t handle, float gamma) { return Overlay_001::setOverlayGamma(handle, gamma); }
@@ -162,8 +162,8 @@ namespace openvr
 
         static const char* getOverlayErrorNameFromEnum(OverlayError error);
 
-        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled);
-        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled);
+        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled);
+        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled);
         static OverlayError setOverlayColor(uint64_t handle, float r, float g, float b);
         static OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b);
         static OverlayError setOverlayAlpha(uint64_t handle, float alpha);
@@ -261,8 +261,8 @@ namespace openvr
             virtual OverlayError setHighQualityOverlay(uint64_t handle) { return Overlay_002::setHighQualityOverlay(handle); }
             virtual uint64_t getHighQualityOverlay() { return Overlay_002::getHighQualityOverlay(); }
             virtual const char* getOverlayErrorNameFromEnum(OverlayError error) { return Overlay_002::getOverlayErrorNameFromEnum(error); }
-            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled) { return Overlay_002::setOverlayFlag(handle, flag, enabled); }
-            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled) { return Overlay_002::getOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled) { return Overlay_002::setOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled) { return Overlay_002::getOverlayFlag(handle, flag, enabled); }
             virtual OverlayError setOverlayColor(uint64_t handle, float r, float g, float b) { return Overlay_002::setOverlayColor(handle, r, g, b); }
             virtual OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b) { return Overlay_002::getOverlayColor(handle, r, g, b); }
             virtual OverlayError setOverlayAlpha(uint64_t handle, float alpha) { return Overlay_002::setOverlayAlpha(handle, alpha); }
@@ -317,8 +317,8 @@ namespace openvr
 
         static const char* getOverlayErrorNameFromEnum(OverlayError error);
 
-        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled);
-        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled);
+        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled);
+        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled);
         static OverlayError setOverlayColor(uint64_t handle, float r, float g, float b);
         static OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b);
         static OverlayError setOverlayAlpha(uint64_t handle, float alpha);
@@ -424,8 +424,8 @@ namespace openvr
             virtual uint32_t getOverlayName(uint64_t handle, char* value, uint32_t bufferSize, OverlayError* error) { return Overlay_003::getOverlayName(handle, value, bufferSize, error); }
             virtual OverlayError getOverlayImageData(uint64_t handle, void* buffer, uint32_t bufferSize, uint32_t* width, uint32_t* height) { return Overlay_003::getOverlayImageData(handle, buffer, bufferSize, width, height); }
             virtual const char* getOverlayErrorNameFromEnum(OverlayError error) { return Overlay_003::getOverlayErrorNameFromEnum(error); }
-            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled) { return Overlay_003::setOverlayFlag(handle, flag, enabled); }
-            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled) { return Overlay_003::getOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled) { return Overlay_003::setOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled) { return Overlay_003::getOverlayFlag(handle, flag, enabled); }
             virtual OverlayError setOverlayColor(uint64_t handle, float r, float g, float b) { return Overlay_003::setOverlayColor(handle, r, g, b); }
             virtual OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b) { return Overlay_003::getOverlayColor(handle, r, g, b); }
             virtual OverlayError setOverlayAlpha(uint64_t handle, float alpha) { return Overlay_003::setOverlayAlpha(handle, alpha); }
@@ -481,8 +481,8 @@ namespace openvr
 
         static const char* getOverlayErrorNameFromEnum(OverlayError error);
 
-        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled);
-        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled);
+        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled);
+        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled);
         static OverlayError setOverlayColor(uint64_t handle, float r, float g, float b);
         static OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b);
         static OverlayError setOverlayAlpha(uint64_t handle, float alpha);
@@ -592,8 +592,8 @@ namespace openvr
             virtual uint32_t getOverlayName(uint64_t handle, char* value, uint32_t bufferSize, OverlayError* error) { return Overlay_004::getOverlayName(handle, value, bufferSize, error); }
             virtual OverlayError getOverlayImageData(uint64_t handle, void* buffer, uint32_t bufferSize, uint32_t* width, uint32_t* height) { return Overlay_004::getOverlayImageData(handle, buffer, bufferSize, width, height); }
             virtual const char* getOverlayErrorNameFromEnum(OverlayError error) { return Overlay_004::getOverlayErrorNameFromEnum(error); }
-            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled) { return Overlay_004::setOverlayFlag(handle, flag, enabled); }
-            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled) { return Overlay_004::getOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled) { return Overlay_004::setOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled) { return Overlay_004::getOverlayFlag(handle, flag, enabled); }
             virtual OverlayError setOverlayColor(uint64_t handle, float r, float g, float b) { return Overlay_004::setOverlayColor(handle, r, g, b); }
             virtual OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b) { return Overlay_004::getOverlayColor(handle, r, g, b); }
             virtual OverlayError setOverlayAlpha(uint64_t handle, float alpha) { return Overlay_004::setOverlayAlpha(handle, alpha); }
@@ -651,8 +651,8 @@ namespace openvr
 
         static const char* getOverlayErrorNameFromEnum(OverlayError error);
 
-        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled);
-        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled);
+        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled);
+        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled);
         static OverlayError setOverlayColor(uint64_t handle, float r, float g, float b);
         static OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b);
         static OverlayError setOverlayAlpha(uint64_t handle, float alpha);
@@ -771,8 +771,8 @@ namespace openvr
             virtual uint32_t getOverlayName(uint64_t handle, char* value, uint32_t bufferSize, OverlayError* error) { return Overlay_005::getOverlayName(handle, value, bufferSize, error); }
             virtual OverlayError getOverlayImageData(uint64_t handle, void* buffer, uint32_t bufferSize, uint32_t* width, uint32_t* height) { return Overlay_005::getOverlayImageData(handle, buffer, bufferSize, width, height); }
             virtual const char* getOverlayErrorNameFromEnum(OverlayError error) { return Overlay_005::getOverlayErrorNameFromEnum(error); }
-            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled) { return Overlay_005::setOverlayFlag(handle, flag, enabled); }
-            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled) { return Overlay_005::getOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled) { return Overlay_005::setOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled) { return Overlay_005::getOverlayFlag(handle, flag, enabled); }
             virtual OverlayError setOverlayColor(uint64_t handle, float r, float g, float b) { return Overlay_005::setOverlayColor(handle, r, g, b); }
             virtual OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b) { return Overlay_005::getOverlayColor(handle, r, g, b); }
             virtual OverlayError setOverlayAlpha(uint64_t handle, float alpha) { return Overlay_005::setOverlayAlpha(handle, alpha); }
@@ -834,8 +834,8 @@ namespace openvr
 
         static const char* getOverlayErrorNameFromEnum(OverlayError error);
 
-        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled);
-        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled);
+        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled);
+        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled);
         static OverlayError setOverlayColor(uint64_t handle, float r, float g, float b);
         static OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b);
         static OverlayError setOverlayAlpha(uint64_t handle, float alpha);
@@ -965,8 +965,8 @@ namespace openvr
             virtual uint32_t getOverlayName(uint64_t handle, char* value, uint32_t bufferSize, OverlayError* error) { return Overlay_006::getOverlayName(handle, value, bufferSize, error); }
             virtual OverlayError getOverlayImageData(uint64_t handle, void* buffer, uint32_t bufferSize, uint32_t* width, uint32_t* height) { return Overlay_006::getOverlayImageData(handle, buffer, bufferSize, width, height); }
             virtual const char* getOverlayErrorNameFromEnum(OverlayError error) { return Overlay_006::getOverlayErrorNameFromEnum(error); }
-            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled) { return Overlay_006::setOverlayFlag(handle, flag, enabled); }
-            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled) { return Overlay_006::getOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled) { return Overlay_006::setOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled) { return Overlay_006::getOverlayFlag(handle, flag, enabled); }
             virtual OverlayError setOverlayColor(uint64_t handle, float r, float g, float b) { return Overlay_006::setOverlayColor(handle, r, g, b); }
             virtual OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b) { return Overlay_006::getOverlayColor(handle, r, g, b); }
             virtual OverlayError setOverlayAlpha(uint64_t handle, float alpha) { return Overlay_006::setOverlayAlpha(handle, alpha); }
@@ -1033,8 +1033,8 @@ namespace openvr
 
         static const char* getOverlayErrorNameFromEnum(OverlayError error);
 
-        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled);
-        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled);
+        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled);
+        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled);
         static OverlayError setOverlayColor(uint64_t handle, float r, float g, float b);
         static OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b);
         static OverlayError setOverlayAlpha(uint64_t handle, float alpha);
@@ -1164,8 +1164,8 @@ namespace openvr
             virtual uint32_t getOverlayName(uint64_t handle, char* value, uint32_t bufferSize, OverlayError* error) { return Overlay_007::getOverlayName(handle, value, bufferSize, error); }
             virtual OverlayError getOverlayImageData(uint64_t handle, void* buffer, uint32_t bufferSize, uint32_t* width, uint32_t* height) { return Overlay_007::getOverlayImageData(handle, buffer, bufferSize, width, height); }
             virtual const char* getOverlayErrorNameFromEnum(OverlayError error) { return Overlay_007::getOverlayErrorNameFromEnum(error); }
-            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled) { return Overlay_007::setOverlayFlag(handle, flag, enabled); }
-            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled) { return Overlay_007::getOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled) { return Overlay_007::setOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled) { return Overlay_007::getOverlayFlag(handle, flag, enabled); }
             virtual OverlayError setOverlayColor(uint64_t handle, float r, float g, float b) { return Overlay_007::setOverlayColor(handle, r, g, b); }
             virtual OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b) { return Overlay_007::getOverlayColor(handle, r, g, b); }
             virtual OverlayError setOverlayAlpha(uint64_t handle, float alpha) { return Overlay_007::setOverlayAlpha(handle, alpha); }
@@ -1232,8 +1232,8 @@ namespace openvr
 
         static const char* getOverlayErrorNameFromEnum(OverlayError error);
 
-        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled);
-        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled);
+        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled);
+        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled);
         static OverlayError setOverlayColor(uint64_t handle, float r, float g, float b);
         static OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b);
         static OverlayError setOverlayAlpha(uint64_t handle, float alpha);
@@ -1370,8 +1370,8 @@ namespace openvr
             virtual uint32_t getOverlayName(uint64_t handle, char* value, uint32_t bufferSize, OverlayError* error) { return Overlay_008::getOverlayName(handle, value, bufferSize, error); }
             virtual OverlayError getOverlayImageData(uint64_t handle, void* buffer, uint32_t bufferSize, uint32_t* width, uint32_t* height) { return Overlay_008::getOverlayImageData(handle, buffer, bufferSize, width, height); }
             virtual const char* getOverlayErrorNameFromEnum(OverlayError error) { return Overlay_008::getOverlayErrorNameFromEnum(error); }
-            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled) { return Overlay_008::setOverlayFlag(handle, flag, enabled); }
-            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled) { return Overlay_008::getOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled) { return Overlay_008::setOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled) { return Overlay_008::getOverlayFlag(handle, flag, enabled); }
             virtual OverlayError setOverlayColor(uint64_t handle, float r, float g, float b) { return Overlay_008::setOverlayColor(handle, r, g, b); }
             virtual OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b) { return Overlay_008::getOverlayColor(handle, r, g, b); }
             virtual OverlayError setOverlayAlpha(uint64_t handle, float alpha) { return Overlay_008::setOverlayAlpha(handle, alpha); }
@@ -1441,8 +1441,8 @@ namespace openvr
 
         static const char* getOverlayErrorNameFromEnum(OverlayError error);
 
-        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled);
-        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled);
+        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled);
+        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled);
         static OverlayError setOverlayColor(uint64_t handle, float r, float g, float b);
         static OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b);
         static OverlayError setOverlayAlpha(uint64_t handle, float alpha);
@@ -1585,8 +1585,8 @@ namespace openvr
             virtual uint32_t getOverlayName(uint64_t handle, char* value, uint32_t bufferSize, OverlayError* error) { return Overlay_010::getOverlayName(handle, value, bufferSize, error); }
             virtual OverlayError getOverlayImageData(uint64_t handle, void* buffer, uint32_t bufferSize, uint32_t* width, uint32_t* height) { return Overlay_010::getOverlayImageData(handle, buffer, bufferSize, width, height); }
             virtual const char* getOverlayErrorNameFromEnum(OverlayError error) { return Overlay_010::getOverlayErrorNameFromEnum(error); }
-            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled) { return Overlay_010::setOverlayFlag(handle, flag, enabled); }
-            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled) { return Overlay_010::getOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled) { return Overlay_010::setOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled) { return Overlay_010::getOverlayFlag(handle, flag, enabled); }
             virtual OverlayError setOverlayColor(uint64_t handle, float r, float g, float b) { return Overlay_010::setOverlayColor(handle, r, g, b); }
             virtual OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b) { return Overlay_010::getOverlayColor(handle, r, g, b); }
             virtual OverlayError setOverlayAlpha(uint64_t handle, float alpha) { return Overlay_010::setOverlayAlpha(handle, alpha); }
@@ -1662,8 +1662,8 @@ namespace openvr
         static OverlayError setOverlayRenderingPid(uint64_t handle, uint32_t pid);
         static uint32_t getOverlayRenderingPid(uint64_t handle);
 
-        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled);
-        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled);
+        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled);
+        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled);
         static OverlayError setOverlayColor(uint64_t handle, float r, float g, float b);
         static OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b);
         static OverlayError setOverlayAlpha(uint64_t handle, float alpha);
@@ -1814,8 +1814,8 @@ namespace openvr
             virtual const char* getOverlayErrorNameFromEnum(OverlayError error) { return Overlay_011::getOverlayErrorNameFromEnum(error); }
             virtual OverlayError setOverlayRenderingPid(uint64_t handle, uint32_t pid) { return Overlay_011::setOverlayRenderingPid(handle, pid); }
             virtual uint32_t getOverlayRenderingPid(uint64_t handle) { return Overlay_011::getOverlayRenderingPid(handle); }
-            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled) { return Overlay_011::setOverlayFlag(handle, flag, enabled); }
-            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled) { return Overlay_011::getOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled) { return Overlay_011::setOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled) { return Overlay_011::getOverlayFlag(handle, flag, enabled); }
             virtual OverlayError setOverlayColor(uint64_t handle, float r, float g, float b) { return Overlay_011::setOverlayColor(handle, r, g, b); }
             virtual OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b) { return Overlay_011::getOverlayColor(handle, r, g, b); }
             virtual OverlayError setOverlayAlpha(uint64_t handle, float alpha) { return Overlay_011::setOverlayAlpha(handle, alpha); }
@@ -1893,8 +1893,8 @@ namespace openvr
         static OverlayError setOverlayRenderingPid(uint64_t handle, uint32_t pid);
         static uint32_t getOverlayRenderingPid(uint64_t handle);
 
-        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled);
-        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled);
+        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled);
+        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled);
         static OverlayError setOverlayColor(uint64_t handle, float r, float g, float b);
         static OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b);
         static OverlayError setOverlayAlpha(uint64_t handle, float alpha);
@@ -2047,8 +2047,8 @@ namespace openvr
             virtual const char* getOverlayErrorNameFromEnum(OverlayError error) { return Overlay_012::getOverlayErrorNameFromEnum(error); }
             virtual OverlayError setOverlayRenderingPid(uint64_t handle, uint32_t pid) { return Overlay_012::setOverlayRenderingPid(handle, pid); }
             virtual uint32_t getOverlayRenderingPid(uint64_t handle) { return Overlay_012::getOverlayRenderingPid(handle); }
-            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled) { return Overlay_012::setOverlayFlag(handle, flag, enabled); }
-            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled) { return Overlay_012::getOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled) { return Overlay_012::setOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled) { return Overlay_012::getOverlayFlag(handle, flag, enabled); }
             virtual OverlayError setOverlayColor(uint64_t handle, float r, float g, float b) { return Overlay_012::setOverlayColor(handle, r, g, b); }
             virtual OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b) { return Overlay_012::getOverlayColor(handle, r, g, b); }
             virtual OverlayError setOverlayAlpha(uint64_t handle, float alpha) { return Overlay_012::setOverlayAlpha(handle, alpha); }
@@ -2127,8 +2127,8 @@ namespace openvr
         static OverlayError setOverlayRenderingPid(uint64_t handle, uint32_t pid);
         static uint32_t getOverlayRenderingPid(uint64_t handle);
 
-        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled);
-        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled);
+        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled);
+        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled);
         static OverlayError setOverlayColor(uint64_t handle, float r, float g, float b);
         static OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b);
         static OverlayError setOverlayAlpha(uint64_t handle, float alpha);
@@ -2289,8 +2289,8 @@ namespace openvr
             virtual const char* getOverlayErrorNameFromEnum(OverlayError error) { return Overlay_013::getOverlayErrorNameFromEnum(error); }
             virtual OverlayError setOverlayRenderingPid(uint64_t handle, uint32_t pid) { return Overlay_013::setOverlayRenderingPid(handle, pid); }
             virtual uint32_t getOverlayRenderingPid(uint64_t handle) { return Overlay_013::getOverlayRenderingPid(handle); }
-            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled) { return Overlay_013::setOverlayFlag(handle, flag, enabled); }
-            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled) { return Overlay_013::getOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled) { return Overlay_013::setOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled) { return Overlay_013::getOverlayFlag(handle, flag, enabled); }
             virtual OverlayError setOverlayColor(uint64_t handle, float r, float g, float b) { return Overlay_013::setOverlayColor(handle, r, g, b); }
             virtual OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b) { return Overlay_013::getOverlayColor(handle, r, g, b); }
             virtual OverlayError setOverlayAlpha(uint64_t handle, float alpha) { return Overlay_013::setOverlayAlpha(handle, alpha); }
@@ -2373,8 +2373,8 @@ namespace openvr
         static OverlayError setOverlayRenderingPid(uint64_t handle, uint32_t pid);
         static uint32_t getOverlayRenderingPid(uint64_t handle);
 
-        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled);
-        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled);
+        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled);
+        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled);
         static OverlayError setOverlayColor(uint64_t handle, float r, float g, float b);
         static OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b);
         static OverlayError setOverlayAlpha(uint64_t handle, float alpha);
@@ -2543,8 +2543,8 @@ namespace openvr
             virtual const char* getOverlayErrorNameFromEnum(OverlayError error) { return Overlay_014::getOverlayErrorNameFromEnum(error); }
             virtual OverlayError setOverlayRenderingPid(uint64_t handle, uint32_t pid) { return Overlay_014::setOverlayRenderingPid(handle, pid); }
             virtual uint32_t getOverlayRenderingPid(uint64_t handle) { return Overlay_014::getOverlayRenderingPid(handle); }
-            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled) { return Overlay_014::setOverlayFlag(handle, flag, enabled); }
-            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled) { return Overlay_014::getOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled) { return Overlay_014::setOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled) { return Overlay_014::getOverlayFlag(handle, flag, enabled); }
             virtual OverlayError setOverlayColor(uint64_t handle, float r, float g, float b) { return Overlay_014::setOverlayColor(handle, r, g, b); }
             virtual OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b) { return Overlay_014::getOverlayColor(handle, r, g, b); }
             virtual OverlayError setOverlayAlpha(uint64_t handle, float alpha) { return Overlay_014::setOverlayAlpha(handle, alpha); }
@@ -2631,8 +2631,8 @@ namespace openvr
         static OverlayError setOverlayRenderingPid(uint64_t handle, uint32_t pid);
         static uint32_t getOverlayRenderingPid(uint64_t handle);
 
-        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled);
-        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled);
+        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled);
+        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled);
         static OverlayError setOverlayColor(uint64_t handle, float r, float g, float b);
         static OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b);
         static OverlayError setOverlayAlpha(uint64_t handle, float alpha);
@@ -2814,8 +2814,8 @@ namespace openvr
             virtual const char* getOverlayErrorNameFromEnum(OverlayError error) { return Overlay_016::getOverlayErrorNameFromEnum(error); }
             virtual OverlayError setOverlayRenderingPid(uint64_t handle, uint32_t pid) { return Overlay_016::setOverlayRenderingPid(handle, pid); }
             virtual uint32_t getOverlayRenderingPid(uint64_t handle) { return Overlay_016::getOverlayRenderingPid(handle); }
-            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled) { return Overlay_016::setOverlayFlag(handle, flag, enabled); }
-            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled) { return Overlay_016::getOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled) { return Overlay_016::setOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled) { return Overlay_016::getOverlayFlag(handle, flag, enabled); }
             virtual OverlayError setOverlayColor(uint64_t handle, float r, float g, float b) { return Overlay_016::setOverlayColor(handle, r, g, b); }
             virtual OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b) { return Overlay_016::getOverlayColor(handle, r, g, b); }
             virtual OverlayError setOverlayAlpha(uint64_t handle, float alpha) { return Overlay_016::setOverlayAlpha(handle, alpha); }
@@ -2907,8 +2907,8 @@ namespace openvr
         static OverlayError setOverlayRenderingPid(uint64_t handle, uint32_t pid);
         static uint32_t getOverlayRenderingPid(uint64_t handle);
 
-        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled);
-        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled);
+        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled);
+        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled);
         static OverlayError setOverlayColor(uint64_t handle, float r, float g, float b);
         static OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b);
         static OverlayError setOverlayAlpha(uint64_t handle, float alpha);
@@ -2963,7 +2963,7 @@ namespace openvr
         static OverlayError setOverlayNeighbor(OverlayNeighborDirection direction, uint64_t from, uint64_t to);
         static OverlayError moveGamepadFocusToNeighbor(OverlayNeighborDirection direction, uint64_t from);
         static OverlayError setOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, const Vector2& center, float radius);
-        static OverlayError getOverlayDualAnalogTransform(uint64_t ulOverlay, DualAnalogWhich which, Vector2* center, float* radius);
+        static OverlayError getOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, Vector2* center, float* radius);
 
         static OverlayError setOverlayTexture(uint64_t handle, const Texture* texture);
         static OverlayError clearOverlayTexture(uint64_t handle);
@@ -3094,8 +3094,8 @@ namespace openvr
             virtual const char* getOverlayErrorNameFromEnum(OverlayError error) { return Overlay_017::getOverlayErrorNameFromEnum(error); }
             virtual OverlayError setOverlayRenderingPid(uint64_t handle, uint32_t pid) { return Overlay_017::setOverlayRenderingPid(handle, pid); }
             virtual uint32_t getOverlayRenderingPid(uint64_t handle) { return Overlay_017::getOverlayRenderingPid(handle); }
-            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled) { return Overlay_017::setOverlayFlag(handle, flag, enabled); }
-            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled) { return Overlay_017::getOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled) { return Overlay_017::setOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled) { return Overlay_017::getOverlayFlag(handle, flag, enabled); }
             virtual OverlayError setOverlayColor(uint64_t handle, float r, float g, float b) { return Overlay_017::setOverlayColor(handle, r, g, b); }
             virtual OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b) { return Overlay_017::getOverlayColor(handle, r, g, b); }
             virtual OverlayError setOverlayAlpha(uint64_t handle, float alpha) { return Overlay_017::setOverlayAlpha(handle, alpha); }
@@ -3140,7 +3140,7 @@ namespace openvr
             virtual OverlayError setOverlayNeighbor(OverlayNeighborDirection direction, uint64_t from, uint64_t to) { return Overlay_017::setOverlayNeighbor(direction, from, to); }
             virtual OverlayError moveGamepadFocusToNeighbor(OverlayNeighborDirection direction, uint64_t from) { return Overlay_017::moveGamepadFocusToNeighbor(direction, from); }
             virtual OverlayError setOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, const Vector2& center, float radius) { return Overlay_017::setOverlayDualAnalogTransform(handle, which, center, radius); }
-            virtual OverlayError getOverlayDualAnalogTransform(uint64_t ulOverlay, DualAnalogWhich which, Vector2* center, float* radius) { return Overlay_017::getOverlayDualAnalogTransform(ulOverlay, which, center, radius); }
+            virtual OverlayError getOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, Vector2* center, float* radius) { return Overlay_017::getOverlayDualAnalogTransform(handle, which, center, radius); }
             virtual OverlayError setOverlayTexture(uint64_t handle, const Texture* texture) { return Overlay_017::setOverlayTexture(handle, texture); }
             virtual OverlayError clearOverlayTexture(uint64_t handle) { return Overlay_017::clearOverlayTexture(handle); }
             virtual OverlayError setOverlayRaw(uint64_t handle, void* buffer, uint32_t width, uint32_t height, uint32_t depth) { return Overlay_017::setOverlayRaw(handle, buffer, width, height, depth); }
@@ -3189,8 +3189,8 @@ namespace openvr
         static OverlayError setOverlayRenderingPid(uint64_t handle, uint32_t pid);
         static uint32_t getOverlayRenderingPid(uint64_t handle);
 
-        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled);
-        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled);
+        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled);
+        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled);
         static OverlayError setOverlayColor(uint64_t handle, float r, float g, float b);
         static OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b);
         static OverlayError setOverlayAlpha(uint64_t handle, float alpha);
@@ -3244,7 +3244,7 @@ namespace openvr
         static OverlayError setOverlayNeighbor(OverlayNeighborDirection direction, uint64_t from, uint64_t to);
         static OverlayError moveGamepadFocusToNeighbor(OverlayNeighborDirection direction, uint64_t from);
         static OverlayError setOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, const Vector2& center, float radius);
-        static OverlayError getOverlayDualAnalogTransform(uint64_t ulOverlay, DualAnalogWhich which, Vector2* center, float* radius);
+        static OverlayError getOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, Vector2* center, float* radius);
 
         static OverlayError setOverlayTexture(uint64_t handle, const Texture* texture);
         static OverlayError clearOverlayTexture(uint64_t handle);
@@ -3374,8 +3374,8 @@ namespace openvr
             virtual const char* getOverlayErrorNameFromEnum(OverlayError error) { return Overlay_018::getOverlayErrorNameFromEnum(error); }
             virtual OverlayError setOverlayRenderingPid(uint64_t handle, uint32_t pid) { return Overlay_018::setOverlayRenderingPid(handle, pid); }
             virtual uint32_t getOverlayRenderingPid(uint64_t handle) { return Overlay_018::getOverlayRenderingPid(handle); }
-            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled) { return Overlay_018::setOverlayFlag(handle, flag, enabled); }
-            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled) { return Overlay_018::getOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled) { return Overlay_018::setOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled) { return Overlay_018::getOverlayFlag(handle, flag, enabled); }
             virtual OverlayError setOverlayColor(uint64_t handle, float r, float g, float b) { return Overlay_018::setOverlayColor(handle, r, g, b); }
             virtual OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b) { return Overlay_018::getOverlayColor(handle, r, g, b); }
             virtual OverlayError setOverlayAlpha(uint64_t handle, float alpha) { return Overlay_018::setOverlayAlpha(handle, alpha); }
@@ -3419,7 +3419,7 @@ namespace openvr
             virtual OverlayError setOverlayNeighbor(OverlayNeighborDirection direction, uint64_t from, uint64_t to) { return Overlay_018::setOverlayNeighbor(direction, from, to); }
             virtual OverlayError moveGamepadFocusToNeighbor(OverlayNeighborDirection direction, uint64_t from) { return Overlay_018::moveGamepadFocusToNeighbor(direction, from); }
             virtual OverlayError setOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, const Vector2& center, float radius) { return Overlay_018::setOverlayDualAnalogTransform(handle, which, center, radius); }
-            virtual OverlayError getOverlayDualAnalogTransform(uint64_t ulOverlay, DualAnalogWhich which, Vector2* center, float* radius) { return Overlay_018::getOverlayDualAnalogTransform(ulOverlay, which, center, radius); }
+            virtual OverlayError getOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, Vector2* center, float* radius) { return Overlay_018::getOverlayDualAnalogTransform(handle, which, center, radius); }
             virtual OverlayError setOverlayTexture(uint64_t handle, const Texture* texture) { return Overlay_018::setOverlayTexture(handle, texture); }
             virtual OverlayError clearOverlayTexture(uint64_t handle) { return Overlay_018::clearOverlayTexture(handle); }
             virtual OverlayError setOverlayRaw(uint64_t handle, void* buffer, uint32_t width, uint32_t height, uint32_t depth) { return Overlay_018::setOverlayRaw(handle, buffer, width, height, depth); }
@@ -3468,8 +3468,8 @@ namespace openvr
         static OverlayError setOverlayRenderingPid(uint64_t handle, uint32_t pid);
         static uint32_t getOverlayRenderingPid(uint64_t handle);
 
-        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled);
-        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled);
+        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled);
+        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled);
         static OverlayError setOverlayColor(uint64_t handle, float r, float g, float b);
         static OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b);
         static OverlayError setOverlayAlpha(uint64_t handle, float alpha);
@@ -3523,7 +3523,7 @@ namespace openvr
         static OverlayError setOverlayNeighbor(OverlayNeighborDirection direction, uint64_t from, uint64_t to);
         static OverlayError moveGamepadFocusToNeighbor(OverlayNeighborDirection direction, uint64_t from);
         static OverlayError setOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, const Vector2* center, float radius);
-        static OverlayError getOverlayDualAnalogTransform(uint64_t ulOverlay, DualAnalogWhich which, Vector2* center, float* radius);
+        static OverlayError getOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, Vector2* center, float* radius);
 
         static OverlayError setOverlayTexture(uint64_t handle, const Texture* texture);
         static OverlayError clearOverlayTexture(uint64_t handle);
@@ -3653,8 +3653,8 @@ namespace openvr
             virtual const char* getOverlayErrorNameFromEnum(OverlayError error) { return Overlay_019::getOverlayErrorNameFromEnum(error); }
             virtual OverlayError setOverlayRenderingPid(uint64_t handle, uint32_t pid) { return Overlay_019::setOverlayRenderingPid(handle, pid); }
             virtual uint32_t getOverlayRenderingPid(uint64_t handle) { return Overlay_019::getOverlayRenderingPid(handle); }
-            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled) { return Overlay_019::setOverlayFlag(handle, flag, enabled); }
-            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled) { return Overlay_019::getOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled) { return Overlay_019::setOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled) { return Overlay_019::getOverlayFlag(handle, flag, enabled); }
             virtual OverlayError setOverlayColor(uint64_t handle, float r, float g, float b) { return Overlay_019::setOverlayColor(handle, r, g, b); }
             virtual OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b) { return Overlay_019::getOverlayColor(handle, r, g, b); }
             virtual OverlayError setOverlayAlpha(uint64_t handle, float alpha) { return Overlay_019::setOverlayAlpha(handle, alpha); }
@@ -3698,7 +3698,7 @@ namespace openvr
             virtual OverlayError setOverlayNeighbor(OverlayNeighborDirection direction, uint64_t from, uint64_t to) { return Overlay_019::setOverlayNeighbor(direction, from, to); }
             virtual OverlayError moveGamepadFocusToNeighbor(OverlayNeighborDirection direction, uint64_t from) { return Overlay_019::moveGamepadFocusToNeighbor(direction, from); }
             virtual OverlayError setOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, const Vector2* center, float radius) { return Overlay_019::setOverlayDualAnalogTransform(handle, which, center, radius); }
-            virtual OverlayError getOverlayDualAnalogTransform(uint64_t ulOverlay, DualAnalogWhich which, Vector2* center, float* radius) { return Overlay_019::getOverlayDualAnalogTransform(ulOverlay, which, center, radius); }
+            virtual OverlayError getOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, Vector2* center, float* radius) { return Overlay_019::getOverlayDualAnalogTransform(handle, which, center, radius); }
             virtual OverlayError setOverlayTexture(uint64_t handle, const Texture* texture) { return Overlay_019::setOverlayTexture(handle, texture); }
             virtual OverlayError clearOverlayTexture(uint64_t handle) { return Overlay_019::clearOverlayTexture(handle); }
             virtual OverlayError setOverlayRaw(uint64_t handle, void* buffer, uint32_t width, uint32_t height, uint32_t depth) { return Overlay_019::setOverlayRaw(handle, buffer, width, height, depth); }
@@ -3744,8 +3744,8 @@ namespace openvr
         static OverlayError setOverlayRenderingPid(uint64_t handle, uint32_t pid);
         static uint32_t getOverlayRenderingPid(uint64_t handle);
 
-        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled);
-        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled);
+        static OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled);
+        static OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled);
         static OverlayError setOverlayColor(uint64_t handle, float r, float g, float b);
         static OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b);
         static OverlayError setOverlayAlpha(uint64_t handle, float alpha);
@@ -3799,7 +3799,7 @@ namespace openvr
         static OverlayError setOverlayNeighbor(OverlayNeighborDirection direction, uint64_t from, uint64_t to);
         static OverlayError moveGamepadFocusToNeighbor(OverlayNeighborDirection direction, uint64_t from);
         static OverlayError setOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, const Vector2* center, float radius);
-        static OverlayError getOverlayDualAnalogTransform(uint64_t ulOverlay, DualAnalogWhich which, Vector2* center, float* radius);
+        static OverlayError getOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, Vector2* center, float* radius);
 
         static OverlayError setOverlayTexture(uint64_t handle, const Texture* texture);
         static OverlayError clearOverlayTexture(uint64_t handle);
@@ -3925,8 +3925,8 @@ namespace openvr
             virtual const char* getOverlayErrorNameFromEnum(OverlayError error) { return Overlay_020::getOverlayErrorNameFromEnum(error); }
             virtual OverlayError setOverlayRenderingPid(uint64_t handle, uint32_t pid) { return Overlay_020::setOverlayRenderingPid(handle, pid); }
             virtual uint32_t getOverlayRenderingPid(uint64_t handle) { return Overlay_020::getOverlayRenderingPid(handle); }
-            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlags flag, bool enabled) { return Overlay_020::setOverlayFlag(handle, flag, enabled); }
-            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlags flag, bool* enabled) { return Overlay_020::getOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError setOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool enabled) { return Overlay_020::setOverlayFlag(handle, flag, enabled); }
+            virtual OverlayError getOverlayFlag(uint64_t handle, OverlayFlagsLegacy flag, bool* enabled) { return Overlay_020::getOverlayFlag(handle, flag, enabled); }
             virtual OverlayError setOverlayColor(uint64_t handle, float r, float g, float b) { return Overlay_020::setOverlayColor(handle, r, g, b); }
             virtual OverlayError getOverlayColor(uint64_t handle, float* r, float* g, float* b) { return Overlay_020::getOverlayColor(handle, r, g, b); }
             virtual OverlayError setOverlayAlpha(uint64_t handle, float alpha) { return Overlay_020::setOverlayAlpha(handle, alpha); }
@@ -3970,7 +3970,7 @@ namespace openvr
             virtual OverlayError setOverlayNeighbor(OverlayNeighborDirection direction, uint64_t from, uint64_t to) { return Overlay_020::setOverlayNeighbor(direction, from, to); }
             virtual OverlayError moveGamepadFocusToNeighbor(OverlayNeighborDirection direction, uint64_t from) { return Overlay_020::moveGamepadFocusToNeighbor(direction, from); }
             virtual OverlayError setOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, const Vector2* center, float radius) { return Overlay_020::setOverlayDualAnalogTransform(handle, which, center, radius); }
-            virtual OverlayError getOverlayDualAnalogTransform(uint64_t ulOverlay, DualAnalogWhich which, Vector2* center, float* radius) { return Overlay_020::getOverlayDualAnalogTransform(ulOverlay, which, center, radius); }
+            virtual OverlayError getOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, Vector2* center, float* radius) { return Overlay_020::getOverlayDualAnalogTransform(handle, which, center, radius); }
             virtual OverlayError setOverlayTexture(uint64_t handle, const Texture* texture) { return Overlay_020::setOverlayTexture(handle, texture); }
             virtual OverlayError clearOverlayTexture(uint64_t handle) { return Overlay_020::clearOverlayTexture(handle); }
             virtual OverlayError setOverlayRaw(uint64_t handle, void* buffer, uint32_t width, uint32_t height, uint32_t depth) { return Overlay_020::setOverlayRaw(handle, buffer, width, height, depth); }
@@ -4067,7 +4067,7 @@ namespace openvr
         static bool isHoverTargetOverlay(uint64_t handle);
 
         static OverlayError setOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, const Vector2* center, float radius);
-        static OverlayError getOverlayDualAnalogTransform(uint64_t ulOverlay, DualAnalogWhich which, Vector2* center, float* radius);
+        static OverlayError getOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, Vector2* center, float* radius);
 
         static OverlayError setOverlayTexture(uint64_t handle, const Texture* texture);
         static OverlayError clearOverlayTexture(uint64_t handle);
@@ -4230,7 +4230,7 @@ namespace openvr
             virtual bool computeOverlayIntersection(uint64_t handle, const OverlayIntersectionParams* params, OverlayIntersectionResults* results) { return Overlay_021::computeOverlayIntersection(handle, params, results); }
             virtual bool isHoverTargetOverlay(uint64_t handle) { return Overlay_021::isHoverTargetOverlay(handle); }
             virtual OverlayError setOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, const Vector2* center, float radius) { return Overlay_021::setOverlayDualAnalogTransform(handle, which, center, radius); }
-            virtual OverlayError getOverlayDualAnalogTransform(uint64_t ulOverlay, DualAnalogWhich which, Vector2* center, float* radius) { return Overlay_021::getOverlayDualAnalogTransform(ulOverlay, which, center, radius); }
+            virtual OverlayError getOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, Vector2* center, float* radius) { return Overlay_021::getOverlayDualAnalogTransform(handle, which, center, radius); }
             virtual OverlayError setOverlayTexture(uint64_t handle, const Texture* texture) { return Overlay_021::setOverlayTexture(handle, texture); }
             virtual OverlayError clearOverlayTexture(uint64_t handle) { return Overlay_021::clearOverlayTexture(handle); }
             virtual OverlayError setOverlayRaw(uint64_t handle, void* buffer, uint32_t width, uint32_t height, uint32_t depth) { return Overlay_021::setOverlayRaw(handle, buffer, width, height, depth); }
@@ -4331,7 +4331,7 @@ namespace openvr
         static bool isHoverTargetOverlay(uint64_t handle);
 
         static OverlayError setOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, const Vector2* center, float radius);
-        static OverlayError getOverlayDualAnalogTransform(uint64_t ulOverlay, DualAnalogWhich which, Vector2* center, float* radius);
+        static OverlayError getOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, Vector2* center, float* radius);
 
         static OverlayError setOverlayIntersectionMask(uint64_t handle, OverlayIntersectionMaskPrimitive* primitives, uint32_t primitivesCount, uint32_t primitiveSize);
         static OverlayError triggerLaserMouseHapticVibration(uint64_t handle, float durationSeconds, float frequency, float amplitude);
@@ -4506,7 +4506,7 @@ namespace openvr
             virtual bool computeOverlayIntersection(uint64_t handle, const OverlayIntersectionParams* params, OverlayIntersectionResults* results) { return Overlay_022::computeOverlayIntersection(handle, params, results); }
             virtual bool isHoverTargetOverlay(uint64_t handle) { return Overlay_022::isHoverTargetOverlay(handle); }
             virtual OverlayError setOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, const Vector2* center, float radius) { return Overlay_022::setOverlayDualAnalogTransform(handle, which, center, radius); }
-            virtual OverlayError getOverlayDualAnalogTransform(uint64_t ulOverlay, DualAnalogWhich which, Vector2* center, float* radius) { return Overlay_022::getOverlayDualAnalogTransform(ulOverlay, which, center, radius); }
+            virtual OverlayError getOverlayDualAnalogTransform(uint64_t handle, DualAnalogWhich which, Vector2* center, float* radius) { return Overlay_022::getOverlayDualAnalogTransform(handle, which, center, radius); }
             virtual OverlayError setOverlayIntersectionMask(uint64_t handle, OverlayIntersectionMaskPrimitive* primitives, uint32_t primitivesCount, uint32_t primitiveSize) { return Overlay_022::setOverlayIntersectionMask(handle, primitives, primitivesCount, primitiveSize); }
             virtual OverlayError triggerLaserMouseHapticVibration(uint64_t handle, float durationSeconds, float frequency, float amplitude) { return Overlay_022::triggerLaserMouseHapticVibration(handle, durationSeconds, frequency, amplitude); }
             virtual OverlayError setOverlayCursor(uint64_t handle, uint64_t cursorHandle) { return Overlay_022::setOverlayCursor(handle, cursorHandle); }

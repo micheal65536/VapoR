@@ -75,6 +75,9 @@ namespace openvr
         bool resetBySystemMenu;
     };
 
+#if defined(__linux__) || defined(__APPLE__)
+#pragma pack(push, 4)
+#endif
     struct Event_0_9_0
     {
         struct EventDataReservedSpace
@@ -87,7 +90,7 @@ namespace openvr
         {
             EventDataReservedSpace reservedSpace;
             EventDataButton button;
-            EventDataMouse_0_9_0 mouse; // TODO: mouse events are not converted in legacy event interface implementation
+            EventDataMouse_0_9_0 mouse;
         };
 
         EventType type;
@@ -95,11 +98,24 @@ namespace openvr
         EventData data;
         float ageSeconds;
     };
+#if defined(__linux__) || defined(__APPLE__)
+#pragma pack(pop)
+#endif
 
+#if defined(__linux__) || defined(__APPLE__)
+#pragma pack(push, 4)
+#endif
     struct Event_0_9_15
     {
+        struct EventDataReservedSpace
+        {
+            uint64_t reserved0;
+            uint64_t reserved1;
+        };
+
         union EventData
         {
+            EventDataReservedSpace reservedSpace;
             EventDataButton button;
             EventDataMouse_0_9_15 mouse;
             EventDataScroll scroll;
@@ -112,4 +128,7 @@ namespace openvr
         float ageSeconds;
         EventData data;
     };
+#if defined(__linux__) || defined(__APPLE__)
+#pragma pack(pop)
+#endif
 }
