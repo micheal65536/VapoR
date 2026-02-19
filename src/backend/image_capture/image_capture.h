@@ -9,9 +9,6 @@ namespace vapor
 {
     namespace image_capture
     {
-        void lockBufferSwap();
-        void unlockBufferSwap();
-
         class ImageCaptureBuffer
         {
             public:

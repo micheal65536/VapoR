@@ -12,6 +12,9 @@ namespace vapor
     class FrameQueue
     {
         public:
+            void lockFrame();
+            void unlockFrame();
+
             image_capture::ImageCaptureBufferManager<std::tuple<OpenXR::View, openvr::TextureBounds>>* getCaptureBufferForEye(int eyeIndex) const;
             bool hasDisplayFrame() const;
 

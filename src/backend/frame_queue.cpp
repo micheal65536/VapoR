@@ -3,7 +3,21 @@
 #include "log/abort.h"
 #include "image_capture/image_capture.h"
 
+#include <mutex>
+
 using namespace vapor;
+
+static std::recursive_mutex mutex;
+
+void FrameQueue::lockFrame()
+{
+    mutex.lock();
+}
+
+void FrameQueue::unlockFrame()
+{
+    mutex.unlock();
+}
 
 image_capture::ImageCaptureBufferManager<std::tuple<OpenXR::View, openvr::TextureBounds>>* FrameQueue::getCaptureBufferForEye(int eyeIndex) const
 {

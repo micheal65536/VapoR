@@ -7,8 +7,6 @@
 #include "log/abort.h"
 #include "config/fixes.h"
 
-#include <mutex>
-
 #include <cstring>
 #include <cmath>
 #include <vector>
@@ -19,18 +17,6 @@
 using namespace vapor::image_capture;
 
 //
-
-static std::recursive_mutex swapMutex;
-
-void vapor::image_capture::lockBufferSwap()
-{
-    swapMutex.lock();
-}
-
-void vapor::image_capture::unlockBufferSwap()
-{
-    swapMutex.unlock();
-}
 
 ImageCaptureBuffer::ImageCaptureBuffer(int width, int height): width(width), height(height)
 {
@@ -49,11 +35,7 @@ int ImageCaptureBuffer::getCurrentCaptureBufferIndex() const
 
 void ImageCaptureBuffer::swapBuffers()
 {
-    lockBufferSwap();
-
     currentBuffer = 1 - currentBuffer;
-
-    unlockBufferSwap();
 }
 
 std::array<OpenGL::ExternalMemory*, 2> ImageCaptureBuffer::importOpenGLMemory() const

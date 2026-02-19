@@ -85,8 +85,6 @@ namespace vapor
 
                 void swapBuffers()
                 {
-                    lockBufferSwap();
-
                     if (nextFrameImageCaptureBuffer != nullptr)
                     {
                         nextFrameImageCaptureBuffer->swapBuffers();
@@ -100,8 +98,6 @@ namespace vapor
                     }
 
                     presentedAttachedData = nextFrameAttachedData;
-
-                    unlockBufferSwap();
                 }
 
                 //

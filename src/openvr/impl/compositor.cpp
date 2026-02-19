@@ -148,7 +148,6 @@ CompositorError CompositorImpl::submit(Eye eye, const Texture* texture, const Te
 
     // TODO: handle different submit flags (array texture etc.)
 
-    // TODO: handle source size
     if (texture->type == TextureType::TEXTURE_TYPE_OPENGL)
     {
         CompositorError error = imageCaptureBuffers[eye].captureOpenGL((GLuint) (uint64_t) texture->handle);
@@ -213,16 +212,16 @@ void CompositorImpl::postPresentHandoff()
 
 void CompositorImpl::gainFocus()
 {
-    vapor::image_capture::lockBufferSwap();
+    this->clientCore.backend->frameQueue->lockFrame();
     this->clientCore.backend->frameQueue->setForeground(&imageCaptureBuffers[0], &imageCaptureBuffers[1]);
-    vapor::image_capture::unlockBufferSwap();
+    this->clientCore.backend->frameQueue->unlockFrame();
 }
 
 void CompositorImpl::loseFocus()
 {
-    vapor::image_capture::lockBufferSwap();
+    this->clientCore.backend->frameQueue->lockFrame();
     this->clientCore.backend->frameQueue->clearForeground();
-    vapor::image_capture::unlockBufferSwap();
+    this->clientCore.backend->frameQueue->unlockFrame();
 }
 
 void CompositorImpl::present()
@@ -242,12 +241,12 @@ void CompositorImpl::present()
 
         if (haveFrames)
         {
-            vapor::image_capture::lockBufferSwap();
+            this->clientCore.backend->frameQueue->lockFrame();
             for (int eye = 0; eye < 2; eye++)
             {
                 imageCaptureBuffers[eye].swapBuffers();
             }
-            vapor::image_capture::unlockBufferSwap();
+            this->clientCore.backend->frameQueue->unlockFrame();
 
             this->presented = true;
         }

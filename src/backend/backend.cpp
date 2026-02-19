@@ -558,7 +558,7 @@ void Backend::step(XrTime displayTime, XrDuration displayDuration)
 
 std::vector<OpenXR::Layer> Backend::render(XrTime displayTime)
 {
-    image_capture::lockBufferSwap();
+    this->frameQueue->lockFrame();
 
     glViewport(0, 0, this->renderWidth, this->renderHeight);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer->id);
@@ -676,7 +676,7 @@ std::vector<OpenXR::Layer> Backend::render(XrTime displayTime)
         }
     };
 
-    image_capture::unlockBufferSwap();
+    this->frameQueue->unlockFrame();
 
     return layers;
 }
