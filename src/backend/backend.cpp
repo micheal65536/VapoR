@@ -133,8 +133,8 @@ Backend::Backend()
     }
 
     this->frameQueue = new FrameQueue();
-
     this->hapticQueue = new HapticQueue();
+    this->inputManager = new InputManager(this->inputProfile);
 }
 
 Backend::~Backend()
@@ -177,6 +177,7 @@ Backend::~Backend()
 
     delete this->frameQueue;
     delete this->hapticQueue;
+    delete this->inputManager;
 
     delete this->inputProfile;
     delete[] this->devicePropertySets;
@@ -488,10 +489,9 @@ void Backend::step(XrTime displayTime, XrDuration displayDuration)
         openVRInputStates.push_back(this->inputProfile->getOpenVRInputState(i, openXRInputStates));
     }
 
-    //
+    delete openXRInputStates;
 
-    // TODO: reimplement legacy input handling using another action set
-    // TODO: what's supposed to happen is that we immediately stop updating the legacy input state once an action manifest is provided, the last known legacy input state becomes frozen and no change events are dispatched for this
+    //
 
     this->frameStates.lock();
 
@@ -511,18 +511,14 @@ void Backend::step(XrTime displayTime, XrDuration displayDuration)
             .localFloorNextFrame = offsetPose(this->viewSpace->locateWithVelocity(*this->localFloorSpace, displayTime + displayDuration), this->standingZeroPose),
             .offsetMatrix = {{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 0.0f}}
         },
-        .inputStates = openVRInputStates,
         .controllerPoses = {
             this->inputProfile->getOpenVRControllerPose(0, openVRInputStates.data()).data.pose,
             this->inputProfile->getOpenVRControllerPose(1, openVRInputStates.data()).data.pose
-        },
-        .legacyInputStates = {
-            this->inputProfile->getOpenVRLegacyInputState(0, openVRInputStates.data()),
-            this->inputProfile->getOpenVRLegacyInputState(1, openVRInputStates.data())
         }
     });
 
-    LegacyInputHelper::emitChangeEvents(this->frameStates, this->eventQueue);
+    this->inputManager->putCurrentInputStates(openVRInputStates);
+    this->inputManager->updateLegacyInputStateAndEmitEvents(this->eventQueue, getCurrentXrTime());
 
     // TODO: dispatch property changed event for display frequency property when the refresh rate changes
     float refreshRate;

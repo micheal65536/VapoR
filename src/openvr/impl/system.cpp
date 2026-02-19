@@ -603,9 +603,8 @@ bool SystemImpl::getControllerState(uint32_t index, ControllerState* state, uint
     ControllerState state1;
     ControllerState& stateToUse = bufferSize < sizeof(ControllerState) ? state1 : *state;
 
-    vapor::FrameState frame = this->clientCore.backend->frameStates.getFrame(0);
-    vapor::LegacyInputState& legacyInputState = frame.legacyInputStates[index - 1];
-    stateToUse.packetNum = (uint32_t) frame.index; // TODO: packet num should only be updated when the state actually changes (this will require work from LegacyInputHelper and probably an extra field in FrameState)
+    vapor::LegacyInputState& legacyInputState = this->clientCore.backend->inputManager->getLegacyInputState(index - 1);
+    stateToUse.packetNum = legacyInputState.packetNum;
     stateToUse.buttonsPressed = utils::makeLegacyInputButtonsBitmap(legacyInputState.click);
     stateToUse.buttonsTouched = utils::makeLegacyInputButtonsBitmap(legacyInputState.touch);
     for (int i = 0; i < 5; i++)
@@ -637,9 +636,11 @@ bool SystemImpl::getControllerStateWithPose(TrackingUniverseOrigin origin, uint3
     ControllerState state1;
     ControllerState& stateToUse = bufferSize < sizeof(ControllerState) ? state1 : *state;
 
+    this->clientCore.backend->frameStates.lock();
     vapor::FrameState frame = this->clientCore.backend->frameStates.getFrame(0);
-    vapor::LegacyInputState& legacyInputState = frame.legacyInputStates[index - 1];
-    stateToUse.packetNum = (uint32_t) frame.index; // TODO: packet num should only be updated when the state actually changes (this will require work from LegacyInputHelper and probably an extra field in FrameState)
+    vapor::LegacyInputState& legacyInputState = this->clientCore.backend->inputManager->getLegacyInputState(index - 1);
+    this->clientCore.backend->frameStates.unlock();
+    stateToUse.packetNum = legacyInputState.packetNum;
     stateToUse.buttonsPressed = utils::makeLegacyInputButtonsBitmap(legacyInputState.click);
     stateToUse.buttonsTouched = utils::makeLegacyInputButtonsBitmap(legacyInputState.touch);
     for (int i = 0; i < 5; i++)

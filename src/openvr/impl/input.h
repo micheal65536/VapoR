@@ -11,6 +11,7 @@ namespace openvr
         public:
             ClientCoreImpl& clientCore;
             InputImpl(ClientCoreImpl& clientCore);
+            ~InputImpl();
 
             //
 

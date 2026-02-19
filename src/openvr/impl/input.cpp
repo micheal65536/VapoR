@@ -19,9 +19,14 @@ InputImpl::InputImpl(ClientCoreImpl& clientCore): clientCore(clientCore)
     // empty
 }
 
+InputImpl::~InputImpl()
+{
+    delete this->clientCore.backend->inputManager->getSceneActionManager();
+    this->clientCore.backend->inputManager->setSceneActionManager(nullptr);
+}
+
 InputError InputImpl::setActionManifestPath(const char* path)
 {
-    // TODO: move impl to backend
     vapor::input::ActionManager* actionManager = new vapor::input::ActionManager();
     if (!actionManager->populateFromJSON(path))
     {
@@ -40,7 +45,8 @@ InputError InputImpl::setActionManifestPath(const char* path)
             LOG("Failed to load custom binding, trying default binding");
             actionManager->loadDefaultBindingForControllerProfile(this->clientCore.backend->inputProfile);
         }
-        this->clientCore.backend->actionManager = actionManager; //
+        delete this->clientCore.backend->inputManager->getSceneActionManager();
+        this->clientCore.backend->inputManager->setSceneActionManager(actionManager);
         return InputError::INPUT_ERROR_NONE;
     }
 }
@@ -68,10 +74,10 @@ InputError InputImpl::getInputSourceHandle(const char* inputSourcePath, uint64_t
 
 InputError InputImpl::updateActionState(ActiveActionSet* actionSets, uint32_t actionSetSize, uint32_t actionSetsCount)
 {
-    // TODO: move impl to backend
-    if (this->clientCore.backend->actionManager != nullptr)
+    vapor::input::ActionManager* actionManager = this->clientCore.backend->inputManager->getSceneActionManager();
+    if (actionManager != nullptr)
     {
-        this->clientCore.backend->actionManager->update(actionSets, actionSetSize, actionSetsCount, this->clientCore.backend->frameStates.getFrame(0).inputStates.data(), this->clientCore.backend->getCurrentXrTime());
+        actionManager->update(actionSets, actionSetSize, actionSetsCount, this->clientCore.backend->inputManager->getInputStates().data(), this->clientCore.backend->getCurrentXrTime());
         return InputError::INPUT_ERROR_NONE;
     }
     else
@@ -84,7 +90,12 @@ InputError InputImpl::getDigitalActionData(uint64_t action, InputDigitalActionDa
 {
     TRACE_F("%d %d", action, restrictToDevice);
 
-    const vapor::input::Action* action_ = this->clientCore.backend->actionManager != nullptr ? this->clientCore.backend->actionManager->findAction(vapor::pathHandleRegistry.getPath(action)) : nullptr;
+    vapor::input::ActionManager* actionManager = this->clientCore.backend->inputManager->getSceneActionManager();
+    if (actionManager == nullptr)
+    {
+        return InputError::INPUT_ERROR_NO_ACTIVE_ACTION_SET;
+    }
+    const vapor::input::Action* action_ = actionManager->findAction(vapor::pathHandleRegistry.getPath(action));
     if (action_ == nullptr)
     {
         return InputError::INPUT_ERROR_INVALID_HANDLE;
@@ -134,7 +145,12 @@ InputError InputImpl::getAnalogActionData(uint64_t action, InputAnalogActionData
 {
     TRACE_F("%d %d", action, restrictToDevice);
 
-    const vapor::input::Action* action_ = this->clientCore.backend->actionManager != nullptr ? this->clientCore.backend->actionManager->findAction(vapor::pathHandleRegistry.getPath(action)) : nullptr;
+    vapor::input::ActionManager* actionManager = this->clientCore.backend->inputManager->getSceneActionManager();
+    if (actionManager == nullptr)
+    {
+        return InputError::INPUT_ERROR_NO_ACTIVE_ACTION_SET;
+    }
+    const vapor::input::Action* action_ = actionManager->findAction(vapor::pathHandleRegistry.getPath(action));
     if (action_ == nullptr)
     {
         return InputError::INPUT_ERROR_INVALID_HANDLE;
@@ -191,7 +207,12 @@ InputError InputImpl::getPoseActionDataRelativeToNow(uint64_t action, TrackingUn
     TRACE_F("%d %d %f %d", action, restrictToDevice, secondsFromNow, actionDataSize);
     STUB_F("secondsFromNow not supported %f", secondsFromNow);
 
-    const vapor::input::Action* action_ = this->clientCore.backend->actionManager != nullptr ? this->clientCore.backend->actionManager->findAction(vapor::pathHandleRegistry.getPath(action)) : nullptr;
+    vapor::input::ActionManager* actionManager = this->clientCore.backend->inputManager->getSceneActionManager();
+    if (actionManager == nullptr)
+    {
+        return InputError::INPUT_ERROR_NO_ACTIVE_ACTION_SET;
+    }
+    const vapor::input::Action* action_ = actionManager->findAction(vapor::pathHandleRegistry.getPath(action));
     if (action_ == nullptr)
     {
         return InputError::INPUT_ERROR_INVALID_HANDLE;
@@ -235,7 +256,12 @@ InputError InputImpl::getPoseActionDataForNextFrame(uint64_t action, TrackingUni
 {
     TRACE_F("%d %d %d", action, restrictToDevice, actionDataSize);
 
-    const vapor::input::Action* action_ = this->clientCore.backend->actionManager != nullptr ? this->clientCore.backend->actionManager->findAction(vapor::pathHandleRegistry.getPath(action)) : nullptr;
+    vapor::input::ActionManager* actionManager = this->clientCore.backend->inputManager->getSceneActionManager();
+    if (actionManager == nullptr)
+    {
+        return InputError::INPUT_ERROR_NO_ACTIVE_ACTION_SET;
+    }
+    const vapor::input::Action* action_ = actionManager->findAction(vapor::pathHandleRegistry.getPath(action));
     if (action_ == nullptr)
     {
         return InputError::INPUT_ERROR_INVALID_HANDLE;
@@ -347,7 +373,12 @@ InputError InputImpl::triggerHapticVibrationAction(uint64_t action, float startS
         STUB_F("startSecondsFromNow %f not supported", startSecondsFromNow);
     }
 
-    const vapor::input::Action* action_ = this->clientCore.backend->actionManager != nullptr ? this->clientCore.backend->actionManager->findAction(vapor::pathHandleRegistry.getPath(action)) : nullptr;
+    vapor::input::ActionManager* actionManager = this->clientCore.backend->inputManager->getSceneActionManager();
+    if (actionManager == nullptr)
+    {
+        return InputError::INPUT_ERROR_NO_ACTIVE_ACTION_SET;
+    }
+    const vapor::input::Action* action_ = actionManager->findAction(vapor::pathHandleRegistry.getPath(action));
     if (action_ == nullptr)
     {
         return InputError::INPUT_ERROR_INVALID_HANDLE;
@@ -376,7 +407,12 @@ InputError InputImpl::getActionOrigins(uint64_t actionSet, uint64_t action, uint
 
     // CHECK: actionSet parameter seems to be ignored/unused?
 
-    const vapor::input::Action* action_ = this->clientCore.backend->actionManager != nullptr ? this->clientCore.backend->actionManager->findAction(vapor::pathHandleRegistry.getPath(action)) : nullptr;
+    vapor::input::ActionManager* actionManager = this->clientCore.backend->inputManager->getSceneActionManager();
+    if (actionManager == nullptr)
+    {
+        return InputError::INPUT_ERROR_NO_ACTIVE_ACTION_SET;
+    }
+    const vapor::input::Action* action_ = actionManager->findAction(vapor::pathHandleRegistry.getPath(action));
     if (action_ == nullptr)
     {
         return InputError::INPUT_ERROR_INVALID_HANDLE;
@@ -539,9 +575,7 @@ InputError InputImpl::getComponentStateForBinding(const char* renderModelName, c
 
 bool InputImpl::isUsingLegacyInput()
 {
-    // CHECK: are we supposed to disable legacy input state and events after action set input has been configured?
-    // TODO: what's supposed to happen is that we immediately stop updating the legacy input state once an action manifest is provided, the last known legacy input state becomes frozen and no change events are dispatched for this
-    return this->clientCore.backend->actionManager == nullptr;
+    return this->clientCore.backend->inputManager->getSceneActionManager() == nullptr;
 }
 
 InputError InputImpl::openBindingUI(const char* appKey, uint64_t actionSet, uint64_t device, bool showOnDesktop)

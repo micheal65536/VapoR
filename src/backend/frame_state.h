@@ -5,9 +5,7 @@
 #include <condition_variable>
 
 #include "openxr.h"
-#include "input_profile.h"
 #include "pose_set.h"
-#include "legacy_input.h"
 
 namespace vapor
 {
@@ -22,9 +20,7 @@ namespace vapor
         OpenXR::ViewPair renderViews;
 
         PoseSet head;
-        std::vector<input_profile::OpenVRInputState> inputStates;
         PoseSet controllerPoses[2];
-        LegacyInputState legacyInputStates[2];
     };
 
     class FrameStateStore

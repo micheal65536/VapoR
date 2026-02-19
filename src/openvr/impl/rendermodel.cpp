@@ -218,8 +218,7 @@ bool RenderModelsImpl::getComponentStateForDevicePath(const char* modelName, con
             return false;
     }
 
-    vapor::FrameState frame = this->clientCore.backend->frameStates.getFrame(0);
-    const vapor::LegacyInputState& legacyInputState = frame.legacyInputStates[controllerIndex];
+    const vapor::LegacyInputState& legacyInputState = this->clientCore.backend->inputManager->getLegacyInputState(controllerIndex);
     return getComponentStateFromLegacyInputState(*this->clientCore.backend->renderModelLoader, modelName, componentName, legacyInputState, controllerModeState, componentState);
 }
 

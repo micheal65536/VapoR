@@ -6,6 +6,7 @@
 #include "frame_queue.h"
 #include "haptic_queue.h"
 #include "event_queue.h"
+#include "input_manager.h"
 #include "input_profile.h"
 #include "device_property_set.h"
 #include "render_model.h"
@@ -38,12 +39,9 @@ namespace vapor
 
             FrameStateStore frameStates = FrameStateStore(10);
             FrameQueue* frameQueue;
-
             HapticQueue* hapticQueue;
-
             EventQueue eventQueue;
-
-            input::ActionManager* actionManager = nullptr;
+            InputManager* inputManager;
 
             void queueResetSeatedZeroPose(bool fromSystemMenu);
             void queueResetStandingZeroPose(bool fromSystemMenu);

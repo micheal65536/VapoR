@@ -1,8 +1,10 @@
 #pragma once
 
+#include "pose_set.h"
+#include <cstdint>
+
 namespace vapor
 {
-    class FrameStateStore;
     class EventQueue;
 
     struct LegacyInputButtonSet
@@ -33,6 +35,8 @@ namespace vapor
         LegacyInputButtonSet touch;
         LegacyInputButtonSet click;
         Axis axes[5];
+
+        uint32_t packetNum = 0;
     };
 
     struct LegacyInputDescription
@@ -52,6 +56,6 @@ namespace vapor
     class LegacyInputHelper
     {
         public:
-            static bool emitChangeEvents(FrameStateStore& frameStates, EventQueue& eventQueue);
+            static bool compareStatesAndEmitChangeEvents(EventQueue& eventQueue, const PoseSet& eventControllerPose, int eventControllerIndex, const LegacyInputState& oldState, const LegacyInputState& newState);
     };
 }

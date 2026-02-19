@@ -4,6 +4,7 @@ target_sources(vrclient PRIVATE
     frame_queue.cpp
     haptic_queue.cpp
     event_queue.cpp
+    input_manager.cpp
     legacy_input.cpp
     device_property_set.cpp
     render_model.cpp
