@@ -1,8 +1,16 @@
+#define OPENXR_IMPL
 #include "openxr.h"
 
 #include <cstring>
 
 using namespace OpenXR;
+
+struct Session::PlatformInternals
+{
+    Display* xDisplay;
+    GLXContext glxContext;
+    GLXPbuffer glxPbuffer;
+};
 
 Instance::Instance(const std::string& applicationName, const std::vector<std::string>& extensions)
 {
@@ -91,8 +99,11 @@ bool Instance::pollEvent(XrEventDataBuffer* event) const
 
 Session::Session(const Instance& instance, XrSystemId system): instance(instance), system(system)
 {
-    this->xDisplay = XOpenDisplay(nullptr);
-    if (!this->xDisplay)
+    this->internals = new PlatformInternals();
+    PlatformInternals* internals = this->internals;
+
+    internals->xDisplay = XOpenDisplay(nullptr);
+    if (!internals->xDisplay)
     {
         ABORT("Failed to open X11 display");
     }
@@ -105,7 +116,7 @@ Session::Session(const Instance& instance, XrSystemId system): instance(instance
         GLX_DEPTH_SIZE, 24,
         None
     };
-    XVisualInfo* visualInfo = glXChooseVisual(this->xDisplay, DefaultScreen(this->xDisplay), visualAttribList);
+    XVisualInfo* visualInfo = glXChooseVisual(internals->xDisplay, DefaultScreen(internals->xDisplay), visualAttribList);
     if (!visualInfo)
     {
         ABORT("Failed to get X11 visual");
@@ -124,15 +135,15 @@ Session::Session(const Instance& instance, XrSystemId system): instance(instance
         GLX_DEPTH_SIZE, 24,
         None
     };
-    GLXFBConfig* fbConfigs = glXChooseFBConfig(this->xDisplay, DefaultScreen(this->xDisplay), configsAttribList, &fbConfigsCounts);
+    GLXFBConfig* fbConfigs = glXChooseFBConfig(internals->xDisplay, DefaultScreen(internals->xDisplay), configsAttribList, &fbConfigsCounts);
     if (!fbConfigs || fbConfigsCounts == 0)
     {
         ABORT("Failed to find framebuffer configuration");
     }
     GLXFBConfig fbConfig = fbConfigs[0];
     XFree(fbConfigs);
-    this->glxContext = glXCreateNewContext(this->xDisplay, fbConfig, GLX_RGBA_TYPE, NULL, True);
-    if (!this->glxContext) {
+    internals->glxContext = glXCreateNewContext(internals->xDisplay, fbConfig, GLX_RGBA_TYPE, NULL, True);
+    if (!internals->glxContext) {
         ABORT("Failed to create OpenGL context");
     }
     int bufferAttribList[] = {
@@ -140,12 +151,12 @@ Session::Session(const Instance& instance, XrSystemId system): instance(instance
         GLX_HEIGHT, 16,
         None
     };
-    this->glxPbuffer = glXCreatePbuffer(this->xDisplay, fbConfig, bufferAttribList);
-    if (!this->glxPbuffer)
+    internals->glxPbuffer = glXCreatePbuffer(internals->xDisplay, fbConfig, bufferAttribList);
+    if (!internals->glxPbuffer)
     {
         ABORT("Failed to create OpenGL pbuffer");
     }
-    if (!glXMakeContextCurrent(this->xDisplay, this->glxPbuffer, this->glxPbuffer, this->glxContext))
+    if (!glXMakeContextCurrent(internals->xDisplay, internals->glxPbuffer, internals->glxPbuffer, internals->glxContext))
     {
         ABORT("Failed to make OpenGL context current");
     }
@@ -167,11 +178,11 @@ Session::Session(const Instance& instance, XrSystemId system): instance(instance
     XrGraphicsBindingOpenGLXlibKHR graphicsBindingOpenGlXlibKhr {
         .type = XR_TYPE_GRAPHICS_BINDING_OPENGL_XLIB_KHR,
         .next = nullptr,
-        .xDisplay = this->xDisplay,
+        .xDisplay = internals->xDisplay,
         .visualid = visualId,
         .glxFBConfig = fbConfig,
-        .glxDrawable = this->glxPbuffer,
-        .glxContext = this->glxContext
+        .glxDrawable = internals->glxPbuffer,
+        .glxContext = internals->glxContext
     };
     sessionCreateInfo.next = &graphicsBindingOpenGlXlibKhr;
     ABORT_ON_OPENXR_ERROR(xrCreateSession(this->instance.handle, &sessionCreateInfo, &this->handle));
@@ -182,9 +193,10 @@ Session::~Session()
     xrDestroySession(this->handle);
     this->handle = XR_NULL_HANDLE;
 
-    glXDestroyContext(this->xDisplay, this->glxContext);
-    glXDestroyPbuffer(this->xDisplay, this->glxPbuffer);
-    XCloseDisplay(this->xDisplay);
+    glXDestroyContext(this->internals->xDisplay, this->internals->glxContext);
+    glXDestroyPbuffer(this->internals->xDisplay, this->internals->glxPbuffer);
+    XCloseDisplay(this->internals->xDisplay);
+    delete this->internals;
 }
 
 void Session::attachActionSets(const std::vector<const ActionSet*>& actionSets) const

@@ -1,13 +1,15 @@
 #pragma once
 
-#define XR_USE_GRAPHICS_API_OPENGL
-#define XR_USE_PLATFORM_XLIB
-#define GL_GLEXT_PROTOTYPES
-
 #define XR_USE_TIMESPEC
+#define XR_USE_GRAPHICS_API_OPENGL
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
 
-#include <X11/Xlib.h>
-#include <GL/glx.h>
+#ifdef OPENXR_IMPL
+    #define XR_USE_PLATFORM_XLIB
+    #include <X11/Xlib.h>
+    #include <GL/glx.h>
+#endif
 
 #include <openxr/openxr.h>
 #include <openxr/openxr_platform.h>
@@ -138,9 +140,8 @@ namespace OpenXR
             XrSystemId system;
 
         private:
-            Display* xDisplay;
-            GLXContext glxContext;
-            GLXPbuffer glxPbuffer;
+            struct PlatformInternals;
+            struct PlatformInternals* internals;
     };
 
     class Swapchain
