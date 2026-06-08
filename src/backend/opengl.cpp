@@ -41,6 +41,9 @@ void Texture::attachExternalMemory(int width, int height, GLenum internalFormat,
     glBindTexture(GL_TEXTURE_2D, this->id);
     ABORT_ON_OPENGL_ERROR();
 
+    glTextureParameteri(this->id, GL_TEXTURE_TILING_EXT, GL_OPTIMAL_TILING_EXT);
+    ABORT_ON_OPENGL_ERROR();
+
     PFNGLTEXSTORAGEMEM2DEXTPROC glTexStorageMem2DEXT = (PFNGLTEXSTORAGEMEM2DEXTPROC) glXGetProcAddress((const GLubyte*) "glTexStorageMem2DEXT");
     glTexStorageMem2DEXT(GL_TEXTURE_2D, 1, internalFormat, width, height, externalMemory.id, memoryOffset);
     ABORT_ON_OPENGL_ERROR();
@@ -104,6 +107,11 @@ ExternalMemory::ExternalMemory(int fd, int size): size(size)
 {
     PFNGLCREATEMEMORYOBJECTSEXTPROC glCreateMemoryObjectsEXT = (PFNGLCREATEMEMORYOBJECTSEXTPROC) glXGetProcAddress((const GLubyte*) "glCreateMemoryObjectsEXT");
     glCreateMemoryObjectsEXT(1, &this->id);
+    ABORT_ON_OPENGL_ERROR();
+
+    PFNGLMEMORYOBJECTPARAMETERIVEXTPROC glMemoryObjectParameterivEXT = (PFNGLMEMORYOBJECTPARAMETERIVEXTPROC) glXGetProcAddress((const GLubyte*) "glMemoryObjectParameterivEXT");
+    GLint param = GL_TRUE;
+    glMemoryObjectParameterivEXT(this->id, GL_DEDICATED_MEMORY_OBJECT_EXT, &param);
     ABORT_ON_OPENGL_ERROR();
 
     PFNGLIMPORTMEMORYFDEXTPROC glImportMemoryFdEXT = (PFNGLIMPORTMEMORYFDEXTPROC) glXGetProcAddress((const GLubyte*) "glImportMemoryFdEXT");

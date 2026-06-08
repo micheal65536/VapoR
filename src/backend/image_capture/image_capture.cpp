@@ -138,6 +138,7 @@ GLImageCaptureBuffer::GLImageCaptureBuffer(int width, int height): ImageCaptureB
     ABORT_ON_OPENGL_ERROR();
 
     PFNGLIMPORTMEMORYFDEXTPROC glImportMemoryFdEXT = (PFNGLIMPORTMEMORYFDEXTPROC) glXGetProcAddress((const GLubyte*) "glImportMemoryFdEXT");
+    PFNGLMEMORYOBJECTPARAMETERIVEXTPROC glMemoryObjectParameterivEXT = (PFNGLMEMORYOBJECTPARAMETERIVEXTPROC) glXGetProcAddress((const GLubyte*) "glMemoryObjectParameterivEXT");
     PFNGLTEXSTORAGEMEM2DEXTPROC glTexStorageMem2DEXT = (PFNGLTEXSTORAGEMEM2DEXTPROC) glXGetProcAddress((const GLubyte*) "glTexStorageMem2DEXT");
     for (int i = 0; i < 2; i++)
     {
@@ -164,9 +165,12 @@ GLImageCaptureBuffer::GLImageCaptureBuffer(int width, int height): ImageCaptureB
         int fd;
         ABORT_ON_VULKAN_ERROR(vkGetMemoryFdKHR(vulkan->device, &memoryGetFdInfo, &fd));
 
+        GLint param = GL_TRUE;
+        glMemoryObjectParameterivEXT(dstExternalMemory[i], GL_DEDICATED_MEMORY_OBJECT_EXT, &param);
         glImportMemoryFdEXT(dstExternalMemory[i], memoryRequirements.size, GL_HANDLE_TYPE_OPAQUE_FD_EXT, fd);
         ABORT_ON_OPENGL_ERROR();
         glBindTexture(GL_TEXTURE_2D, dstTextures[i]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_TILING_EXT, GL_OPTIMAL_TILING_EXT);
         glTexStorageMem2DEXT(GL_TEXTURE_2D, 1, GL_RGBA8, width, height, dstExternalMemory[i], 0);
         ABORT_ON_OPENGL_ERROR();
     }
