@@ -86,7 +86,9 @@ GLImageCaptureBuffer::GLImageCaptureBuffer(int width, int height): ImageCaptureB
         VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME,
         VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME,
         VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME,
-        VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME
+        VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME,
+        VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME,
+        VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME
     };
     uint32_t queueFamilyIndex = 0; // TODO
     float queuePriority = 1.0f;
@@ -144,7 +146,7 @@ GLImageCaptureBuffer::GLImageCaptureBuffer(int width, int height): ImageCaptureB
         VkMemoryRequirements memoryRequirements;
         vkGetImageMemoryRequirements(vulkan->device, image, &memoryRequirements);
         uint32_t memoryTypeIndex = vulkan->selectMemoryType(0, memoryRequirements.memoryTypeBits);
-        dstMemory[i] = vulkan->allocateMemory(memoryRequirements.size, memoryTypeIndex, true);
+        dstMemory[i] = vulkan->allocateMemory(memoryRequirements.size, memoryTypeIndex, true, image);
         vkDestroyImage(vulkan->device, image, nullptr);
 
         VkMemoryGetFdInfoKHR memoryGetFdInfo {
@@ -262,7 +264,7 @@ VulkanImageCaptureBuffer::VulkanImageCaptureBuffer(int width, int height, VkInst
         VkMemoryRequirements memoryRequirements;
         vkGetImageMemoryRequirements(common.device, dstImages[i], &memoryRequirements);
         uint32_t memoryTypeIndex = common.selectMemoryType(0, memoryRequirements.memoryTypeBits);
-        dstImagesMemory[i] = common.allocateMemory(memoryRequirements.size, memoryTypeIndex, true);
+        dstImagesMemory[i] = common.allocateMemory(memoryRequirements.size, memoryTypeIndex, true, dstImages[i]);
         ABORT_ON_VULKAN_ERROR(vkBindImageMemory(common.device, dstImages[i], dstImagesMemory[i], 0));
 
         VkMemoryGetFdInfoKHR memoryGetFdInfo {
@@ -443,7 +445,7 @@ uint32_t VulkanCommon::selectMemoryType(VkMemoryPropertyFlags propertyFlags, uin
     ABORT("Cannot find suitable memory type");
 }
 
-VkDeviceMemory VulkanCommon::allocateMemory(VkDeviceSize size, uint32_t memoryTypeIndex, bool exported)
+VkDeviceMemory VulkanCommon::allocateMemory(VkDeviceSize size, uint32_t memoryTypeIndex, bool exported, VkImage imageForExportedDedicatedAllocateInfo)
 {
     VkMemoryAllocateInfo memoryAllocateInfo {
         .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
@@ -452,6 +454,7 @@ VkDeviceMemory VulkanCommon::allocateMemory(VkDeviceSize size, uint32_t memoryTy
         .memoryTypeIndex = memoryTypeIndex
     };
     VkExportMemoryAllocateInfo exportMemoryAllocateInfo;
+    VkMemoryDedicatedAllocateInfo memoryDedicatedAllocateInfo;
     if (exported)
     {
         exportMemoryAllocateInfo = {
@@ -460,6 +463,13 @@ VkDeviceMemory VulkanCommon::allocateMemory(VkDeviceSize size, uint32_t memoryTy
             .handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT
         };
         memoryAllocateInfo.pNext = &exportMemoryAllocateInfo;
+        memoryDedicatedAllocateInfo = {
+            .sType = VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO,
+            .pNext = nullptr,
+            .image = imageForExportedDedicatedAllocateInfo,
+            .buffer = VK_NULL_HANDLE
+        };
+        exportMemoryAllocateInfo.pNext = &memoryDedicatedAllocateInfo;
     }
     VkDeviceMemory memory;
     ABORT_ON_VULKAN_ERROR(vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &memory));
@@ -535,7 +545,7 @@ VkDeviceMemory VulkanCommon::allocateAndBindImage(VkImage image, VkMemoryPropert
     VkMemoryRequirements memoryRequirements;
     vkGetImageMemoryRequirements(device, image, &memoryRequirements);
     uint32_t memoryTypeIndex = selectMemoryType(memoryPropertyFlags, memoryRequirements.memoryTypeBits);
-    VkDeviceMemory memory = allocateMemory(memoryRequirements.size, memoryTypeIndex, exported);
+    VkDeviceMemory memory = allocateMemory(memoryRequirements.size, memoryTypeIndex, exported, image);
     ABORT_ON_VULKAN_ERROR(vkBindImageMemory(device, image, memory, 0));
     return memory;
 }

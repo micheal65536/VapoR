@@ -24,7 +24,7 @@ namespace vapor
 
                 VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
                 uint32_t selectMemoryType(VkMemoryPropertyFlags propertyFlags, uint32_t imageMemoryTypeBits);
-                VkDeviceMemory allocateMemory(VkDeviceSize size, uint32_t memoryTypeIndex, bool exported);
+                VkDeviceMemory allocateMemory(VkDeviceSize size, uint32_t memoryTypeIndex, bool exported, VkImage imageForExportedDedicatedAllocateInfo);
 
                 VkCommandPool commandPool;
                 VkCommandBuffer commandBuffer;
