@@ -142,7 +142,7 @@ GLImageCaptureBuffer::GLImageCaptureBuffer(int width, int height): ImageCaptureB
     for (int i = 0; i < 2; i++)
     {
         // TODO: can we do this (determine memory size etc.) without creating an image?
-        VkImage image = vulkan->createImage(width, height, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_LAYOUT_UNDEFINED);
+        VkImage image = vulkan->createImage(width, height, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_LAYOUT_UNDEFINED, true);
         VkMemoryRequirements memoryRequirements;
         vkGetImageMemoryRequirements(vulkan->device, image, &memoryRequirements);
         uint32_t memoryTypeIndex = vulkan->selectMemoryType(0, memoryRequirements.memoryTypeBits);
@@ -260,7 +260,7 @@ VulkanImageCaptureBuffer::VulkanImageCaptureBuffer(int width, int height, VkInst
 {
     for (int i = 0; i < 2; i++)
     {
-        dstImages[i] = common.createImage(width, height, vapor::config::fixes::createVulkanTargetInLinearColorspace ? VK_FORMAT_R8G8B8A8_UNORM : VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_LAYOUT_UNDEFINED);
+        dstImages[i] = common.createImage(width, height, vapor::config::fixes::createVulkanTargetInLinearColorspace ? VK_FORMAT_R8G8B8A8_UNORM : VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_LAYOUT_UNDEFINED, true);
         VkMemoryRequirements memoryRequirements;
         vkGetImageMemoryRequirements(common.device, dstImages[i], &memoryRequirements);
         uint32_t memoryTypeIndex = common.selectMemoryType(0, memoryRequirements.memoryTypeBits);
@@ -314,7 +314,7 @@ openvr::CompositorError VulkanImageCaptureBuffer::capture(const openvr::VulkanTe
             tmpImageWidth = textureData->width;
             tmpImageHeight = textureData->height;
             tmpImageFormat = (VkFormat) textureData->format;
-            tmpImage = common.createImage(tmpImageWidth, tmpImageHeight, tmpImageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_LAYOUT_UNDEFINED);
+            tmpImage = common.createImage(tmpImageWidth, tmpImageHeight, tmpImageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_LAYOUT_UNDEFINED, false);
             tmpImageMemory = common.allocateAndBindImage(tmpImage, 0, false);
         }
 
@@ -512,7 +512,7 @@ void VulkanCommon::endAndSubmitCommandBuffer()
     }
 }
 
-VkImage VulkanCommon::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkImageLayout initialLayout)
+VkImage VulkanCommon::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkImageLayout initialLayout, bool exported)
 {
     VkImageCreateInfo imageCreateInfo {
         .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -535,6 +535,16 @@ VkImage VulkanCommon::createImage(uint32_t width, uint32_t height, VkFormat form
         .pQueueFamilyIndices = nullptr,
         .initialLayout = initialLayout
     };
+    VkExternalMemoryImageCreateInfo externalMemoryImageCreateInfo;
+    if (exported)
+    {
+        externalMemoryImageCreateInfo = {
+            .sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO,
+            .pNext = nullptr,
+            .handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT
+        };
+        imageCreateInfo.pNext = &externalMemoryImageCreateInfo;
+    }
     VkImage image;
     ABORT_ON_VULKAN_ERROR(vkCreateImage(device, &imageCreateInfo, nullptr, &image));
     return image;

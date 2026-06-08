@@ -32,7 +32,7 @@ namespace vapor
                 void beginCommandBuffer();
                 void endAndSubmitCommandBuffer();
 
-                VkImage createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkImageLayout initialLayout);
+                VkImage createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkImageLayout initialLayout, bool exported);
                 VkDeviceMemory allocateAndBindImage(VkImage image, VkMemoryPropertyFlags memoryPropertyFlags, bool exported);
 
                 void transitionImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask);
