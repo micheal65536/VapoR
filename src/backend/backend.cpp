@@ -563,6 +563,19 @@ void Backend::step(XrTime displayTime, XrDuration displayDuration)
 
     //
 
+    this->windowManager->lock();
+    for (auto& it: this->windowManager->getWindows())
+    {
+        windows::Window* window = it;
+        window->lock();
+        if (window->transform != nullptr)
+        {
+            window->transform->update(*this);
+        }
+        window->unlock();
+    }
+    this->windowManager->unlock();
+
     // TODO: window manager events
 }
 

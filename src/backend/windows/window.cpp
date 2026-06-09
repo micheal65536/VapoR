@@ -89,6 +89,10 @@ void Window::render(WindowRenderer* windowRenderer, const PoseSet& headPose, con
         return;
     }
 
+    if (!this->transform->shouldDisplay())
+    {
+        return;
+    }
     const float (&transformMatrix)[3][4] = this->transform->getOverlayToWorldTransformMatrix();
     float headPoseMatrix[3][4];
     this->transform->getHeadPoseToUse(headPose, &headPoseMatrix);

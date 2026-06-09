@@ -395,22 +395,45 @@ OverlayError OverlayImpl::getOverlayTransformAbsolute(uint64_t handle, TrackingU
 
 OverlayError OverlayImpl::setOverlayTransformTrackedDeviceRelative(uint64_t handle, uint32_t trackedDeviceIndex, const Matrix34* matrix)
 {
-    // TODO
-    STUB_F("%lu", handle);
+    TRACE_F("%lu %u", handle, trackedDeviceIndex);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+    if (trackedDeviceIndex < 0 || trackedDeviceIndex > 2)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_TRACKED_DEVICE;
+    }
+    overlay->window->lock();
+    delete overlay->window->transform;
+    overlay->window->transform = new vapor::windows::TrackedDeviceRelativeTransform(trackedDeviceIndex, *matrix);
+    overlay->window->unlock();
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 
 OverlayError OverlayImpl::getOverlayTransformTrackedDeviceRelative(uint64_t handle, uint32_t* trackedDeviceIndex, Matrix34* matrix)
 {
-    // TODO
-    STUB_F("%lu", handle);
+    TRACE_F("%lu", handle);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+    const vapor::windows::TrackedDeviceRelativeTransform* transform = getOverlayTransformAndCheckType<vapor::windows::TrackedDeviceRelativeTransform>(overlay->window->transform, OverlayTransformType::OVERLAY_TRANSFORM_TYPE_TRACKED_DEVICE_RELATIVE);
+    if (transform == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_WRONG_TRANSFORM_TYPE;
+    }
+    *trackedDeviceIndex = transform->deviceIndex;
+    *matrix = transform->offset;
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 
 OverlayError OverlayImpl::setOverlayTransformTrackedDeviceComponent(uint64_t handle, uint32_t trackedDeviceIndex, const char* componentName)
 {
     // TODO
-    STUB_F("%lu", handle);
+    STUB_F("%lu %u %s", handle, trackedDeviceIndex, componentName);
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 

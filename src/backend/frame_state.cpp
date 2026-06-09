@@ -34,7 +34,7 @@ void FrameStateStore::postFrame(FrameState frame)
     this->frameConditionVariable.notify_all();
 }
 
-FrameState FrameStateStore::getFrame(int indexAgo)
+FrameState FrameStateStore::getFrame(int indexAgo) const
 {
     this->mutex.lock();
     int index = this->size - indexAgo - 1;
@@ -43,7 +43,7 @@ FrameState FrameStateStore::getFrame(int indexAgo)
     return frame;
 }
 
-long FrameStateStore::getFrameCounter()
+long FrameStateStore::getFrameCounter() const
 {
     this->mutex.lock();
     long counter = this->counter;
@@ -51,7 +51,7 @@ long FrameStateStore::getFrameCounter()
     return counter;
 }
 
-void FrameStateStore::waitForNextFrame()
+void FrameStateStore::waitForNextFrame() const
 {
     std::unique_lock<std::recursive_mutex> lock(this->mutex);
     long start = this->counter;
@@ -65,12 +65,12 @@ void FrameStateStore::waitForNextFrame()
     }
 }
 
-void FrameStateStore::lock()
+void FrameStateStore::lock() const
 {
     this->mutex.lock();
 }
 
-void FrameStateStore::unlock()
+void FrameStateStore::unlock() const
 {
     this->mutex.unlock();
 }
