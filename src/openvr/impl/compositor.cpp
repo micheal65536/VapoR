@@ -386,14 +386,14 @@ void CompositorImpl::unlockGLSharedTextureForAccess(GLSharedTextureHandle* share
 
 uint32_t CompositorImpl::getVulkanInstanceExtensionsRequired(char* value, uint32_t bufferSize)
 {
-    static const char* extensions = VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME " " VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME;
+    static const char* extensions = VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME " " VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME " " VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME;
     std::strncpy(value, extensions, bufferSize);
     return std::strlen(extensions) + 1;
 }
 
 uint32_t CompositorImpl::getVulkanDeviceExtensionsRequired(VkPhysicalDevice_T* device, char* value, uint32_t bufferSize)
 {
-    static const char* extensions = VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME " " VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME " " VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME " " VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME;
+    static const char* extensions = VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME " " VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME " " VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME " " VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME " " VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME " " VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME;
     std::strncpy(value, extensions, bufferSize);
     return std::strlen(extensions) + 1;
 }
