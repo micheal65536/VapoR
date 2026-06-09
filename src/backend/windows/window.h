@@ -43,9 +43,12 @@ namespace vapor
                 bool visible = false;
                 bool dashboard = false;
 
+                float texelAspectRatio = 1.0f;
                 float widthInMeters = 1.0f;
 
                 // TODO: curvature properties
+
+                float textureBounds[4] = {0.0f, 0.0f, 1.0f, 1.0f};
 
                 Transform* transform = nullptr;
 
@@ -74,7 +77,6 @@ namespace vapor
                 OpenGL::Texture* internalTexture = nullptr;
                 OpenGL::Texture* externalTextures[2] = {nullptr, nullptr};
                 OpenGL::ExternalMemory* externalMemory[2] = {nullptr, nullptr};
-                //float textureBounds[4] = {0.0f, 0.0f, 1.0f, 1.0f}; // TODO: crop bounds applied immediately without texture/frame change
 
                 std::recursive_mutex mutex;
         };

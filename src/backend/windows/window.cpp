@@ -93,8 +93,9 @@ void Window::render(WindowRenderer* windowRenderer, const PoseSet& headPose, con
     float headPoseMatrix[3][4];
     this->transform->getHeadPoseToUse(headPose, &headPoseMatrix);
 
-    // TODO: apply width in meters and aspect ratio/texel scale etc.
-    windowRenderer->renderFlat(textureForRender, headPoseMatrix, view, transformMatrix);
+    // TODO: decide between flat and curved rendering (or other render styles? need to check if cursor/dashboard/etc. requires a different render style)
+    float aspectRatio = ((textureHeight * (textureBounds[3] - textureBounds[1])) / (textureWidth * (textureBounds[2] - textureBounds[0]))) / this->texelAspectRatio;
+    windowRenderer->renderFlat(textureForRender, textureBounds, headPoseMatrix, view, this->widthInMeters, aspectRatio, transformMatrix);
 }
 
 void Window::clearImage()
@@ -145,7 +146,11 @@ void Window::submitCpuImage(void* buffer, int width, int height, int depth)
     cpuImageWidth = width;
     cpuImageHeight = height;
     cpuImageDepth = depth;
-    std::memcpy(cpuImageBuffer, buffer, bufferSize);
+    //std::memcpy(cpuImageBuffer, buffer, bufferSize);
+    for (int row = 0; row < height; row++)
+    {
+        std::memcpy(cpuImageBuffer + (height - row - 1) * width * depth, buffer + row * width * depth, width * depth);
+    }
     hasCpuImageChanged = true;
 
     hasCpuImage = true;

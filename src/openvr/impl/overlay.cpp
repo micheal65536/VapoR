@@ -219,15 +219,25 @@ OverlayError OverlayImpl::getOverlayGamma(uint64_t handle, float* gamma)
 
 OverlayError OverlayImpl::setOverlayTexelAspectRatio(uint64_t handle, float aspect)
 {
-    // TODO
-    STUB_F("%lu %f", handle, aspect);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+    overlay->window->lock();
+    overlay->window->texelAspectRatio = aspect;
+    overlay->window->unlock();
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 
 OverlayError OverlayImpl::getOverlayTexelAspectRatio(uint64_t handle, float* aspect)
 {
-    // TODO
-    STUB_F("%lu", handle);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+    *aspect = overlay->window->texelAspectRatio;
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 
@@ -263,7 +273,6 @@ OverlayError OverlayImpl::getOverlayWidthInMeters(uint64_t handle, float* width)
     Overlay* overlay = getOverlay(handle);
     if (overlay == nullptr)
     {
-        // TODO: check if *width is changed on error
         return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
     }
     *width = overlay->window->widthInMeters;
@@ -533,15 +542,35 @@ OverlayError OverlayImpl::getOverlayTextureColorSpace(uint64_t handle, ColorSpac
 
 OverlayError OverlayImpl::setOverlayTextureBounds(uint64_t handle, const TextureBounds* bounds)
 {
-    // TODO
-    STUB_F("%lu", handle);
+    TRACE_F("%lu %f %f %f %f", handle, bounds->uMin, bounds->vMin, bounds->uMax, bounds->vMax);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+    overlay->window->lock();
+    overlay->window->textureBounds[0] = bounds->uMin;
+    overlay->window->textureBounds[1] = bounds->vMin;
+    overlay->window->textureBounds[2] = bounds->uMax;
+    overlay->window->textureBounds[3] = bounds->vMax;
+    overlay->window->unlock();
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 
 OverlayError OverlayImpl::getOverlayTextureBounds(uint64_t handle, TextureBounds* bounds)
 {
-    // TODO
-    STUB_F("%lu", handle);
+    TRACE_F("%lu %d", handle, bounds);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+    overlay->window->lock();
+    bounds->uMin = overlay->window->textureBounds[0];
+    bounds->vMin = overlay->window->textureBounds[1];
+    bounds->uMax = overlay->window->textureBounds[2];
+    bounds->vMax = overlay->window->textureBounds[3];
+    overlay->window->unlock();
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 

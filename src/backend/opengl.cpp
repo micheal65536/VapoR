@@ -29,6 +29,13 @@ void Texture::image(int width, int height, GLenum format, GLenum type, GLint int
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, data);
     ABORT_ON_OPENGL_ERROR();
 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    ABORT_ON_OPENGL_ERROR();
+
     if (savedTextureId != this->id)
     {
         glBindTexture(GL_TEXTURE_2D, savedTextureId);
@@ -66,6 +73,13 @@ void Texture::attachExternalMemory(int width, int height, GLenum internalFormat,
 
     PFNGLTEXSTORAGEMEM2DEXTPROC glTexStorageMem2DEXT = (PFNGLTEXSTORAGEMEM2DEXTPROC) glXGetProcAddress((const GLubyte*) "glTexStorageMem2DEXT");
     glTexStorageMem2DEXT(GL_TEXTURE_2D, 1, internalFormat, width, height, externalMemory.id, memoryOffset);
+    ABORT_ON_OPENGL_ERROR();
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     ABORT_ON_OPENGL_ERROR();
 
     if (savedTextureId != this->id)
