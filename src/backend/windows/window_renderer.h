@@ -1,0 +1,30 @@
+#pragma once
+
+#include "backend/opengl.h"
+#include "backend/openxr.h"
+#include <cstdint>
+
+namespace vapor
+{
+    namespace windows
+    {
+        class WindowRenderer
+        {
+            public:
+                WindowRenderer();
+                ~WindowRenderer();
+
+                void renderFlat(OpenGL::Texture* texture, const float (&headPoseMatrix)[3][4], const OpenXR::View& view, const float (&transformMatrix)[3][4]);
+                //void renderCurved();
+
+            private:
+                OpenGL::ShaderProgram* shaderProgram;
+                OpenGL::AttributeBuffer* flatVertices;
+                OpenGL::AttributeBuffer* flatIndices;
+                OpenGL::VertexAttributeArray* flatVAO;
+                OpenGL::AttributeBuffer* curvedVertices;
+                OpenGL::AttributeBuffer* curvedIndices;
+                OpenGL::VertexAttributeArray* curvedVAO;
+        };
+    }
+}

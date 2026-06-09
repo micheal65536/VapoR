@@ -2,6 +2,10 @@
 #include "log/log.h"
 #include "log/stub.h"
 
+#include "log/abort.h"
+
+#include <cstring>
+
 using namespace openvr;
 
 OverlayImpl::OverlayImpl(ClientCoreImpl& clientCore): clientCore(clientCore)
@@ -16,25 +20,48 @@ OverlayImpl::~OverlayImpl()
 
 OverlayError OverlayImpl::findOverlay(const char* key, uint64_t* handle)
 {
-    // TODO
-    STUB_F("%s", key);
+    TRACE_F("%s", key);
+    Overlay* overlay = lookupOverlay(key);
+    if (overlay != nullptr)
+    {
+        *handle = overlay->handle;
+        return OverlayError::OVERLAY_ERROR_NONE;
+    }
     *handle = 0;
     return OverlayError::OVERLAY_ERROR_UNKNOWN_OVERLAY;
 }
 
 OverlayError OverlayImpl::createOverlay(const char* key, const char* name, uint64_t* handle)
 {
-    // TODO
-    STUB_F("%s %s", key, name);
-    *handle = 0;
-    return OverlayError::OVERLAY_ERROR_REQUEST_FAILED;
+    TRACE_F("%s %s", key, name);
+
+    Overlay* overlay = lookupOverlay(key);
+    if (overlay != nullptr)
+    {
+        *handle = overlay->handle;
+        return OverlayError::OVERLAY_ERROR_KEY_IN_USE;
+    }
+    overlay = storeNewOverlay(key);
+    if (overlay == nullptr)
+    {
+        ABORT();
+    }
+    *handle = overlay->handle;
+
+    overlay->window = new vapor::windows::Window();
+    overlay->window->title = name;
+    this->clientCore.backend->windowManager->addWindow(overlay->window);
+
+    return OverlayError::OVERLAY_ERROR_NONE;
 }
 
-OverlayError OverlayImpl::createDashboardOverlay(const char* key, const char* friendlyName, uint64_t* mainHandle, uint64_t* thumbnailHandle)
+OverlayError OverlayImpl::createDashboardOverlay(const char* key, const char* name, uint64_t* mainHandle, uint64_t* thumbnailHandle)
 {
     // TODO
-    STUB_F("%s %s", key, friendlyName);
+    STUB_F("%s %s", key, name);
     *mainHandle = *thumbnailHandle = 0;
+    // TODO: testing
+    createOverlay(key, name, mainHandle);
     return OverlayError::OVERLAY_ERROR_REQUEST_FAILED;
 }
 
@@ -48,29 +75,83 @@ OverlayError OverlayImpl::createSubviewOverlay(uint64_t parentHandle, const char
 
 OverlayError OverlayImpl::destroyOverlay(uint64_t handle)
 {
-    // TODO
-    STUB_F("%lu", handle);
+    TRACE_F("%lu", handle);
+
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+
+    // TODO: handle windows that have a relation e.g. subview/child position/cursor/dashboard icon
+    this->clientCore.backend->windowManager->removeWindow(overlay->window);
+    delete overlay->window;
+
+    removeOverlay(handle);
+
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 
 uint32_t OverlayImpl::getOverlayKey(uint64_t handle, char* value, uint32_t bufferSize, OverlayError* error)
 {
-    // TODO
-    STUB_F("%lu", handle);
-    return 0;
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        if (error != nullptr)
+        {
+            *error = OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+            return 0;
+        }
+    }
+    if (error != nullptr)
+    {
+        *error = OverlayError::OVERLAY_ERROR_NONE;
+    }
+
+    uint32_t requiredBufferSize = overlay->key.length() + 1;
+    if (bufferSize >= requiredBufferSize)
+    {
+        std::memcpy(value, overlay->key.c_str(), requiredBufferSize);
+    }
+    return requiredBufferSize;
 }
 
 uint32_t OverlayImpl::getOverlayName(uint64_t handle, char* value, uint32_t bufferSize, OverlayError* error)
 {
-    // TODO
-    STUB_F("%lu", handle);
-    return 0;
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        if (error != nullptr)
+        {
+            *error = OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+            return 0;
+        }
+    }
+    if (error != nullptr)
+    {
+        *error = OverlayError::OVERLAY_ERROR_NONE;
+    }
+
+    uint32_t requiredBufferSize = overlay->window->title.length() + 1;
+    if (bufferSize >= requiredBufferSize)
+    {
+        std::memcpy(value, overlay->window->title.c_str(), requiredBufferSize);
+    }
+    return requiredBufferSize;
 }
 
 OverlayError OverlayImpl::setOverlayName(uint64_t handle, const char* name)
 {
-    // TODO
-    STUB_F("%lu %s", handle, name);
+    TRACE_F("%lu %s", handle, name);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+    overlay->window->lock();
+    overlay->window->title = name;
+    overlay->window->unlock();
+    return OverlayError::OVERLAY_ERROR_NONE;
 }
 
 OverlayError OverlayImpl::setOverlayFlag(uint64_t handle, uint32_t flags, bool enabled)
@@ -166,15 +247,26 @@ OverlayError OverlayImpl::getOverlaySortOrder(uint64_t handle, uint32_t* sortOrd
 
 OverlayError OverlayImpl::setOverlayWidthInMeters(uint64_t handle, float width)
 {
-    // TODO
-    STUB_F("%lu %f", handle, width);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+    overlay->window->lock();
+    overlay->window->widthInMeters = width;
+    overlay->window->unlock();
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 
 OverlayError OverlayImpl::getOverlayWidthInMeters(uint64_t handle, float* width)
 {
-    // TODO
-    STUB_F("%lu", handle);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        // TODO: check if *width is changed on error
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+    *width = overlay->window->widthInMeters;
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 
@@ -229,22 +321,66 @@ OverlayError OverlayImpl::getTransformForOverlayCoordinates(uint64_t handle, Tra
 
 OverlayError OverlayImpl::getOverlayTransformType(uint64_t handle, OverlayTransformType* transformType)
 {
-    // TODO
-    STUB_F("%lu", handle);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+    const vapor::windows::Transform* transform = overlay->window->transform;
+    if (transform == nullptr)
+    {
+        *transformType = OverlayTransformType::OVERLAY_TRANSFORM_TYPE_INVALID;
+    }
+    else
+    {
+        *transformType = transform->getTransformType();
+    }
     return OverlayError::OVERLAY_ERROR_NONE;
+}
+
+template<typename T> inline T* getOverlayTransformAndCheckType(vapor::windows::Transform* transform, openvr::OverlayTransformType transformType)
+{
+    if (transform == nullptr)
+    {
+        return nullptr;
+    }
+    if (transform->getTransformType() != transformType)
+    {
+        return nullptr;
+    }
+    return (T*) transform;
 }
 
 OverlayError OverlayImpl::setOverlayTransformAbsolute(uint64_t handle, TrackingUniverseOrigin origin, const Matrix34* matrix)
 {
-    // TODO
-    STUB_F("%lu", handle);
+    TRACE_F("%lu", handle);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+    overlay->window->lock();
+    delete overlay->window->transform;
+    overlay->window->transform = new vapor::windows::AbsoluteTransform(origin, *matrix);
+    overlay->window->unlock();
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 
 OverlayError OverlayImpl::getOverlayTransformAbsolute(uint64_t handle, TrackingUniverseOrigin* origin, Matrix34* matrix)
 {
-    // TODO
-    STUB_F("%lu", handle);
+    TRACE_F("%lu", handle);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+    const vapor::windows::AbsoluteTransform* transform = getOverlayTransformAndCheckType<vapor::windows::AbsoluteTransform>(overlay->window->transform, OverlayTransformType::OVERLAY_TRANSFORM_TYPE_ABSOLUTE);
+    if (transform == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_WRONG_TRANSFORM_TYPE;
+    }
+    *origin = transform->trackingUniverse;
+    *matrix = transform->offset;
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 
@@ -336,7 +472,7 @@ bool OverlayImpl::isOverlayVisible(uint64_t handle)
 {
     // TODO
     STUB_F("%lu", handle);
-    return false;
+    return true;
 }
 
 OverlayError OverlayImpl::legacyIsDashboardOverlay(uint64_t handle, bool* dashboard)
@@ -411,22 +547,73 @@ OverlayError OverlayImpl::getOverlayTextureBounds(uint64_t handle, TextureBounds
 
 OverlayError OverlayImpl::setOverlayTexture(uint64_t handle, const Texture* texture)
 {
-    // TODO
-    STUB_F("%lu", handle);
+    TRACE_F("%lu %d %d", handle, texture->type, texture->colorSpace);
+
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+
+    overlay->window->lock();
+
+    vapor::image_capture::ImageCaptureBufferManager<int>& imageCaptureBuffer = overlay->window->getImageCaptureBuffer();
+
+    // TODO: handle different submit flags (array texture etc.)
+
+    CompositorError captureError;
+    if (texture->type == TextureType::TEXTURE_TYPE_OPENGL)
+    {
+        captureError = imageCaptureBuffer.captureOpenGL((GLuint) (uint64_t) texture->handle);
+    }
+    else if (texture->type == TextureType::TEXTURE_TYPE_VULKAN)
+    {
+        const VulkanTextureData* textureData = (VulkanTextureData*) texture->handle;
+        captureError = imageCaptureBuffer.captureVulkan(textureData);
+    }
+    else
+    {
+        STUB_F("Unsupported texture type %d", texture->type);
+        overlay->window->unlock();
+        return OverlayError::OVERLAY_ERROR_REQUEST_FAILED;
+    }
+
+    if (captureError != CompositorError::COMPOSITOR_ERROR_NONE)
+    {
+        // TODO: properly translate relevant error values
+        overlay->window->unlock();
+        return OverlayError::OVERLAY_ERROR_REQUEST_FAILED;
+    }
+
+    imageCaptureBuffer.swapBuffers();
+    overlay->window->activateGpuImage();
+
+    overlay->window->unlock();
+
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 
 OverlayError OverlayImpl::clearOverlayTexture(uint64_t handle)
 {
-    // TODO
-    STUB_F("%lu", handle);
+    TRACE_F("%lu", handle);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+    overlay->window->clearImage();
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 
 OverlayError OverlayImpl::setOverlayRaw(uint64_t handle, void* buffer, uint32_t width, uint32_t height, uint32_t depth)
 {
-    // TODO
-    STUB_F("%lu", handle);
+    TRACE_F("%lu %u %u %u", handle, width, height, depth);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+    overlay->window->submitCpuImage(buffer, width, height, depth);
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 
@@ -662,4 +849,71 @@ const char* OverlayImpl::getOverlayErrorNameFromEnum(OverlayError error)
     // TODO
     STUB_F("%d", error);
     return "";
+}
+
+//
+
+static inline std::string stringToLowercase(const std::string& in)
+{
+    std::string out = in;
+    std::transform(out.begin(), out.end(), out.begin(), [](char c){ return std::tolower(c); });
+    return out;
+}
+
+OverlayImpl::Overlay* OverlayImpl::storeNewOverlay(const std::string& key)
+{
+    if (overlaysKeyLookup.contains(stringToLowercase(key)))
+    {
+        return nullptr;
+    }
+    static uint64_t nextOverlayHandle = 1;
+    uint64_t handle = nextOverlayHandle++;
+    overlays.emplace(handle, Overlay {.handle = handle, .key = key});
+    Overlay& overlay = overlays.at(handle);
+    overlaysKeyLookup[stringToLowercase(key)] = &overlay;
+    TRACE_F("stored overlay %s %lu", key.c_str(), handle);
+    return &overlay;
+}
+
+OverlayImpl::Overlay* OverlayImpl::getOverlay(uint64_t handle)
+{
+    auto it = overlays.find(handle);
+    if (it == overlays.end())
+    {
+        return nullptr;
+    }
+    return &it->second;
+}
+
+OverlayImpl::Overlay* OverlayImpl::lookupOverlay(const std::string& key)
+{
+    auto it = overlaysKeyLookup.find(stringToLowercase(key));
+    if (it == overlaysKeyLookup.end())
+    {
+        return nullptr;
+    }
+    return it->second;
+}
+
+bool OverlayImpl::removeOverlay(uint64_t handle)
+{
+    auto it = overlays.find(handle);
+    if (it == overlays.end())
+    {
+        return false;
+    }
+    TRACE_F("removed overlay %s %lu", it->second.key.c_str(), handle);
+    overlaysKeyLookup.erase(stringToLowercase(it->second.key));
+    overlays.erase(it);
+    return true;
+}
+
+void OverlayImpl::Overlay::syncFlagsToWindow()
+{
+    // TODO
+}
+
+void OverlayImpl::Overlay::syncFlagsFromWindow()
+{
+    // TODO
 }

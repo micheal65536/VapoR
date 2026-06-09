@@ -75,6 +75,8 @@ namespace openvr
         bool resetBySystemMenu;
     };
 
+// TODO: check proper sturct packing for old and new event structs
+
 #if defined(__linux__) || defined(__APPLE__)
 #pragma pack(push, 4)
 #endif

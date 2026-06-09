@@ -24,22 +24,10 @@ void SystemImpl::getRecommendedRenderTargetSize(uint32_t* width, uint32_t* heigh
 
 Matrix44 SystemImpl::getProjectionMatrix(Eye eye, float near, float far)
 {
-    float left, right, top, bottom;
-    this->getProjectionRaw(eye, &left, &right, &top, &bottom);
-
-    float idx = 1.0f / (right - left);
-    float idy = 1.0f / (bottom - top);
-    float idz = 1.0f / (far - near);
-    float sx = right + left;
-    float sy = bottom + top;
-
+    vapor::FrameState frame = this->clientCore.backend->frameStates.getFrame(0);
+    OpenXR::View& view = eye == Eye::EYE_RIGHT ? frame.views.right : frame.views.left;
     Matrix44 mat;
-    float (*m)[4] = mat.m;
-    m[0][0] = 2.0f * idx; m[0][1] = 0.0f;       m[0][2] = sx * idx;   m[0][3] = 0.0f;
-    m[1][0] = 0.0f;       m[1][1] = 2.0f * idy; m[1][2] = sy * idy;   m[1][3] = 0.0f;
-    m[2][0] = 0.0f;       m[2][1] = 0.0f;       m[2][2] = -far * idz; m[2][3] = -far * near * idz;
-    m[3][0] = 0.0f;       m[3][1] = 0.0f;       m[3][2] = -1.0f;      m[3][3] = 0.0f;
-
+    ::utils::getProjectionMatrix(view.fov, near, far, &mat.m, nullptr, nullptr, nullptr, nullptr);
     return mat;
 }
 
@@ -47,11 +35,7 @@ void SystemImpl::getProjectionRaw(Eye eye, float* left, float* right, float* top
 {
     vapor::FrameState frame = this->clientCore.backend->frameStates.getFrame(0);
     OpenXR::View& view = eye == Eye::EYE_RIGHT ? frame.views.right : frame.views.left;
-    *left = std::tan(view.fov.angleLeft);
-    *right = std::tan(view.fov.angleRight);
-    // NOTE: I know this looks backwards but it seems to match ALVR and SteamVR native
-    *top = std::tan(view.fov.angleDown);
-    *bottom = std::tan(view.fov.angleUp);
+    ::utils::getProjectionMatrix(view.fov, 0.0f, 0.0f, nullptr, left, right, top, bottom);
 }
 
 bool SystemImpl::computeDistortion(Eye eye, float u, float v, DistortionCoordinates* distortionCoordinates)
@@ -66,7 +50,7 @@ Matrix34 SystemImpl::getEyeToHeadTransform(Eye eye)
     vapor::FrameState frame = this->clientCore.backend->frameStates.getFrame(0);
     OpenXR::View& view = eye == Eye::EYE_RIGHT ? frame.views.right : frame.views.left;
     Matrix34 matrix;
-    utils::poseToMatrix(view.pose, &matrix);
+    ::utils::poseToMatrix(view.pose, &matrix.m);
     return matrix;
 }
 

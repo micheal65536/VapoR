@@ -4,6 +4,11 @@
 #include <cstdint>
 #include "client_core.h"
 
+#include "backend/windows/window_manager.h"
+
+#include <string>
+#include <map>
+
 namespace openvr
 {
     class OverlayImpl
@@ -18,7 +23,7 @@ namespace openvr
             OverlayError findOverlay(const char* key, uint64_t* handle);
 
             OverlayError createOverlay(const char* key, const char* name, uint64_t* handle);
-            OverlayError createDashboardOverlay(const char* key, const char* friendlyName, uint64_t* mainHandle, uint64_t* thumbnailHandle);
+            OverlayError createDashboardOverlay(const char* key, const char* name, uint64_t* mainHandle, uint64_t* thumbnailHandle);
             OverlayError createSubviewOverlay(uint64_t parentHandle, const char* key, const char* name, uint64_t* handle);
             OverlayError destroyOverlay(uint64_t handle);
 
@@ -120,5 +125,25 @@ namespace openvr
             void closeMessageOverlay();
 
             const char* getOverlayErrorNameFromEnum(OverlayError error);
+
+        private:
+            struct Overlay
+            {
+                const uint64_t handle;
+                const std::string key;
+                vapor::windows::Window* window = nullptr;
+                uint32_t flags = 0; // TODO: check default/initial value
+
+                void syncFlagsToWindow();
+                void syncFlagsFromWindow();
+            };
+
+            std::map<uint64_t, Overlay> overlays;
+            std::map<const std::string, Overlay*> overlaysKeyLookup;
+
+            Overlay* storeNewOverlay(const std::string& key);
+            Overlay* getOverlay(uint64_t handle);
+            Overlay* lookupOverlay(const std::string& key);
+            bool removeOverlay(uint64_t handle);
     };
 }

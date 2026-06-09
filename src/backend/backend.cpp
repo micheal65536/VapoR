@@ -38,6 +38,8 @@ Backend::Backend()
     this->instance->getViewConfiguration(this->session->system, &this->renderWidth, &this->renderHeight, &v, &v, &v, &v);
     this->swapchains[0] = new OpenXR::Swapchain(*this->session, this->renderWidth, this->renderHeight, 1, GL_SRGB8_ALPHA8);
     this->swapchains[1] = new OpenXR::Swapchain(*this->session, this->renderWidth, this->renderHeight, 1, GL_SRGB8_ALPHA8);
+    this->overlaySwapchains[0] = new OpenXR::Swapchain(*this->session, this->renderWidth, this->renderHeight, 1, GL_SRGB8_ALPHA8);
+    this->overlaySwapchains[1] = new OpenXR::Swapchain(*this->session, this->renderWidth, this->renderHeight, 1, GL_SRGB8_ALPHA8);
     this->framebuffer = new OpenGL::Framebuffer(this->renderWidth, this->renderHeight);
     ABORT_ON_OPENGL_ERROR();
 
@@ -135,10 +137,20 @@ Backend::Backend()
     this->frameQueue = new FrameQueue();
     this->hapticQueue = new HapticQueue();
     this->inputManager = new InputManager(this->inputProfile);
+    this->windowManager = new windows::WindowManager();
+
+    this->windowRenderer = new windows::WindowRenderer();
 }
 
 Backend::~Backend()
 {
+    delete this->frameQueue;
+    delete this->hapticQueue;
+    delete this->inputManager;
+    delete this->windowManager;
+
+    delete this->windowRenderer;
+
     for (int i = 0; i < 2; i++)
     {
         delete this->srcFramebuffers[i];
@@ -154,6 +166,8 @@ Backend::~Backend()
     delete this->framebuffer;
     delete this->swapchains[0];
     delete this->swapchains[1];
+    delete this->overlaySwapchains[0];
+    delete this->overlaySwapchains[1];
 
     delete this->viewSpace;
     delete this->localSpace;
@@ -174,10 +188,6 @@ Backend::~Backend()
     this->actionSpaces.clear();
 
     delete this->instance;
-
-    delete this->frameQueue;
-    delete this->hapticQueue;
-    delete this->inputManager;
 
     delete this->inputProfile;
     delete[] this->devicePropertySets;
@@ -550,17 +560,25 @@ void Backend::step(XrTime displayTime, XrDuration displayDuration)
         }
         this->actions[actionIndex]->applyHapticFeedback(*this->session, "", duration, frequency, amplitude);
     }
+
+    //
+
+    // TODO: window manager events
 }
 
 std::vector<OpenXR::Layer> Backend::render(XrTime displayTime)
 {
-    this->frameQueue->lockFrame();
-
     glViewport(0, 0, this->renderWidth, this->renderHeight);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer->id);
 
+    FrameState frame = this->frameStates.getFrame(0);
+
+    //
+
+    this->frameQueue->lockFrame();
+
     bool hasFrame = this->frameQueue->hasDisplayFrame();
-    OpenXR::ViewPair views = this->session->locateViews(displayTime, *this->localSpace);
+    OpenXR::ViewPair sceneViews = frame.renderViews;
 
     for (int eye = 0; eye < 2; eye++)
     {
@@ -610,10 +628,10 @@ std::vector<OpenXR::Layer> Backend::render(XrTime displayTime)
                 switch (eye)
                 {
                     case 0:
-                        views.left = view;
+                        sceneViews.left = view;
                         break;
                     case 1:
-                        views.right = view;
+                        sceneViews.right = view;
                         break;
                 }
             }
@@ -648,12 +666,67 @@ std::vector<OpenXR::Layer> Backend::render(XrTime displayTime)
         swapchains[eye]->releaseImage();
     }
 
+    this->frameQueue->unlockFrame();
+
+    //
+
+    this->windowManager->lock();
+    const std::list<windows::Window*>& windows = this->windowManager->getWindows();
+    for (auto& it: windows)
+    {
+        windows::Window* window = it;
+        window->lock();
+    }
+
+    for (int eye = 0; eye < 2; eye++)
+    {
+        GLuint image = overlaySwapchains[eye]->acquireImage();
+        if (!overlaySwapchains[eye]->waitSwapchain(10000000l))
+        {
+            ABORT("Timeout waiting for overlay swapchain image");
+        }
+        framebuffer->bindTexture(image);
+
+        const OpenXR::View* view;
+        switch (eye)
+        {
+            case 0:
+                view = &frame.views.left;
+                break;
+            case 1:
+                view = &frame.views.right;
+                break;
+        }
+
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        ABORT_ON_OPENGL_ERROR();
+
+        // TODO: deal with draw order, visibility, etc.
+        for (auto& it: windows)
+        {
+            windows::Window* window = it;
+            window->render(this->windowRenderer, frame.head, *view);
+        }
+
+        overlaySwapchains[eye]->releaseImage();
+    }
+
+    for (auto& it: windows)
+    {
+        windows::Window* window = it;
+        window->unlock();
+    }
+    this->windowManager->unlock();
+
+    //
+
     std::vector<OpenXR::Layer> layers = {
         OpenXR::Layer {
             .space = *this->localSpace,
 
-            .leftPose = views.left.pose,
-            .leftFov = views.left.fov,
+            .leftPose = sceneViews.left.pose,
+            .leftFov = sceneViews.left.fov,
             .leftSwapchain = *swapchains[0],
             .leftImageX = 0,
             .leftImageY = 0,
@@ -661,9 +734,30 @@ std::vector<OpenXR::Layer> Backend::render(XrTime displayTime)
             .leftImageHeight = this->renderHeight,
             .leftImageIndex = 0,
 
-            .rightPose = views.right.pose,
-            .rightFov = views.right.fov,
+            .rightPose = sceneViews.right.pose,
+            .rightFov = sceneViews.right.fov,
             .rightSwapchain = *swapchains[1],
+            .rightImageX = 0,
+            .rightImageY = 0,
+            .rightImageWidth = this->renderWidth,
+            .rightImageHeight = this->renderHeight,
+            .rightImageIndex = 0
+        },
+        OpenXR::Layer {
+            .space = *this->localSpace,
+
+            .leftPose = frame.renderViews.left.pose,
+            .leftFov = frame.renderViews.left.fov,
+            .leftSwapchain = *overlaySwapchains[0],
+            .leftImageX = 0,
+            .leftImageY = 0,
+            .leftImageWidth = this->renderWidth,
+            .leftImageHeight = this->renderHeight,
+            .leftImageIndex = 0,
+
+            .rightPose = frame.renderViews.right.pose,
+            .rightFov = frame.renderViews.right.fov,
+            .rightSwapchain = *overlaySwapchains[1],
             .rightImageX = 0,
             .rightImageY = 0,
             .rightImageWidth = this->renderWidth,
@@ -671,8 +765,6 @@ std::vector<OpenXR::Layer> Backend::render(XrTime displayTime)
             .rightImageIndex = 0
         }
     };
-
-    this->frameQueue->unlockFrame();
 
     return layers;
 }
