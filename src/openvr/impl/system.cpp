@@ -49,7 +49,7 @@ void SystemImpl::getProjectionRaw(Eye eye, float* left, float* right, float* top
     OpenXR::View& view = eye == Eye::EYE_RIGHT ? frame.views.right : frame.views.left;
     *left = std::tan(view.fov.angleLeft);
     *right = std::tan(view.fov.angleRight);
-    // TODO: I know this looks backwards but it seems to match ALVR?
+    // NOTE: I know this looks backwards but it seems to match ALVR and SteamVR native
     *top = std::tan(view.fov.angleDown);
     *bottom = std::tan(view.fov.angleUp);
 }
@@ -63,7 +63,6 @@ bool SystemImpl::computeDistortion(Eye eye, float u, float v, DistortionCoordina
 
 Matrix34 SystemImpl::getEyeToHeadTransform(Eye eye)
 {
-    // CHECK
     vapor::FrameState frame = this->clientCore.backend->frameStates.getFrame(0);
     OpenXR::View& view = eye == Eye::EYE_RIGHT ? frame.views.right : frame.views.left;
     Matrix34 matrix;
@@ -582,7 +581,7 @@ const char* SystemImpl::getEventTypeNameFromEnum(EventType type)
 
 HiddenAreaMesh SystemImpl::getHiddenAreaMesh(Eye eye, HiddenAreaMeshType type)
 {
-    // TODO: check if returning null vertices is acceptable here (OpenVR header says that this is acceptable, actually check what SteamVR does when no hidden area mesh is provided)
+    // CHECK: check if returning null vertices is acceptable here (OpenVR header says that this is acceptable, actually check what SteamVR does when no hidden area mesh is provided)
     TRACE_F("%d %d", eye, type);
     return HiddenAreaMesh {
         .vertices = nullptr,
@@ -594,73 +593,105 @@ bool SystemImpl::getControllerState(uint32_t index, ControllerState* state, uint
 {
     TRACE_F("%d", index);
 
-    if (index == 0 || index > 2)
-    {
-        // CHECK: no state for HMD? (maybe we still return pose?)
-        return false;
-    }
-
     ControllerState state1;
     ControllerState& stateToUse = bufferSize < sizeof(ControllerState) ? state1 : *state;
-
-    vapor::LegacyInputState& legacyInputState = this->clientCore.backend->inputManager->getLegacyInputState(index - 1);
-    stateToUse.packetNum = legacyInputState.packetNum;
-    stateToUse.buttonsPressed = utils::makeLegacyInputButtonsBitmap(legacyInputState.click);
-    stateToUse.buttonsTouched = utils::makeLegacyInputButtonsBitmap(legacyInputState.touch);
-    for (int i = 0; i < 5; i++)
+    if (index >= 1 && index <= 2)
     {
-        stateToUse.axes[i] = {
-            .x = legacyInputState.axes[i].x,
-            .y = legacyInputState.axes[i].y
-        };
+        vapor::LegacyInputState& legacyInputState = this->clientCore.backend->inputManager->getLegacyInputState(index - 1);
+        stateToUse.packetNum = legacyInputState.packetNum;
+        stateToUse.buttonsPressed = utils::makeLegacyInputButtonsBitmap(legacyInputState.click);
+        stateToUse.buttonsTouched = utils::makeLegacyInputButtonsBitmap(legacyInputState.touch);
+        for (int i = 0; i < 5; i++)
+        {
+            stateToUse.axes[i] = {
+                .x = legacyInputState.axes[i].x,
+                .y = legacyInputState.axes[i].y
+            };
+        }
     }
-
+    else
+    {
+        stateToUse.packetNum = 0;
+        stateToUse.buttonsPressed = 0;
+        stateToUse.buttonsTouched = 0;
+        for (int i = 0; i < 5; i++)
+        {
+            stateToUse.axes[i] = {
+                .x = 0.0f,
+                .y = 0.0f
+            };
+        }
+    }
     if (bufferSize < sizeof(ControllerState))
     {
         std::memcpy(state, &state1, bufferSize);
     }
-    return true;
+
+    if (index >= 0 && index <= 2)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 bool SystemImpl::getControllerStateWithPose(TrackingUniverseOrigin origin, uint32_t index, ControllerState* state, uint32_t bufferSize, TrackedDevicePose* pose)
 {
     TRACE_F("%d", index);
 
-    if (index == 0 || index > 2)
-    {
-        // CHECK: no state for HMD? (maybe we still return pose?)
-        // CHECK: should we empty out the provided pose buffer if the device index is invalid?
-        return false;
-    }
-
     ControllerState state1;
     ControllerState& stateToUse = bufferSize < sizeof(ControllerState) ? state1 : *state;
-
     this->clientCore.backend->frameStates.lock();
     vapor::FrameState frame = this->clientCore.backend->frameStates.getFrame(0);
-    vapor::LegacyInputState& legacyInputState = this->clientCore.backend->inputManager->getLegacyInputState(index - 1);
-    this->clientCore.backend->frameStates.unlock();
-    stateToUse.packetNum = legacyInputState.packetNum;
-    stateToUse.buttonsPressed = utils::makeLegacyInputButtonsBitmap(legacyInputState.click);
-    stateToUse.buttonsTouched = utils::makeLegacyInputButtonsBitmap(legacyInputState.touch);
-    for (int i = 0; i < 5; i++)
+    if (index >= 1 && index <= 2)
     {
-        stateToUse.axes[i] = {
-            .x = legacyInputState.axes[i].x,
-            .y = legacyInputState.axes[i].y
-        };
+        vapor::LegacyInputState& legacyInputState = this->clientCore.backend->inputManager->getLegacyInputState(index - 1);
+        this->clientCore.backend->frameStates.unlock();
+        stateToUse.packetNum = legacyInputState.packetNum;
+        stateToUse.buttonsPressed = utils::makeLegacyInputButtonsBitmap(legacyInputState.click);
+        stateToUse.buttonsTouched = utils::makeLegacyInputButtonsBitmap(legacyInputState.touch);
+        for (int i = 0; i < 5; i++)
+        {
+            stateToUse.axes[i] = {
+                .x = legacyInputState.axes[i].x,
+                .y = legacyInputState.axes[i].y
+            };
+        }
     }
-
-    if (pose != nullptr)
+    else
     {
-        utils::selectTrackedDevicePose(frame.controllerPoses[index - 1], origin, false, pose);
+        this->clientCore.backend->frameStates.unlock();
+        stateToUse.packetNum = 0;
+        stateToUse.buttonsPressed = 0;
+        stateToUse.buttonsTouched = 0;
+        for (int i = 0; i < 5; i++)
+        {
+            stateToUse.axes[i] = {
+                .x = 0.0f,
+                .y = 0.0f
+            };
+        }
     }
-
     if (bufferSize < sizeof(ControllerState))
     {
         std::memcpy(state, &state1, bufferSize);
     }
-    return true;
+
+    if (index >= 0 && index <= 2 && pose != nullptr)
+    {
+        utils::selectTrackedDevicePose(index == 0 ? frame.head : frame.controllerPoses[index - 1], origin, false, pose);
+    }
+
+    if (index >= 0 && index <= 2)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void SystemImpl::triggerHapticPulse(uint32_t index, uint32_t axisId, unsigned short durationUs)
