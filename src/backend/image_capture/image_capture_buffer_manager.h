@@ -57,7 +57,7 @@ namespace vapor
                     return ((GLImageCaptureBuffer*) nextFrameImageCaptureBuffer)->capture(srcTextureId, 0, 0);
                 }
 
-                openvr::CompositorError captureVulkan(const openvr::VulkanTextureData* textureData)
+                openvr::CompositorError captureVulkan(const openvr::VulkanTextureData* textureData, uint32_t arrayIndex)
                 {
                     int width = textureData->width;
                     int height = textureData->height;
@@ -73,7 +73,7 @@ namespace vapor
                         nextFrameImageCaptureBufferApi = Api::VULKAN;
                     }
 
-                    return ((VulkanImageCaptureBuffer*) nextFrameImageCaptureBuffer)->capture(textureData, 0, 0);
+                    return ((VulkanImageCaptureBuffer*) nextFrameImageCaptureBuffer)->capture(textureData, arrayIndex, 0, 0);
                 }
 
                 void submitAttachedData(const AttachedData& attachedData)
