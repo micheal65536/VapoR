@@ -611,8 +611,6 @@ OverlayError OverlayImpl::setOverlayTexture(uint64_t handle, const Texture* text
 
     vapor::image_capture::ImageCaptureBufferManager<int>& imageCaptureBuffer = overlay->window->getImageCaptureBuffer();
 
-    // TODO: handle different submit flags (array texture etc.)
-
     CompositorError captureError;
     if (texture->type == TextureType::TEXTURE_TYPE_OPENGL)
     {
