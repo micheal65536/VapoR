@@ -20,6 +20,8 @@ namespace openvr
             CompositorImpl(ClientCoreImpl& clientCore);
             ~CompositorImpl();
 
+            DeviceType legacyDeviceType = DeviceType::DEVICE_TYPE_NONE;
+
             //
 
             void setTrackingSpace(TrackingUniverseOrigin origin);

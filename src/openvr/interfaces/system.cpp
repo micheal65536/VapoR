@@ -3,6 +3,8 @@
 #include "log/log.h"
 #include "log/stub.h"
 
+#include "utils/legacy_helpers.h"
+
 #include <cstring>
 
 using namespace openvr;
@@ -2608,10 +2610,7 @@ bool System_003::pollNextEvent(Event_0_9_0* event)
 {
     Event_0_9_15 e;
     bool r = openvr::systemImpl->pollNextEvent(&e, sizeof(Event_0_9_15));
-    event->type = e.type;
-    event->trackedDeviceIndex = e.trackedDeviceIndex;
-    event->ageSeconds = e.ageSeconds;
-    std::memcpy(&event->data, &e.data, sizeof(Event_0_9_0::EventData));
+    utils::convertToLegacyEvent(*event, e);
     return r;
 }
 
@@ -2619,10 +2618,7 @@ bool System_004::pollNextEvent(Event_0_9_0* event)
 {
     Event_0_9_15 e;
     bool r = openvr::systemImpl->pollNextEvent(&e, sizeof(Event_0_9_15));
-    event->type = e.type;
-    event->trackedDeviceIndex = e.trackedDeviceIndex;
-    event->ageSeconds = e.ageSeconds;
-    std::memcpy(&event->data, &e.data, sizeof(Event_0_9_0::EventData));
+    utils::convertToLegacyEvent(*event, e);
     return r;
 }
 
@@ -2630,10 +2626,7 @@ bool System_005::pollNextEvent(Event_0_9_0* event)
 {
     Event_0_9_15 e;
     bool r = openvr::systemImpl->pollNextEvent(&e, sizeof(Event_0_9_15));
-    event->type = e.type;
-    event->trackedDeviceIndex = e.trackedDeviceIndex;
-    event->ageSeconds = e.ageSeconds;
-    std::memcpy(&event->data, &e.data, sizeof(Event_0_9_0::EventData));
+    utils::convertToLegacyEvent(*event, e);
     return r;
 }
 
@@ -2641,10 +2634,7 @@ bool System_006::pollNextEvent(Event_0_9_0* event)
 {
     Event_0_9_15 e;
     bool r = openvr::systemImpl->pollNextEvent(&e, sizeof(Event_0_9_15));
-    event->type = e.type;
-    event->trackedDeviceIndex = e.trackedDeviceIndex;
-    event->ageSeconds = e.ageSeconds;
-    std::memcpy(&event->data, &e.data, sizeof(Event_0_9_0::EventData));
+    utils::convertToLegacyEvent(*event, e);
     return r;
 }
 
@@ -2652,10 +2642,7 @@ bool System_007::pollNextEvent(Event_0_9_0* event)
 {
     Event_0_9_15 e;
     bool r = openvr::systemImpl->pollNextEvent(&e, sizeof(Event_0_9_15));
-    event->type = e.type;
-    event->trackedDeviceIndex = e.trackedDeviceIndex;
-    event->ageSeconds = e.ageSeconds;
-    std::memcpy(&event->data, &e.data, sizeof(Event_0_9_0::EventData));
+    utils::convertToLegacyEvent(*event, e);
     return r;
 }
 
@@ -2663,10 +2650,7 @@ bool System_009::pollNextEvent(Event_0_9_0* event)
 {
     Event_0_9_15 e;
     bool r = openvr::systemImpl->pollNextEvent(&e, sizeof(Event_0_9_15));
-    event->type = e.type;
-    event->trackedDeviceIndex = e.trackedDeviceIndex;
-    event->ageSeconds = e.ageSeconds;
-    std::memcpy(&event->data, &e.data, sizeof(Event_0_9_0::EventData));
+    utils::convertToLegacyEvent(*event, e);
     return r;
 }
 
@@ -2674,10 +2658,7 @@ bool System_010::pollNextEvent(Event_0_9_0* event)
 {
     Event_0_9_15 e;
     bool r = openvr::systemImpl->pollNextEvent(&e, sizeof(Event_0_9_15));
-    event->type = e.type;
-    event->trackedDeviceIndex = e.trackedDeviceIndex;
-    event->ageSeconds = e.ageSeconds;
-    std::memcpy(&event->data, &e.data, sizeof(Event_0_9_0::EventData));
+    utils::convertToLegacyEvent(*event, e);
     return r;
 }
 

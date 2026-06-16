@@ -2,8 +2,6 @@
 
 #include "../types.h"
 
-#include "../impl/client_core.h"
-
 namespace openvr
 {
     // TODO: ClientCore_001 is known to exist but we don't have source code for it so we don't know the format

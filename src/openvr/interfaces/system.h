@@ -4,8 +4,6 @@
 #include <cstdint>
 #include <vulkan/vulkan.h>
 
-#include "../impl/system.h"
-
 namespace openvr
 {
     struct System_003

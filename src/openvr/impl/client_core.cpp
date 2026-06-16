@@ -45,7 +45,7 @@ InitError ClientCoreImpl::init(ApplicationType applicationType, const char* star
         openvr::compositorImpl = new CompositorImpl(*openvr::clientCoreImpl);
         openvr::inputImpl = new InputImpl(*openvr::clientCoreImpl);
         openvr::chaperoneImpl = new ChaperoneImpl(*openvr::clientCoreImpl);
-        //openvr::overlayImpl = new OverlayImpl(*openvr::clientCoreImpl);
+        openvr::overlayImpl = new OverlayImpl(*openvr::clientCoreImpl);
         openvr::renderModelsImpl = new RenderModelsImpl(*openvr::clientCoreImpl);
         openvr::settingsImpl = new SettingsImpl(*openvr::clientCoreImpl);
         openvr::screenshotsImpl = new ScreenshotsImpl(*openvr::clientCoreImpl);
@@ -69,7 +69,7 @@ void ClientCoreImpl::cleanup()
         delete openvr::compositorImpl;
         delete openvr::inputImpl;
         delete openvr::chaperoneImpl;
-        //delete openvr::overlayImpl;
+        delete openvr::overlayImpl;
         delete openvr::renderModelsImpl;
         delete openvr::settingsImpl;
         delete openvr::screenshotsImpl;
@@ -80,7 +80,7 @@ void ClientCoreImpl::cleanup()
         openvr::compositorImpl = nullptr;
         openvr::inputImpl = nullptr;
         openvr::chaperoneImpl = nullptr;
-        //openvr::overlayImpl = nullptr;
+        openvr::overlayImpl = nullptr;
         openvr::renderModelsImpl = nullptr;
         openvr::settingsImpl = nullptr;
         openvr::screenshotsImpl = nullptr;
@@ -331,14 +331,105 @@ static void* getInterface(const std::string& nameAndVersion, bool create, bool* 
     }
     else if (name == "IVROverlay")
     {
-        // TODO
-        if (version == "018")
+        if (version == "001")
+        {
+            return create ? (fnTable ? (void*) new Overlay_001() : (void*) new Overlay_001_v()) : nullptr;
+        }
+        else if (version == "002")
+        {
+            return create ? (fnTable ? (void*) new Overlay_002() : (void*) new Overlay_002_v()) : nullptr;
+        }
+        else if (version == "003")
+        {
+            return create ? (fnTable ? (void*) new Overlay_003() : (void*) new Overlay_003_v()) : nullptr;
+        }
+        else if (version == "004")
+        {
+            return create ? (fnTable ? (void*) new Overlay_004() : (void*) new Overlay_004_v()) : nullptr;
+        }
+        else if (version == "005")
+        {
+            return create ? (fnTable ? (void*) new Overlay_005() : (void*) new Overlay_005_v()) : nullptr;
+        }
+        else if (version == "006")
+        {
+            return create ? (fnTable ? (void*) new Overlay_006() : (void*) new Overlay_006_v()) : nullptr;
+        }
+        else if (version == "007")
+        {
+            return create ? (fnTable ? (void*) new Overlay_007() : (void*) new Overlay_007_v()) : nullptr;
+        }
+        else if (version == "008")
+        {
+            return create ? (fnTable ? (void*) new Overlay_008() : (void*) new Overlay_008_v()) : nullptr;
+        }
+        else if (version == "010")
+        {
+            return create ? (fnTable ? (void*) new Overlay_010() : (void*) new Overlay_010_v()) : nullptr;
+        }
+        else if (version == "011")
+        {
+            return create ? (fnTable ? (void*) new Overlay_011() : (void*) new Overlay_011_v()) : nullptr;
+        }
+        else if (version == "012")
+        {
+            return create ? (fnTable ? (void*) new Overlay_012() : (void*) new Overlay_012_v()) : nullptr;
+        }
+        else if (version == "013")
+        {
+            return create ? (fnTable ? (void*) new Overlay_013() : (void*) new Overlay_013_v()) : nullptr;
+        }
+        else if (version == "014")
+        {
+            return create ? (fnTable ? (void*) new Overlay_014() : (void*) new Overlay_014_v()) : nullptr;
+        }
+        else if (version == "016")
+        {
+            return create ? (fnTable ? (void*) new Overlay_016() : (void*) new Overlay_016_v()) : nullptr;
+        }
+        else if (version == "017")
+        {
+            return create ? (fnTable ? (void*) new Overlay_017() : (void*) new Overlay_017_v()) : nullptr;
+        }
+        else if (version == "018")
         {
             return create ? (fnTable ? (void*) new Overlay_018() : (void*) new Overlay_018_v()) : nullptr;
         }
         else if (version == "019")
         {
             return create ? (fnTable ? (void*) new Overlay_019() : (void*) new Overlay_019_v()) : nullptr;
+        }
+        else if (version == "020")
+        {
+            return create ? (fnTable ? (void*) new Overlay_020() : (void*) new Overlay_020_v()) : nullptr;
+        }
+        else if (version == "021")
+        {
+            return create ? (fnTable ? (void*) new Overlay_021() : (void*) new Overlay_021_v()) : nullptr;
+        }
+        else if (version == "022")
+        {
+            return create ? (fnTable ? (void*) new Overlay_022() : (void*) new Overlay_022_v()) : nullptr;
+        }
+        else if (version == "024")
+        {
+            return create ? (fnTable ? (void*) new Overlay_024() : (void*) new Overlay_024_v()) : nullptr;
+        }
+        else if (version == "025")
+        {
+            return create ? (fnTable ? (void*) new Overlay_025() : (void*) new Overlay_025_v()) : nullptr;
+        }
+        else if (version == "026")
+        {
+            return create ? (fnTable ? (void*) new Overlay_026() : (void*) new Overlay_026_v()) : nullptr;
+        }
+        else if (version == "027")
+        {
+            return create ? (fnTable ? (void*) new Overlay_027() : (void*) new Overlay_027_v()) : nullptr;
+        }
+        else if (version == "028")
+        {
+            return create ? (fnTable ? (void*) new Overlay_028() : (void*) new Overlay_028_v()) : nullptr;
         }
     }
     else if (name == "IVRRenderModels")

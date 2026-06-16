@@ -16,7 +16,7 @@ namespace openvr
     CompositorImpl* compositorImpl = nullptr;
     InputImpl* inputImpl = nullptr;
     ChaperoneImpl* chaperoneImpl = nullptr;
-    //OverlayImpl* overlayImpl = nullptr;
+    OverlayImpl* overlayImpl = nullptr;
     RenderModelsImpl* renderModelsImpl = nullptr;
     SettingsImpl* settingsImpl = nullptr;
     ScreenshotsImpl* screenshotsImpl = nullptr;

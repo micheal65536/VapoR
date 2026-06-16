@@ -11,6 +11,7 @@
 #include "device_property_set.h"
 #include "render_model.h"
 #include "input/action_manager.h"
+#include "windows/window_manager.h"
 
 #include <string>
 #include <vector>
@@ -43,6 +44,7 @@ namespace vapor
             HapticQueue* hapticQueue;
             EventQueue eventQueue;
             InputManager* inputManager;
+            windows::WindowManager* windowManager;
 
             void queueResetSeatedZeroPose(bool fromSystemMenu);
             void queueResetStandingZeroPose(bool fromSystemMenu);
@@ -63,10 +65,13 @@ namespace vapor
             PFN_xrGetDisplayRefreshRateFB xrGetDisplayRefreshRateFB;
 
             OpenXR::Swapchain* swapchains[2];
+            OpenXR::Swapchain* overlaySwapchains[2];
             OpenGL::Framebuffer* framebuffer;
             OpenGL::Framebuffer* srcFramebuffers[2] = {nullptr, nullptr};
             OpenGL::Texture* srcTextures[2][2] = {{nullptr, nullptr}, {nullptr, nullptr}};
             OpenGL::ExternalMemory* externalMemory[2][2] = {{nullptr, nullptr}, {nullptr, nullptr}};
+
+            windows::WindowRenderer* windowRenderer;
 
             OpenXR::Space* viewSpace;
             OpenXR::Space* localSpace;

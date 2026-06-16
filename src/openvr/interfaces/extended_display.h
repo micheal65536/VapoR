@@ -3,8 +3,6 @@
 #include "../types.h"
 #include <cstdint>
 
-#include "../impl/extended_display.h"
-
 namespace openvr
 {
     struct ExtendedDisplay_001

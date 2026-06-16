@@ -3,8 +3,6 @@
 #include "../types.h"
 #include <cstdint>
 
-#include "../impl/rendermodel.h"
-
 namespace openvr
 {
     struct RenderModels_001

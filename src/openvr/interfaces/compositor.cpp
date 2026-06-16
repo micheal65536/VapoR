@@ -3,6 +3,8 @@
 #include "log/log.h"
 #include "log/stub.h"
 
+#include "utils/legacy_helpers.h"
+
 using namespace openvr;
 
 static uint32_t errorCodeToString(CompositorError error, char* buffer, uint32_t bufferSize)
@@ -12,32 +14,26 @@ static uint32_t errorCodeToString(CompositorError error, char* buffer, uint32_t 
     return 0;
 }
 
-CompositorError Compositor_005::lastError = CompositorError::COMPOSITOR_ERROR_NONE;
-CompositorError Compositor_006::lastError = CompositorError::COMPOSITOR_ERROR_NONE;
-CompositorError Compositor_007::lastError = CompositorError::COMPOSITOR_ERROR_NONE;
-CompositorError Compositor_008::lastError = CompositorError::COMPOSITOR_ERROR_NONE;
-
-DeviceType Compositor_005::deviceType = DeviceType::DEVICE_TYPE_NONE;
-DeviceType Compositor_006::deviceType = DeviceType::DEVICE_TYPE_NONE;
+static CompositorError legacyLastError = CompositorError::COMPOSITOR_ERROR_NONE;
 
 uint32_t Compositor_005::getLastError(char* buffer, uint32_t bufferSize)
 {
-    return errorCodeToString(Compositor_005::lastError, buffer, bufferSize);
+    return errorCodeToString(legacyLastError, buffer, bufferSize);
 }
 
 uint32_t Compositor_006::getLastError(char* buffer, uint32_t bufferSize)
 {
-    return errorCodeToString(Compositor_006::lastError, buffer, bufferSize);
+    return errorCodeToString(legacyLastError, buffer, bufferSize);
 }
 
 uint32_t Compositor_007::getLastError(char* buffer, uint32_t bufferSize)
 {
-    return errorCodeToString(Compositor_007::lastError, buffer, bufferSize);
+    return errorCodeToString(legacyLastError, buffer, bufferSize);
 }
 
 uint32_t Compositor_008::getLastError(char* buffer, uint32_t bufferSize)
 {
-    return errorCodeToString(Compositor_008::lastError, buffer, bufferSize);
+    return errorCodeToString(legacyLastError, buffer, bufferSize);
 }
 
 void Compositor_005::setVSync(bool enabled)
@@ -330,32 +326,32 @@ TrackingUniverseOrigin Compositor_029::getTrackingSpace()
 
 void Compositor_005::setGraphicsDevice(DeviceType deviceType, void* device)
 {
-    Compositor_005::deviceType = deviceType;
+    openvr::compositorImpl->legacyDeviceType = deviceType;
 }
 
 void Compositor_006::setGraphicsDevice(DeviceType deviceType, void* device)
 {
-    Compositor_006::deviceType = deviceType;
+    openvr::compositorImpl->legacyDeviceType = deviceType;
 }
 
 void Compositor_005::waitGetPoses(TrackedDevicePose* poses, uint32_t posesCount)
 {
-    Compositor_005::lastError = openvr::compositorImpl->waitGetPoses(poses, posesCount, nullptr, 0);
+    legacyLastError = openvr::compositorImpl->waitGetPoses(poses, posesCount, nullptr, 0);
 }
 
 CompositorError Compositor_006::waitGetPoses(TrackedDevicePose* renderPoses, uint32_t renderPosesCount, TrackedDevicePose* gamePoses, uint32_t gamePosesCount)
 {
-    return (Compositor_006::lastError = openvr::compositorImpl->waitGetPoses(renderPoses, renderPosesCount, gamePoses, gamePosesCount));
+    return (legacyLastError = openvr::compositorImpl->waitGetPoses(renderPoses, renderPosesCount, gamePoses, gamePosesCount));
 }
 
 CompositorError Compositor_007::waitGetPoses(TrackedDevicePose* renderPoses, uint32_t renderPosesCount, TrackedDevicePose* gamePoses, uint32_t gamePosesCount)
 {
-    return (Compositor_007::lastError = openvr::compositorImpl->waitGetPoses(renderPoses, renderPosesCount, gamePoses, gamePosesCount));
+    return (legacyLastError = openvr::compositorImpl->waitGetPoses(renderPoses, renderPosesCount, gamePoses, gamePosesCount));
 }
 
 CompositorError Compositor_008::waitGetPoses(TrackedDevicePose* renderPoses, uint32_t renderPosesCount, TrackedDevicePose* gamePoses, uint32_t gamePosesCount)
 {
-    return (Compositor_008::lastError = openvr::compositorImpl->waitGetPoses(renderPoses, renderPosesCount, gamePoses, gamePosesCount));
+    return (legacyLastError = openvr::compositorImpl->waitGetPoses(renderPoses, renderPosesCount, gamePoses, gamePosesCount));
 }
 
 CompositorError Compositor_009::waitGetPoses(TrackedDevicePose* renderPoses, uint32_t renderPosesCount, TrackedDevicePose* gamePoses, uint32_t gamePosesCount)
@@ -440,7 +436,7 @@ CompositorError Compositor_029::waitGetPoses(TrackedDevicePose* renderPoses, uin
 
 CompositorError Compositor_008::getLastPoses(TrackedDevicePose* renderPoses, uint32_t renderPosesCount, TrackedDevicePose* gamePoses, uint32_t gamePosesCount)
 {
-    return (Compositor_008::lastError = openvr::compositorImpl->getLastPoses(renderPoses, renderPosesCount, gamePoses, gamePosesCount));
+    return (legacyLastError = openvr::compositorImpl->getLastPoses(renderPoses, renderPosesCount, gamePoses, gamePosesCount));
 }
 
 CompositorError Compositor_009::getLastPoses(TrackedDevicePose* renderPoses, uint32_t renderPosesCount, TrackedDevicePose* gamePoses, uint32_t gamePosesCount)
@@ -600,55 +596,35 @@ CompositorError Compositor_029::getSubmitTexture(Texture* textureOut, bool* need
 
 void Compositor_005::submit(Eye eye, void* texture, const TextureBounds* bounds)
 {
-    TextureType textureType;
-    switch (Compositor_005::deviceType)
+    TextureType textureType = utils::legacyDeviceTypeToTextureType(openvr::compositorImpl->legacyDeviceType);
+    if (textureType == TextureType::TEXTURE_TYPE_INVALID)
     {
-        case DeviceType::DEVICE_TYPE_OPENGL:
-            textureType = TextureType::TEXTURE_TYPE_OPENGL;
-            break;
-        case DeviceType::DEVICE_TYPE_D3D9:
-        case DeviceType::DEVICE_TYPE_D3D9EX:
-        case DeviceType::DEVICE_TYPE_D3D10:
-        case DeviceType::DEVICE_TYPE_D3D11:
-            textureType = TextureType::TEXTURE_TYPE_DIRECTX_11;
-            break;
-        case DeviceType::DEVICE_TYPE_NONE:
-            TRACE_F("called with no device type set!");
-            Compositor_005::lastError = CompositorError::COMPOSITOR_ERROR_REQUEST_FAILED;
-            return;
+        TRACE_F("called with no device type set!");
+        legacyLastError = CompositorError::COMPOSITOR_ERROR_REQUEST_FAILED;
+        return;
     }
     Texture texture_ {
         .handle = texture,
         .type = textureType,
-        .colorSpace = ColorSpace::COLOR_SPACE_AUTO // TODO
+        .colorSpace = ColorSpace::COLOR_SPACE_AUTO
     };
-    Compositor_005::lastError = openvr::compositorImpl->submit(eye, &texture_, bounds, SubmitFlags::SUBMIT_DEFAULT);
+    legacyLastError = openvr::compositorImpl->submit(eye, &texture_, bounds, SubmitFlags::SUBMIT_DEFAULT);
 }
 
 CompositorError Compositor_006::submit(Eye eye, void* texture, const TextureBounds* bounds)
 {
-    TextureType textureType;
-    switch (Compositor_006::deviceType)
+    TextureType textureType = utils::legacyDeviceTypeToTextureType(openvr::compositorImpl->legacyDeviceType);
+    if (textureType == TextureType::TEXTURE_TYPE_INVALID)
     {
-        case DeviceType::DEVICE_TYPE_OPENGL:
-            textureType = TextureType::TEXTURE_TYPE_OPENGL;
-            break;
-        case DeviceType::DEVICE_TYPE_D3D9:
-        case DeviceType::DEVICE_TYPE_D3D9EX:
-        case DeviceType::DEVICE_TYPE_D3D10:
-        case DeviceType::DEVICE_TYPE_D3D11:
-            textureType = TextureType::TEXTURE_TYPE_DIRECTX_11;
-            break;
-        case DeviceType::DEVICE_TYPE_NONE:
-            TRACE_F("called with no device type set!");
-            return (Compositor_006::lastError = CompositorError::COMPOSITOR_ERROR_REQUEST_FAILED);
+        TRACE_F("called with no device type set!");
+        return (legacyLastError = CompositorError::COMPOSITOR_ERROR_REQUEST_FAILED);
     }
     Texture texture_ {
         .handle = texture,
         .type = textureType,
-        .colorSpace = ColorSpace::COLOR_SPACE_AUTO // TODO
+        .colorSpace = ColorSpace::COLOR_SPACE_AUTO
     };
-    return (Compositor_006::lastError = openvr::compositorImpl->submit(eye, &texture_, bounds, SubmitFlags::SUBMIT_DEFAULT));
+    return (legacyLastError = openvr::compositorImpl->submit(eye, &texture_, bounds, SubmitFlags::SUBMIT_DEFAULT));
 }
 
 CompositorError Compositor_007::submit(Eye eye, TextureType textureType, void* texture, const TextureBounds* bounds)
@@ -656,9 +632,9 @@ CompositorError Compositor_007::submit(Eye eye, TextureType textureType, void* t
     Texture texture_ {
         .handle = texture,
         .type = textureType,
-        .colorSpace = ColorSpace::COLOR_SPACE_AUTO // TODO
+        .colorSpace = ColorSpace::COLOR_SPACE_AUTO
     };
-    return (Compositor_007::lastError = openvr::compositorImpl->submit(eye, &texture_, bounds, SubmitFlags::SUBMIT_DEFAULT));
+    return (legacyLastError = openvr::compositorImpl->submit(eye, &texture_, bounds, SubmitFlags::SUBMIT_DEFAULT));
 }
 
 CompositorError Compositor_008::submit(Eye eye, TextureType textureType, void* texture, const TextureBounds* bounds)
@@ -666,9 +642,9 @@ CompositorError Compositor_008::submit(Eye eye, TextureType textureType, void* t
     Texture texture_ {
         .handle = texture,
         .type = textureType,
-        .colorSpace = ColorSpace::COLOR_SPACE_AUTO // TODO
+        .colorSpace = ColorSpace::COLOR_SPACE_AUTO
     };
-    return (Compositor_008::lastError = openvr::compositorImpl->submit(eye, &texture_, bounds, SubmitFlags::SUBMIT_DEFAULT));
+    return (legacyLastError = openvr::compositorImpl->submit(eye, &texture_, bounds, SubmitFlags::SUBMIT_DEFAULT));
 }
 
 CompositorError Compositor_009::submit(Eye eye, const Texture* texture, const TextureBounds* bounds, int32_t submitFlags)
@@ -1558,35 +1534,35 @@ void Compositor_008::setSkyboxOverride(TextureType textureType, void* front, voi
         Texture {
             .handle = front,
             .type = textureType,
-            .colorSpace = ColorSpace::COLOR_SPACE_AUTO // TODO
+            .colorSpace = ColorSpace::COLOR_SPACE_AUTO
         },
         Texture {
             .handle = back,
             .type = textureType,
-            .colorSpace = ColorSpace::COLOR_SPACE_AUTO // TODO
+            .colorSpace = ColorSpace::COLOR_SPACE_AUTO
         },
         Texture {
             .handle = left,
             .type = textureType,
-            .colorSpace = ColorSpace::COLOR_SPACE_AUTO // TODO
+            .colorSpace = ColorSpace::COLOR_SPACE_AUTO
         },
         Texture {
             .handle = right,
             .type = textureType,
-            .colorSpace = ColorSpace::COLOR_SPACE_AUTO // TODO
+            .colorSpace = ColorSpace::COLOR_SPACE_AUTO
         },
         Texture {
             .handle = top,
             .type = textureType,
-            .colorSpace = ColorSpace::COLOR_SPACE_AUTO // TODO
+            .colorSpace = ColorSpace::COLOR_SPACE_AUTO
         },
         Texture {
             .handle = bottom,
             .type = textureType,
-            .colorSpace = ColorSpace::COLOR_SPACE_AUTO // TODO
+            .colorSpace = ColorSpace::COLOR_SPACE_AUTO
         }
     };
-    Compositor_008::lastError = openvr::compositorImpl->setSkyboxOverride(textures, 6);
+    legacyLastError = openvr::compositorImpl->setSkyboxOverride(textures, 6);
 }
 
 CompositorError Compositor_009::setSkyboxOverride(const Texture* textures, uint32_t texturesCount)

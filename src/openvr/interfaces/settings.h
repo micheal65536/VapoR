@@ -3,8 +3,6 @@
 #include "../types.h"
 #include <cstdint>
 
-#include "../impl/settings.h"
-
 namespace openvr
 {
     struct Settings_001

@@ -3,8 +3,6 @@
 #include "../types.h"
 #include <cstdint>
 
-#include "../impl/input.h"
-
 namespace openvr
 {
     struct Input_003

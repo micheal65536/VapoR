@@ -3,8 +3,6 @@
 #include "../types.h"
 #include <cstdint>
 
-#include "../impl/applications.h"
-
 namespace openvr
 {
     // TODO: other versions

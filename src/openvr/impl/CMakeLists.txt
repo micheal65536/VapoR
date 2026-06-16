@@ -5,6 +5,7 @@ target_sources(vrclient PRIVATE
     compositor.cpp
     input.cpp
     chaperone.cpp
+    overlay.cpp
     rendermodel.cpp
     settings.cpp
     screenshot.cpp
