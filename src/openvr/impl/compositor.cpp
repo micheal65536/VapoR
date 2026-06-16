@@ -159,7 +159,18 @@ CompositorError CompositorImpl::submit(Eye eye, const Texture* texture, const Te
     else if (texture->type == TextureType::TEXTURE_TYPE_VULKAN)
     {
         const VulkanTextureData* textureData = (VulkanTextureData*) texture->handle;
-        CompositorError error = imageCaptureBuffers[eye].captureVulkan(textureData);
+        uint32_t arrayIndex;
+        if (submitFlags & SubmitFlags::SUBMIT_VULKAN_TEXTURE_WITH_ARRAY_DATA)
+        {
+            const VulkanTextureArrayData* textureArrayData = (const VulkanTextureArrayData*) textureData;
+            TRACE_F("Vulkan array texture data %d %d", textureArrayData->arrayIndex, textureArrayData->arraySize);
+            arrayIndex = textureArrayData->arrayIndex;
+        }
+        else
+        {
+            arrayIndex = 0;
+        }
+        CompositorError error = imageCaptureBuffers[eye].captureVulkan(textureData, arrayIndex);
         if (error != CompositorError::COMPOSITOR_ERROR_NONE)
         {
             return error;

@@ -123,6 +123,12 @@ namespace openvr
         uint32_t sampleCount;
     };
 
+    struct VulkanTextureArrayData : public VulkanTextureData
+    {
+        uint32_t arrayIndex;
+        uint32_t arraySize;
+    };
+
     struct GLSharedTextureHandle
     {
         // TODO

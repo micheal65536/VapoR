@@ -297,7 +297,7 @@ VulkanImageCaptureBuffer::~VulkanImageCaptureBuffer()
     }
 }
 
-openvr::CompositorError VulkanImageCaptureBuffer::capture(const openvr::VulkanTextureData* textureData, int x, int y)
+openvr::CompositorError VulkanImageCaptureBuffer::capture(const openvr::VulkanTextureData* textureData, uint32_t textureArrayIndex, int x, int y)
 {
     if (textureData->instance != common.instance || textureData->physicalDevice != common.physicalDevice || textureData->device != common.device || textureData->queue != common.queue || textureData->queueFamilyIndex != common.queueFamilyIndex)
     {
@@ -308,6 +308,7 @@ openvr::CompositorError VulkanImageCaptureBuffer::capture(const openvr::VulkanTe
     common.beginCommandBuffer();
 
     VkImage srcImage;
+    uint32_t srcArrayIndex;
     if (textureData->sampleCount != 1)
     {
         if (textureData->width != tmpImageWidth || textureData->height != tmpImageHeight || (VkFormat) textureData->format != tmpImageFormat)
@@ -328,7 +329,7 @@ openvr::CompositorError VulkanImageCaptureBuffer::capture(const openvr::VulkanTe
             .srcSubresource = {
                 .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
                 .mipLevel = 0,
-                .baseArrayLayer = 0,
+                .baseArrayLayer = textureArrayIndex,
                 .layerCount = 1
             },
             .srcOffset = { .x = 0, .y = 0, .z = 0},
@@ -346,10 +347,12 @@ openvr::CompositorError VulkanImageCaptureBuffer::capture(const openvr::VulkanTe
         common.transitionImageLayout(tmpImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
 
         srcImage = tmpImage;
+        srcArrayIndex = 0;
     }
     else
     {
         srcImage = textureData->image;
+        srcArrayIndex = textureArrayIndex;
     }
 
     VkImage dstImage = dstImages[getCurrentCaptureBufferIndex()];
@@ -360,7 +363,7 @@ openvr::CompositorError VulkanImageCaptureBuffer::capture(const openvr::VulkanTe
         .srcSubresource = {
             .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
             .mipLevel = 0,
-            .baseArrayLayer = 0,
+            .baseArrayLayer = srcArrayIndex,
             .layerCount = 1
         },
         .srcOffsets = {
