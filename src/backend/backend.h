@@ -12,6 +12,7 @@
 #include "render_model.h"
 #include "input/action_manager.h"
 
+#include <string>
 #include <vector>
 #include <ctime>
 
@@ -20,7 +21,7 @@ namespace vapor
     class Backend
     {
         public:
-            Backend();
+            Backend(const std::string& startupParamsString);
             ~Backend();
             void loop();
             void waitForFirstFrame();

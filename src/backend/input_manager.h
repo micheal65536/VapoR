@@ -4,6 +4,7 @@
 #include "input_profile.h"
 #include "legacy_input.h"
 
+#include <string>
 #include <vector>
 #include <mutex>
 
@@ -20,7 +21,8 @@ namespace vapor
             void putCurrentInputStates(const std::vector<input_profile::OpenVRInputState>& inputStates);
             const std::vector<input_profile::OpenVRInputState>& getInputStates();
 
-            void setSceneActionManager(input::ActionManager* actionManager);
+            bool createSceneActionManager(const std::string& manifestPath);
+            //void setSceneActionManager(input::ActionManager* actionManager);
             input::ActionManager* getSceneActionManager();
 
             void updateLegacyInputStateAndEmitEvents(EventQueue& eventQueue, long currentTime);

@@ -21,33 +21,18 @@ InputImpl::InputImpl(ClientCoreImpl& clientCore): clientCore(clientCore)
 
 InputImpl::~InputImpl()
 {
-    delete this->clientCore.backend->inputManager->getSceneActionManager();
-    this->clientCore.backend->inputManager->setSceneActionManager(nullptr);
+    // empty
 }
 
 InputError InputImpl::setActionManifestPath(const char* path)
 {
-    vapor::input::ActionManager* actionManager = new vapor::input::ActionManager();
-    if (!actionManager->populateFromJSON(path))
+    if (this->clientCore.backend->inputManager->createSceneActionManager(path))
     {
-        LOG("Failed to read actions from %s", path);
-        return InputError::INPUT_ERROR_IPC_ERROR;
+        return InputError::INPUT_ERROR_NONE;
     }
     else
     {
-        LOG("Read actions from %s", path);
-        if (actionManager->loadBinding("vapor_binding.json", this->clientCore.backend->inputProfile))
-        {
-            LOG("Loaded custom binding");
-        }
-        else
-        {
-            LOG("Failed to load custom binding, trying default binding");
-            actionManager->loadDefaultBindingForControllerProfile(this->clientCore.backend->inputProfile);
-        }
-        delete this->clientCore.backend->inputManager->getSceneActionManager();
-        this->clientCore.backend->inputManager->setSceneActionManager(actionManager);
-        return InputError::INPUT_ERROR_NONE;
+        return InputError::INPUT_ERROR_IPC_ERROR;
     }
 }
 
