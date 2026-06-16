@@ -619,7 +619,7 @@ OverlayError OverlayImpl::setOverlayTexture(uint64_t handle, const Texture* text
     else if (texture->type == TextureType::TEXTURE_TYPE_VULKAN)
     {
         const VulkanTextureData* textureData = (VulkanTextureData*) texture->handle;
-        captureError = imageCaptureBuffer.captureVulkan(textureData);
+        captureError = imageCaptureBuffer.captureVulkan(textureData, 0);
     }
     else
     {
