@@ -28,8 +28,9 @@ WindowRenderer::WindowRenderer()
         "uniform sampler2D u_texture;\n"
         "uniform vec4 u_texture_bounds;\n"
         "in vec2 v_uv;\n"
+        "layout(location = 0) out vec4 f_color;\n"
         "void main() {\n"
-        "   gl_FragColor = texture(u_texture, v_uv * (u_texture_bounds.zw - u_texture_bounds.xy) + u_texture_bounds.xy);\n"
+        "   f_color = texture(u_texture, v_uv * (u_texture_bounds.zw - u_texture_bounds.xy) + u_texture_bounds.xy);\n"
         "}"
     );
     this->flatVertices = new OpenGL::AttributeBuffer();
