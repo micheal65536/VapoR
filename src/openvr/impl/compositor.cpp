@@ -332,6 +332,7 @@ float CompositorImpl::getCurrentGridAlpha()
 CompositorError CompositorImpl::setSkyboxOverride(const Texture* textures, uint32_t texturesCount)
 {
     STUB();
+    return CompositorError::COMPOSITOR_ERROR_NONE;
 }
 
 void CompositorImpl::clearSkyboxOverride()
