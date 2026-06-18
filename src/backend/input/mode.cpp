@@ -1318,6 +1318,187 @@ bool DpadMode::DpadOutput::update(float x, float y)
 
 //
 
+ScrollMode::ScrollMode(const nlohmann::json::object_t& parameters, OpenVRProfileInputType profileInputType)
+{
+    const std::string& scrollModeString = parameters.contains("scroll_mode") ? parameters.at("scroll_mode") : "discrete";
+    if (profileInputType == OpenVRProfileInputType::JOYSTICK)
+    {
+        if (scrollModeString == "discrete")
+        {
+            scrollBehavior = new JoystickDiscreteScrollBehavior(parameters);
+        }
+        else if (scrollModeString == "smooth")
+        {
+            scrollBehavior = new JoystickSmoothScrollBehavior(parameters);
+        }
+    }
+    else if (profileInputType == OpenVRProfileInputType::TRACKPAD)
+    {
+        if (scrollModeString == "discrete")
+        {
+            scrollBehavior = new TrackpadDiscreteScrollBehavior(parameters);
+        }
+        else if (scrollModeString == "smooth")
+        {
+            scrollBehavior = new TrackpadSmoothScrollBehavior(parameters);
+        }
+    }
+}
+
+ScrollMode::~ScrollMode()
+{
+    delete scrollBehavior;
+    scrollBehavior = nullptr;
+}
+
+std::vector<std::string> ScrollMode::getProvidedOutputNames()
+{
+    static const std::vector<std::string> names = (std::vector<std::string>) {"scroll"};
+    return names;
+}
+
+std::vector<int> ScrollMode::connect(const std::vector<Mode::ComponentDescription>& availableComponents, const bool* connectedOutputs)
+{
+    std::vector<int> indexes;
+
+    if (scrollBehavior == nullptr)
+    {
+        return indexes;
+    }
+
+    if (!connectedOutputs[0])
+    {
+        delete scrollBehavior;
+        scrollBehavior = nullptr;
+        return indexes;
+    }
+
+    int xIndex = findComponent("x", OpenVRInputType::FLOAT, availableComponents);
+    int yIndex = findComponent("y", OpenVRInputType::FLOAT, availableComponents);
+    int touchIndex = scrollBehavior->requiresTouch() ? findComponent("touch", OpenVRInputType::BOOLEAN, availableComponents) : -1;
+    if (xIndex == -1 || yIndex == -1 || (scrollBehavior->requiresTouch() && touchIndex == -1))
+    {
+        delete scrollBehavior;
+        scrollBehavior = nullptr;
+        return indexes;
+    }
+    indexes.push_back(xIndex);
+    indexes.push_back(yIndex);
+    indexes.push_back(touchIndex);
+
+    return indexes;
+
+}
+
+std::vector<InputState> ScrollMode::getInitialStates(const uint64_t* inputSourceHandles)
+{
+    if (scrollBehavior == nullptr)
+    {
+        InputState emptyInitialState = InputState {
+            .type = InputType::EMPTY
+        };
+        return std::vector<InputState> {emptyInitialState};
+    }
+
+    if (scrollBehavior->requiresTouch())
+    {
+        outputInputSourceHandle = inputSourceHandles[2];
+    }
+    else
+    {
+        outputInputSourceHandle = inputSourceHandles[0];
+    }
+
+    InputState initialState = InputState {
+        .type = InputType::ANALOG,
+        .data = {.analog = {0.0f, 0.0f, 0.0f}},
+        .inputSourceHandle = outputInputSourceHandle,
+        .changeTime = 0
+    };
+    return std::vector<InputState> {initialState};
+}
+
+std::vector<InputState> ScrollMode::update(const InputState* inputStates, long currentTime)
+{
+    if (scrollBehavior == nullptr)
+    {
+        InputState emptyInputState = InputState {
+            .type = InputType::EMPTY
+        };
+        return std::vector<InputState> {emptyInputState};
+    }
+
+    InputState xInputState = inputStates[0];
+    InputState yInputState = inputStates[1];
+    InputState touchInputState = inputStates[2];
+    if (xInputState.type != InputType::EMPTY && yInputState.type != InputType::EMPTY && (!scrollBehavior->requiresTouch() || touchInputState.type != InputType::EMPTY))
+    {
+        scrollBehavior->update(inputStates, currentTime, lastUpdateTime);
+        lastUpdateTime = currentTime;
+    }
+
+    InputState inputState = InputState {
+        .type = InputType::ANALOG,
+        .data = {.analog = {scrollBehavior->x, scrollBehavior->y, 0.0f}},
+        .inputSourceHandle = outputInputSourceHandle,
+        .changeTime = lastUpdateTime
+    };
+    return std::vector<InputState> {inputState};
+}
+
+ScrollMode::JoystickDiscreteScrollBehavior::JoystickDiscreteScrollBehavior(const nlohmann::json::object_t& parameters)
+{
+    rate = parameters.contains("discrete_scroll_joystick_ratefactor") ? parameters.at("discrete_scroll_joystick_ratefactor").get<float>() : 1.0f;
+    scale = parameters.contains("discrete_scroll_joystick_scalefactor") ? parameters.at("discrete_scroll_joystick_scalefactor").get<float>() : 1.0f;
+    // TODO: discrete_scroll_joystick_deadzone_horizontal
+    deadZone = parameters.contains("discrete_scroll_joystick_deadzone_vertical") ? parameters.at("discrete_scroll_joystick_deadzone_vertical").get<float>() : 0.1f;
+}
+
+void ScrollMode::JoystickDiscreteScrollBehavior::JoystickDiscreteScrollBehavior::update(const InputState* inputStates, long currentTime, long previousUpdateTime)
+{
+    y = 0.0f;
+    float value = inputStates[1].data.analog.x;
+    value = std::copysign(std::max((std::abs(value) - deadZone) / (1.0f - deadZone), 0.0f), value) * rate;
+    accumulator += value;
+    if (std::abs(accumulator) > 6.0f)
+    {
+        y = std::copysign(1.0f, accumulator) * scale;
+        accumulator = 0.0f;
+    }
+}
+
+ScrollMode::JoystickSmoothScrollBehavior::JoystickSmoothScrollBehavior(const nlohmann::json::object_t& parameters)
+{
+    // TODO
+}
+
+void ScrollMode::JoystickSmoothScrollBehavior::JoystickSmoothScrollBehavior::update(const InputState* inputStates, long currentTime, long previousUpdateTime)
+{
+    // TODO
+}
+
+ScrollMode::TrackpadDiscreteScrollBehavior::TrackpadDiscreteScrollBehavior(const nlohmann::json::object_t& parameters)
+{
+    // TODO
+}
+
+void ScrollMode::TrackpadDiscreteScrollBehavior::TrackpadDiscreteScrollBehavior::update(const InputState* inputStates, long currentTime, long previousUpdateTime)
+{
+    // TODO
+}
+
+ScrollMode::TrackpadSmoothScrollBehavior::TrackpadSmoothScrollBehavior(const nlohmann::json::object_t& parameters)
+{
+    // TODO
+}
+
+void ScrollMode::TrackpadSmoothScrollBehavior::TrackpadSmoothScrollBehavior::update(const InputState* inputStates, long currentTime, long previousUpdateTime)
+{
+    // TODO
+}
+
+//
+
 ToggleButtonMode::ToggleButtonMode(const nlohmann::json::object_t& parameters)
 {
     clickInitialState = parameters.contains("click_initial_state") ? parameters.at("click_initial_state").get<bool>() : false;

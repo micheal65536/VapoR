@@ -267,18 +267,76 @@ namespace vapor
                 DpadOutput center;
         };
 
-        /*class ScrollMode: public Mode
+        class ScrollMode: public Mode
         {
             public:
                 ScrollMode(const nlohmann::json::object_t& parameters, input_profile::OpenVRProfileInputType profileInputType);
+                ~ScrollMode();
                 virtual std::vector<std::string> getProvidedOutputNames();
                 virtual std::vector<int> connect(const std::vector<ComponentDescription>& availableComponents, const bool* connectedOutputs);
                 virtual std::vector<InputState> getInitialStates(const uint64_t* inputSourceHandles);
                 virtual std::vector<InputState> update(const InputState* inputStates, long currentTime);
 
             private:
-                // TODO
-        };*/
+                class ScrollBehavior
+                {
+                    public:
+                        virtual ~ScrollBehavior() = default;
+                        virtual bool requiresTouch() const = 0;
+                        virtual void update(const InputState* inputStates, long currentTime, long previousUpdateTime) = 0;
+
+                        float x = 0.0f;
+                        float y = 0.0f;
+                };
+                class JoystickDiscreteScrollBehavior: public ScrollBehavior
+                {
+                    public:
+                        JoystickDiscreteScrollBehavior(const nlohmann::json::object_t& parameters);
+                        virtual bool requiresTouch() const { return false; };
+                        virtual void update(const InputState* inputStates, long currentTime, long previousUpdateTime);
+
+                    private:
+                        float rate;
+                        float scale;
+                        float deadZone;
+
+                        float accumulator = 0.0f;
+                };
+                class JoystickSmoothScrollBehavior: public ScrollBehavior
+                {
+                    public:
+                        JoystickSmoothScrollBehavior(const nlohmann::json::object_t& parameters);
+                        virtual bool requiresTouch() const { return false; };
+                        virtual void update(const InputState* inputStates, long currentTime, long previousUpdateTime);
+
+                    private:
+                        // TODO
+                };
+                class TrackpadDiscreteScrollBehavior: public ScrollBehavior
+                {
+                    public:
+                        TrackpadDiscreteScrollBehavior(const nlohmann::json::object_t& parameters);
+                        virtual bool requiresTouch() const { return true; };
+                        virtual void update(const InputState* inputStates, long currentTime, long previousUpdateTime);
+
+                    private:
+                        // TODO
+                };
+                class TrackpadSmoothScrollBehavior: public ScrollBehavior
+                {
+                    public:
+                        TrackpadSmoothScrollBehavior(const nlohmann::json::object_t& parameters);
+                        virtual bool requiresTouch() const { return true; };
+                        virtual void update(const InputState* inputStates, long currentTime, long previousUpdateTime);
+
+                    private:
+                        // TODO
+                };
+                ScrollBehavior* scrollBehavior = nullptr;
+
+                long lastUpdateTime = 0;
+                uint64_t outputInputSourceHandle;
+        };
 
         class ToggleButtonMode: public Mode
         {
