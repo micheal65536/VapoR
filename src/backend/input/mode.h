@@ -310,7 +310,8 @@ namespace vapor
                         virtual void update(const InputState* inputStates, long currentTime, long previousUpdateTime);
 
                     private:
-                        // TODO
+                        float scale;
+                        float deadZone;
                 };
                 class TrackpadDiscreteScrollBehavior: public ScrollBehavior
                 {

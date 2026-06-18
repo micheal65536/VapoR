@@ -1469,12 +1469,22 @@ void ScrollMode::JoystickDiscreteScrollBehavior::JoystickDiscreteScrollBehavior:
 
 ScrollMode::JoystickSmoothScrollBehavior::JoystickSmoothScrollBehavior(const nlohmann::json::object_t& parameters)
 {
-    // TODO
+    scale = parameters.contains("smooth_scroll_joystick_max_scroll_velocity") ? parameters.at("smooth_scroll_joystick_max_scroll_velocity").get<float>() : 20.0f;
+    deadZone = parameters.contains("smooth_scroll_joystick_min_input_magnitude") ? parameters.at("smooth_scroll_joystick_min_input_magnitude").get<float>() : 0.01f;
 }
 
 void ScrollMode::JoystickSmoothScrollBehavior::JoystickSmoothScrollBehavior::update(const InputState* inputStates, long currentTime, long previousUpdateTime)
 {
-    // TODO
+    float time = (currentTime - previousUpdateTime) / 1000000000.0;
+    float x = inputStates[0].data.analog.x;
+    float y = inputStates[1].data.analog.x;
+    float d = std::sqrt(x * x + y * y);
+    if (d > 0.0f)
+    {
+        float d1 = std::max((d - deadZone) / (1.0f - deadZone), 0.0f) * scale * time;
+        this->x = d1 * (x / d);
+        this->y = d1 * (y / d);
+    }
 }
 
 ScrollMode::TrackpadDiscreteScrollBehavior::TrackpadDiscreteScrollBehavior(const nlohmann::json::object_t& parameters)
