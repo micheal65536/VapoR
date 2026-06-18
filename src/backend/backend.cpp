@@ -9,6 +9,8 @@
 
 #include "config/device_profile.h"
 
+#include "config/startup_params.h"
+
 #include "input_profile.h"
 #include "input_profiles/oculus_touch.h"
 #include "input_profiles/vive_controller.h"
@@ -24,7 +26,7 @@
 
 using namespace vapor;
 
-Backend::Backend()
+Backend::Backend(const std::string& startupParamsString)
 {
     config::paths::setDataDirs();
     config::config::loadConfig();
@@ -140,6 +142,21 @@ Backend::Backend()
     this->windowManager = new windows::WindowManager();
 
     this->windowRenderer = new windows::WindowRenderer();
+
+    // handle startup parameters passed by client
+
+    config::StartupParams startupParams;
+    if (startupParams.parse(startupParamsString))
+    {
+        if (startupParams.actionManifestPath != "")
+        {
+            this->inputManager->createSceneActionManager(startupParams.actionManifestPath);
+        }
+    }
+    else
+    {
+        LOG("Failed to parse startup params");
+    }
 }
 
 Backend::~Backend()
@@ -270,10 +287,7 @@ void Backend::loop()
 
 void Backend::waitForFirstFrame()
 {
-    if (this->frameStates.getFrameCounter() == 0)
-    {
-        this->frameStates.waitForNextFrame();
-    }
+    this->frameStates.waitForFrame(1);
 }
 
 void Backend::requestExit()

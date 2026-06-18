@@ -260,11 +260,11 @@ openvr::CompositorError GLImageCaptureBuffer::capture(GLuint srcTextureId, int x
 
 //
 
-VulkanImageCaptureBuffer::VulkanImageCaptureBuffer(int width, int height, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue queue, uint32_t queueFamilyIndex): ImageCaptureBuffer(width, height), common(instance, physicalDevice, device, queue, queueFamilyIndex)
+VulkanImageCaptureBuffer::VulkanImageCaptureBuffer(int width, int height, VkFormat format, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue queue, uint32_t queueFamilyIndex): ImageCaptureBuffer(width, height), common(instance, physicalDevice, device, queue, queueFamilyIndex), format(format)
 {
     for (int i = 0; i < 2; i++)
     {
-        dstImages[i] = common.createImage(width, height, vapor::config::fixes::createVulkanTargetInLinearColorspace ? VK_FORMAT_R8G8B8A8_UNORM : VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_LAYOUT_UNDEFINED, true);
+        dstImages[i] = common.createImage(width, height, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_LAYOUT_UNDEFINED, true);
         VkMemoryRequirements memoryRequirements;
         vkGetImageMemoryRequirements(common.device, dstImages[i], &memoryRequirements);
         uint32_t memoryTypeIndex = common.selectMemoryType(0, memoryRequirements.memoryTypeBits);
@@ -297,13 +297,18 @@ VulkanImageCaptureBuffer::~VulkanImageCaptureBuffer()
     }
 }
 
+bool VulkanImageCaptureBuffer::isCompatible(const openvr::VulkanTextureData* textureData)
+{
+    return textureData->width == width && textureData->height == height && (VkFormat) textureData->format == format && textureData->instance == common.instance && textureData->physicalDevice == common.physicalDevice && textureData->device == common.device && textureData->queue == common.queue && textureData->queueFamilyIndex == common.queueFamilyIndex;
+}
+
 openvr::CompositorError VulkanImageCaptureBuffer::capture(const openvr::VulkanTextureData* textureData, uint32_t textureArrayIndex, int x, int y)
 {
-    if (textureData->instance != common.instance || textureData->physicalDevice != common.physicalDevice || textureData->device != common.device || textureData->queue != common.queue || textureData->queueFamilyIndex != common.queueFamilyIndex)
+    /*if (textureData->instance != common.instance || textureData->physicalDevice != common.physicalDevice || textureData->device != common.device || textureData->queue != common.queue || textureData->queueFamilyIndex != common.queueFamilyIndex)
     {
         LOG("Texture submitted with mismatched Vulkan context");
         return openvr::CompositorError::COMPOSITOR_ERROR_TEXTURE_IS_ON_WRONG_DEVICE;
-    }
+    }*/
 
     common.beginCommandBuffer();
 
@@ -377,8 +382,8 @@ openvr::CompositorError VulkanImageCaptureBuffer::capture(const openvr::VulkanTe
             .layerCount = 1
         },
         .dstOffsets = {
-            { .x = 0, .y = 0, .z = 0 },
-            { .x = this->width, .y = this->height, .z = 1 }
+            { .x = 0, .y = this->height, .z = 0 },
+            { .x = this->width, .y = 0, .z = 1 }
         }
     };
     vkCmdBlitImage(common.commandBuffer, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageBlit, VK_FILTER_NEAREST);

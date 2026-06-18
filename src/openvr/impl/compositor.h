@@ -93,5 +93,6 @@ namespace openvr
             void loseFocus();
             void present();
             bool presented = true;
+            long lastWaitFrameCounter = 0;
     };
 }

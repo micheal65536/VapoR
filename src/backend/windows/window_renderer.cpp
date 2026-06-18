@@ -62,10 +62,10 @@ WindowRenderer::~WindowRenderer()
     delete this->flatVertices;
     delete this->flatIndices;
 
-    //delete this->curvedShaderProgram;
+    /*delete this->curvedShaderProgram;
     delete this->curvedVAO;
     delete this->curvedVertices;
-    delete this->curvedIndices;
+    delete this->curvedIndices;*/
 }
 
 void WindowRenderer::renderFlat(OpenGL::Texture* texture, const float (&textureBounds)[4], const float (&headPoseMatrix)[3][4], const OpenXR::View& view, float widthInMeters, float aspectRatio, const float (&transformMatrix)[3][4])

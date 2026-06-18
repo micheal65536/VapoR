@@ -9,10 +9,10 @@
 
 using namespace openvr;
 
-static void run(std::promise<vapor::Backend*>* promise, std::promise<bool>* finishPromise)
+static void run(std::promise<vapor::Backend*>* promise, std::promise<bool>* finishPromise, const char* startupInfo)
 {
     TRACE_F("starting backend");
-    vapor::Backend* backend = new vapor::Backend();
+    vapor::Backend* backend = new vapor::Backend(startupInfo != nullptr ? startupInfo : "");
     promise->set_value(backend);
     backend->loop();
     delete backend;
@@ -35,7 +35,7 @@ InitError ClientCoreImpl::init(ApplicationType applicationType, const char* star
 
         std::promise<vapor::Backend*> promise;
         this->backendFinishedPromise = std::promise<bool>();
-        std::thread thread = std::thread(run, &promise, &this->backendFinishedPromise);
+        std::thread thread = std::thread(run, &promise, &this->backendFinishedPromise, startupInfo);
         thread.detach();
         vapor::Backend* backend = promise.get_future().get();
         backend->waitForFirstFrame();

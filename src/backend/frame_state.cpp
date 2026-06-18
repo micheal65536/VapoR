@@ -51,18 +51,14 @@ long FrameStateStore::getFrameCounter() const
     return counter;
 }
 
-void FrameStateStore::waitForNextFrame() const
+long FrameStateStore::waitForFrame(long requireCounter) const
 {
     std::unique_lock<std::recursive_mutex> lock(this->mutex);
-    long start = this->counter;
-    for (;;)
+    while (this->counter < requireCounter)
     {
         this->frameConditionVariable.wait(lock);
-        if (this->counter > start)
-        {
-            break;
-        }
     }
+    return this->counter;
 }
 
 void FrameStateStore::lock() const

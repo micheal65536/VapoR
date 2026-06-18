@@ -40,7 +40,6 @@ The following config options currently exist:
 
 VapoR includes various "fixes" that can be manually set for specific games if necessary (see above for specifying game-specific configuration options). The following fixes currently exist:
 * `flip` - flip image if it is upside down
-* `linear_colorspace` - fix linear/sRGB colorspace conversion if submitted image appears to bright (Vulkan/DXVK only)
 
 # Roadmap
 

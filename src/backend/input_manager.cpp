@@ -1,5 +1,7 @@
 #include "input_manager.h"
 
+#include "log/log.h"
+
 #include "event_queue.h"
 
 #include "openvr/types_input.h"
@@ -15,6 +17,7 @@ InputManager::~InputManager()
 {
     // TODO
     //delete legacyInputActionManager;
+    delete sceneActionManager;
 }
 
 void InputManager::putCurrentInputStates(const std::vector<input_profile::OpenVRInputState>& inputStates)
@@ -30,12 +33,43 @@ const std::vector<input_profile::OpenVRInputState>& InputManager::getInputStates
     return currentInputStates;
 }
 
-void InputManager::setSceneActionManager(input::ActionManager* actionManager)
+bool InputManager::createSceneActionManager(const std::string& manifestPath)
+{
+    std::unique_lock<std::recursive_mutex> lock(mutex);
+
+    input::ActionManager* actionManager = new input::ActionManager();
+    if (!actionManager->populateFromJSON(manifestPath))
+    {
+        LOG("Failed to read actions from %s", manifestPath.c_str());
+        return false;
+    }
+    else
+    {
+        LOG("Read actions from %s", manifestPath.c_str());
+
+        if (actionManager->loadBinding("vapor_binding.json", inputProfile))
+        {
+            LOG("Loaded custom binding");
+        }
+        else
+        {
+            LOG("Failed to load custom binding, trying default binding");
+            actionManager->loadDefaultBindingForControllerProfile(inputProfile);
+        }
+
+        delete sceneActionManager;
+        sceneActionManager = actionManager;
+
+        return true;
+    }
+}
+
+/*void InputManager::setSceneActionManager(input::ActionManager* actionManager)
 {
     mutex.lock();
     sceneActionManager = actionManager;
     mutex.unlock();
-}
+}*/
 
 input::ActionManager* InputManager::getSceneActionManager()
 {

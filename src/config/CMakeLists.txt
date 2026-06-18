@@ -4,4 +4,6 @@ target_sources(vrclient PRIVATE
     fixes.cpp
 
     device_profile.cpp
+
+    startup_params.cpp
 )
