@@ -38,10 +38,6 @@ static bool loadConfigFromFile(const std::string& filePath)
             {
                 fixes::flipImage = fixes.at("flip");
             }
-            if (fixes.contains("linear_colorspace"))
-            {
-                fixes::createVulkanTargetInLinearColorspace = fixes.at("linear_colorspace");
-            }
         }
 
         LOG("Loaded config");

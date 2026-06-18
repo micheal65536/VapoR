@@ -61,9 +61,10 @@ namespace vapor
         class VulkanImageCaptureBuffer: public ImageCaptureBuffer
         {
             public:
-                VulkanImageCaptureBuffer(int width, int height, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue queue, uint32_t queueFamilyIndex);
+                VulkanImageCaptureBuffer(int width, int height, VkFormat format, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue queue, uint32_t queueFamilyIndex);
                 ~VulkanImageCaptureBuffer();
  
+                bool isCompatible(const openvr::VulkanTextureData* textureData);
                 openvr::CompositorError capture(const openvr::VulkanTextureData* textureData, uint32_t textureArrayIndex, int x, int y);
 
             private:
@@ -71,6 +72,8 @@ namespace vapor
 
                 VkImage dstImages[2];
                 VkDeviceMemory dstImagesMemory[2];
+
+                const VkFormat format;
 
                 VkImage tmpImage = VK_NULL_HANDLE;
                 VkDeviceMemory tmpImageMemory = VK_NULL_HANDLE;

@@ -62,14 +62,13 @@ namespace vapor
                     int width = textureData->width;
                     int height = textureData->height;
 
-                    // TODO: check Vulkan properties
-                    if (nextFrameImageCaptureBuffer == nullptr || nextFrameImageCaptureBuffer->width != width || nextFrameImageCaptureBuffer->height != height || nextFrameImageCaptureBufferApi != Api::VULKAN)
+                    if (nextFrameImageCaptureBuffer == nullptr || nextFrameImageCaptureBuffer->width != width || nextFrameImageCaptureBuffer->height != height || nextFrameImageCaptureBufferApi != Api::VULKAN || !((VulkanImageCaptureBuffer*) nextFrameImageCaptureBuffer)->isCompatible(textureData))
                     {
                         if (nextFrameImageCaptureBuffer != presentedImageCaptureBuffer)
                         {
                             delete nextFrameImageCaptureBuffer;
                         }
-                        nextFrameImageCaptureBuffer = new VulkanImageCaptureBuffer(width, height, textureData->instance, textureData->physicalDevice, textureData->device, textureData->queue, textureData->queueFamilyIndex);
+                        nextFrameImageCaptureBuffer = new VulkanImageCaptureBuffer(width, height, (VkFormat) textureData->format, textureData->instance, textureData->physicalDevice, textureData->device, textureData->queue, textureData->queueFamilyIndex);
                         nextFrameImageCaptureBufferApi = Api::VULKAN;
                     }
 
