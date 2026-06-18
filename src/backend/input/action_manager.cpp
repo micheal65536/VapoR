@@ -259,10 +259,10 @@ bool ActionManager::loadBinding(const std::string& filePath, InputProfile* input
                     {
                         mode = new DpadMode(parameters, profileInputType);
                     }
-                    /*else if (modeName == "scroll")
+                    else if (modeName == "scroll")
                     {
                         mode = new ScrollMode(parameters, profileInputType);
-                    }*/
+                    }
                     else if (modeName == "toggle_button")
                     {
                         mode = new ToggleButtonMode(parameters);
