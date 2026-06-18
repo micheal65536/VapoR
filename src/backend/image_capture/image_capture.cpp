@@ -382,8 +382,8 @@ openvr::CompositorError VulkanImageCaptureBuffer::capture(const openvr::VulkanTe
             .layerCount = 1
         },
         .dstOffsets = {
-            { .x = 0, .y = 0, .z = 0 },
-            { .x = this->width, .y = this->height, .z = 1 }
+            { .x = 0, .y = this->height, .z = 0 },
+            { .x = this->width, .y = 0, .z = 1 }
         }
     };
     vkCmdBlitImage(common.commandBuffer, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageBlit, VK_FILTER_NEAREST);
