@@ -36,7 +36,7 @@ CompositorError CompositorImpl::waitGetPoses(TrackedDevicePose* renderPoses, uin
 
     this->present();
 
-    this->clientCore.backend->frameStates.waitForNextFrame();
+    lastWaitFrameCounter = this->clientCore.backend->frameStates.waitForFrame(lastWaitFrameCounter + 1);
 
     TRACE_F("finished waiting");
 
@@ -237,10 +237,10 @@ void CompositorImpl::loseFocus()
 
 void CompositorImpl::present()
 {
-    TRACE();
-
     if (!this->presented)
     {
+        TRACE();
+
         bool haveFrames = true;
         for (int eye = 0; eye < 2; eye++)
         {

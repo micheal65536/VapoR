@@ -287,10 +287,7 @@ void Backend::loop()
 
 void Backend::waitForFirstFrame()
 {
-    if (this->frameStates.getFrameCounter() == 0)
-    {
-        this->frameStates.waitForNextFrame();
-    }
+    this->frameStates.waitForFrame(1);
 }
 
 void Backend::requestExit()

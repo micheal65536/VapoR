@@ -34,7 +34,7 @@ namespace vapor
             FrameState getFrame(int indexAgo) const;
 
             long getFrameCounter() const;
-            void waitForNextFrame() const;
+            long waitForFrame(long requireCounter) const;
 
             // these are provided in case we want to retrieve multiple frames without the risk of a new frame being posted in-between, or we want to post a frame and do additional work such as queuing events atomically before allowing the new frame to become visible to the OpenVR client
             // it is not required to call lock/unlock merely to retrieve a single frame
