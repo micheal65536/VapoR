@@ -14,9 +14,11 @@ Set `VAPOR_LOG_TRACE=ON` to enable trace log output or `VAPOR_LOG_SILENT=ON` to 
 
 Running `make install` will copy VapoR's `vrclient.so` file and the data files needed by VapoR to the expected places (files are installed under `${CMAKE_INSTALL_PREFIX}/lib/VapoR` and `${CMAKE_INSTALL_PREFIX}/share/VapoR`).
 
-Copy the `openvrpaths.vrpath` file from the build output directory or the installed `${CMAKE_INSTALL_PREFIX}/lib/VapoR` directory to your `~/.config/openvr/openvrpaths.vrpath` file (beware that Steam will usually overwrite this file when opened/closed).
+Copy the `openvrpaths.vrpath` file from the build output directory or the installed `${CMAKE_INSTALL_PREFIX}/lib/VapoR` directory to your `~/.config/openvr/openvrpaths.vrpath` file (beware that Steam will occasionally overwrite this file).
 
 If you don't want to run `make install`, you will need to set up VapoR's `vrclient.so` file somewhere with the required `bin/linux64/vrclient.so` directory structure and edit your `~/.config/openvr/openvrpaths.vrpath` accordingly. You will also need to copy the data files to your home directory or set the `VAPOR_DIR` environment variable to point to the data location (see below).
+
+**Please note:** By default, VapoR will install to `/usr/local`. When running games on Linux (including Proton games), Steam uses a container-like environment called "Pressure Vessel" which does not allow direct access to paths under `/usr`. While this location *is* accessible from within Pressure Vessel under `/run/host/usr`, VapoR is not currently able to handle this situation and will be unable to find its data files in the expected place. To work around this, please either build and install VapoR with a different prefix in a location that is directly accessible from within Pressure Vessel (such as under `/opt` or `$HOME`), or add the `VAPOR_DIR=/run/host/usr/local/share/VapoR` environment variable in front of the Steam launch options for the game.
 
 # Config
 
@@ -33,7 +35,7 @@ For games that use action set input, VapoR will try to load a custom input bindi
 ## Config options
 
 The following config options currently exist:
-* `device_profile` - specifies the name of the device profile to use
+* `device_profile` - specifies the name of the device profile to use **if you are using a headset other than a Quest headset you MUST change this to one of the other profiles provided under `data/device_profiles` otherwise input and possibly other things may not work**
 * `fixes` - a nested JSON object listing the fixes to apply (see below)
 
 ## Fixes
@@ -43,16 +45,22 @@ VapoR includes various "fixes" that can be manually set for specific games if ne
 
 # Roadmap
 
+**Current tested and known working games:**
+* Derail Valley (except loading screen background)
+* Vivecraft
+* Blade & Sorcery
+
 **Current status/supported features:**
 * Submitting frames
 * Getting device poses
 * Legacy input
 * Action set input
-  - Scroll source mode and various other obscure are not yet implemented (you will need to use a binding without these source modes)
+  - a few obscure source modes (particularly "grab" mode) are not yet implemented (you will need to use a binding without these source modes)
+  - scroll source mode is not supported on trackpad devices
 * Render models (missing textures)
+* Overlay windows (basic only, no input support, does **not** include overlays provided by a separate process from the main game/scene application)
 * Oculus Quest 2 and Quest 3 device profiles (from ALVR)
-* Derail Valley works (except loading screen)
-* Vivecraft works (accessing all functions requires using a custom input binding that doesn't make use of unimplemented input source modes)
+* Vive device profile
 
 **Phase 1:**
 * Make Derail Valley work
