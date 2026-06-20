@@ -19,7 +19,7 @@ void Transform::update(const Backend& backend)
     // empty
 }
 
-void Transform::getHeadPoseToUse(const PoseSet& headPoseSet, float (*pose)[3][4])
+void Transform::getHeadPoseToUse(const PoseSet& headPoseSet, float (*pose)[3][4]) const
 {
     selectPoseFromPoseSet(headPoseSet, openvr::TrackingUniverseOrigin::ORIGIN_STANDING, pose);
 }
@@ -31,12 +31,12 @@ AbsoluteTransform::AbsoluteTransform(openvr::TrackingUniverseOrigin trackingUniv
     // empty
 }
 
-const float (&AbsoluteTransform::getOverlayToWorldTransformMatrix())[3][4]
+const float (&AbsoluteTransform::getOverlayToWorldTransformMatrix() const)[3][4]
 {
     return this->offset.m;
 }
 
-void AbsoluteTransform::getHeadPoseToUse(const PoseSet& headPoseSet, float (*pose)[3][4])
+void AbsoluteTransform::getHeadPoseToUse(const PoseSet& headPoseSet, float (*pose)[3][4]) const
 {
     selectPoseFromPoseSet(headPoseSet, this->trackingUniverse, pose);
 }
@@ -71,7 +71,7 @@ void TrackedDeviceRelativeTransform::update(const Backend& backend)
     }
 }
 
-void TrackedDeviceRelativeTransform::getHeadPoseToUse(const PoseSet& headPoseSet, float (*pose)[3][4])
+void TrackedDeviceRelativeTransform::getHeadPoseToUse(const PoseSet& headPoseSet, float (*pose)[3][4]) const
 {
     selectPoseFromPoseSet(headPoseSet, openvr::TrackingUniverseOrigin::ORIGIN_STANDING, pose);
 }

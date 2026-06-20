@@ -14,10 +14,11 @@ namespace vapor
         class Transform
         {
             public:
+                virtual ~Transform() = default;
                 virtual void update(const Backend& backend);
-                virtual bool shouldDisplay() { return true; };
-                virtual const float (&getOverlayToWorldTransformMatrix())[3][4] = 0;
-                virtual void getHeadPoseToUse(const PoseSet& headPoseSet, float (*pose)[3][4]);
+                virtual bool shouldDisplay() const { return true; };
+                virtual const float (&getOverlayToWorldTransformMatrix() const)[3][4] = 0;
+                virtual void getHeadPoseToUse(const PoseSet& headPoseSet, float (*pose)[3][4]) const;
                 virtual openvr::OverlayTransformType getTransformType() const { return openvr::OverlayTransformType::OVERLAY_TRANSFORM_TYPE_INVALID; };
         };
 
@@ -25,8 +26,8 @@ namespace vapor
         {
             public:
                 AbsoluteTransform(openvr::TrackingUniverseOrigin trackingUniverse, const openvr::Matrix34& offset);
-                virtual const float (&getOverlayToWorldTransformMatrix())[3][4];
-                virtual void getHeadPoseToUse(const PoseSet& headPoseSet, float (*pose)[3][4]);
+                virtual const float (&getOverlayToWorldTransformMatrix() const)[3][4];
+                virtual void getHeadPoseToUse(const PoseSet& headPoseSet, float (*pose)[3][4]) const;
                 virtual openvr::OverlayTransformType getTransformType() const { return openvr::OverlayTransformType::OVERLAY_TRANSFORM_TYPE_ABSOLUTE; };
 
                 const openvr::TrackingUniverseOrigin trackingUniverse;
@@ -38,9 +39,9 @@ namespace vapor
             public:
                 TrackedDeviceRelativeTransform(uint32_t deviceIndex, const openvr::Matrix34& offset);
                 virtual void update(const Backend& backend);
-                virtual bool shouldDisplay() { return haveMatrix; };
-                virtual const float (&getOverlayToWorldTransformMatrix())[3][4] { return matrix; };
-                virtual void getHeadPoseToUse(const PoseSet& headPoseSet, float (*pose)[3][4]);
+                virtual bool shouldDisplay() const { return haveMatrix; };
+                virtual const float (&getOverlayToWorldTransformMatrix() const)[3][4] { return matrix; };
+                virtual void getHeadPoseToUse(const PoseSet& headPoseSet, float (*pose)[3][4]) const;
                 virtual openvr::OverlayTransformType getTransformType() const { return openvr::OverlayTransformType::OVERLAY_TRANSFORM_TYPE_TRACKED_DEVICE_RELATIVE; };
 
                 const uint32_t deviceIndex;
