@@ -14,7 +14,7 @@ namespace vapor
                 WindowRenderer();
                 ~WindowRenderer();
 
-                void renderFlat(OpenGL::Texture* texture, const float (&textureBounds)[4], const float (&headPoseMatrix)[3][4], const OpenXR::View& view, float widthInMeters, float aspectRatio, const float (&transformMatrix)[3][4]);
+                void renderFlat(OpenGL::Texture* texture, const float (&textureBounds)[4], const float (&headPoseMatrix)[3][4], const OpenXR::View& view, float widthInMeters, float aspectRatio, const float (&transformMatrix)[3][4], float alpha);
                 //void renderCurved();
 
             private:

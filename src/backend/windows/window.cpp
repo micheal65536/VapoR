@@ -100,7 +100,7 @@ void Window::render(WindowRenderer* windowRenderer, const PoseSet& headPose, con
 
     // TODO: decide between flat and curved rendering (or other render styles? need to check if cursor/dashboard/etc. requires a different render style)
     float aspectRatio = ((textureHeight * std::abs(textureBounds[3] - textureBounds[1])) / (textureWidth * std::abs(textureBounds[2] - textureBounds[0]))) / this->texelAspectRatio;
-    windowRenderer->renderFlat(textureForRender, textureBounds, headPoseMatrix, view, this->widthInMeters, aspectRatio, transformMatrix);
+    windowRenderer->renderFlat(textureForRender, textureBounds, headPoseMatrix, view, this->widthInMeters, aspectRatio, transformMatrix, alpha);
 }
 
 void Window::clearImage()

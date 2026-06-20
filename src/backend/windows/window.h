@@ -42,10 +42,12 @@ namespace vapor
 
                 bool visible = false;
                 bool dashboard = false;
+                int sortOrder = 0;
+
+                float alpha = 1.0f;
 
                 float texelAspectRatio = 1.0f;
                 float widthInMeters = 1.0f;
-
                 // TODO: curvature properties
 
                 float textureBounds[4] = {0.0f, 0.0f, 1.0f, 1.0f};
