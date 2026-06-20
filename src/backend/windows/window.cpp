@@ -2,6 +2,7 @@
 
 #include "backend/opengl.h"
 #include <cstring>
+#include <cmath>
 
 using namespace vapor::windows;
 
@@ -98,7 +99,7 @@ void Window::render(WindowRenderer* windowRenderer, const PoseSet& headPose, con
     this->transform->getHeadPoseToUse(headPose, &headPoseMatrix);
 
     // TODO: decide between flat and curved rendering (or other render styles? need to check if cursor/dashboard/etc. requires a different render style)
-    float aspectRatio = ((textureHeight * (textureBounds[3] - textureBounds[1])) / (textureWidth * (textureBounds[2] - textureBounds[0]))) / this->texelAspectRatio;
+    float aspectRatio = ((textureHeight * std::abs(textureBounds[3] - textureBounds[1])) / (textureWidth * std::abs(textureBounds[2] - textureBounds[0]))) / this->texelAspectRatio;
     windowRenderer->renderFlat(textureForRender, textureBounds, headPoseMatrix, view, this->widthInMeters, aspectRatio, transformMatrix);
 }
 
