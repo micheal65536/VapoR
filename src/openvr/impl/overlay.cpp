@@ -62,6 +62,7 @@ OverlayError OverlayImpl::createDashboardOverlay(const char* key, const char* na
     *mainHandle = *thumbnailHandle = 0;
     // TODO: testing
     createOverlay(key, name, mainHandle);
+    // TODO: set dashboard flag on overlay
     return OverlayError::OVERLAY_ERROR_REQUEST_FAILED;
 }
 
@@ -191,15 +192,28 @@ OverlayError OverlayImpl::getOverlayColor(uint64_t handle, float* r, float* g, f
 
 OverlayError OverlayImpl::setOverlayAlpha(uint64_t handle, float alpha)
 {
-    // TODO
-    STUB_F("%lu %f", handle, alpha);
+    TRACE_F("%lu %f", handle, alpha);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+    overlay->window->lock();
+    overlay->window->alpha = alpha;
+    overlay->window->unlock();
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 
 OverlayError OverlayImpl::getOverlayAlpha(uint64_t handle, float* alpha)
 {
-    // TODO
-    STUB_F("%lu", handle);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+    overlay->window->lock();
+    *alpha = overlay->window->alpha;
+    overlay->window->unlock();
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 
@@ -243,15 +257,28 @@ OverlayError OverlayImpl::getOverlayTexelAspectRatio(uint64_t handle, float* asp
 
 OverlayError OverlayImpl::setOverlaySortOrder(uint64_t handle, uint32_t sortOrder)
 {
-    // TODO
-    STUB_F("%lu %u", handle, sortOrder);
+    TRACE_F("%lu %u", handle, sortOrder);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+    overlay->window->lock();
+    overlay->window->sortOrder = sortOrder;
+    overlay->window->unlock();
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 
 OverlayError OverlayImpl::getOverlaySortOrder(uint64_t handle, uint32_t* sortOrder)
 {
-    // TODO
-    STUB_F("%lu", handle);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+    overlay->window->lock();
+    *sortOrder = overlay->window->sortOrder;
+    overlay->window->unlock();
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 
@@ -488,36 +515,80 @@ OverlayError OverlayImpl::setSubviewOverlayPosition(uint64_t handle, float x, fl
 
 OverlayError OverlayImpl::showOverlay(uint64_t handle)
 {
-    // TODO
-    STUB_F("%lu", handle);
+    TRACE_F("%lu", handle);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+    overlay->window->lock();
+    overlay->window->visible = true;
+    overlay->window->unlock();
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 
 OverlayError OverlayImpl::hideOverlay(uint64_t handle)
 {
-    // TODO
-    STUB_F("%lu", handle);
+    TRACE_F("%lu", handle);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+    overlay->window->lock();
+    overlay->window->visible = false;
+    overlay->window->unlock();
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 
 bool OverlayImpl::isOverlayVisible(uint64_t handle)
 {
-    // TODO
-    STUB_F("%lu", handle);
-    return true;
+    TRACE_F("%lu", handle);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return false;
+    }
+    bool visible;
+    overlay->window->lock();
+    if (!overlay->window->dashboard)
+    {
+        visible = overlay->window->visible;
+    }
+    else
+    {
+        // TODO: return true for dashboard overlays when dashboard is open
+        visible = false;
+    }
+    overlay->window->unlock();
+    return visible;
 }
 
 OverlayError OverlayImpl::legacyIsDashboardOverlay(uint64_t handle, bool* dashboard)
 {
-    // TODO
-    STUB_F("%lu", handle);
+    TRACE_F("%lu", handle);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+    overlay->window->lock();
+    *dashboard = overlay->window->dashboard;
+    overlay->window->unlock();
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 
 OverlayError OverlayImpl::legacySetAsDashboardOverlay(uint64_t handle, bool dashboard)
 {
-    // TODO
-    STUB_F("%lu %d", handle, dashboard);
+    TRACE_F("%lu %d", handle, dashboard);
+    Overlay* overlay = getOverlay(handle);
+    if (overlay == nullptr)
+    {
+        return OverlayError::OVERLAY_ERROR_INVALID_HANDLE;
+    }
+    overlay->window->lock();
+    overlay->window->dashboard = dashboard;
+    overlay->window->unlock();
     return OverlayError::OVERLAY_ERROR_NONE;
 }
 

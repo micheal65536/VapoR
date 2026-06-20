@@ -27,10 +27,12 @@ WindowRenderer::WindowRenderer()
         "precision highp float;\n"
         "uniform sampler2D u_texture;\n"
         "uniform vec4 u_texture_bounds;\n"
+        "uniform float u_alpha;\n"
         "in vec2 v_uv;\n"
         "layout(location = 0) out vec4 f_color;\n"
         "void main() {\n"
         "   f_color = texture(u_texture, v_uv * (u_texture_bounds.zw - u_texture_bounds.xy) + u_texture_bounds.xy);\n"
+        "   f_color.a *= u_alpha;\n"
         "}"
     );
     this->flatVertices = new OpenGL::AttributeBuffer();
@@ -68,7 +70,7 @@ WindowRenderer::~WindowRenderer()
     delete this->curvedIndices;*/
 }
 
-void WindowRenderer::renderFlat(OpenGL::Texture* texture, const float (&textureBounds)[4], const float (&headPoseMatrix)[3][4], const OpenXR::View& view, float widthInMeters, float aspectRatio, const float (&transformMatrix)[3][4])
+void WindowRenderer::renderFlat(OpenGL::Texture* texture, const float (&textureBounds)[4], const float (&headPoseMatrix)[3][4], const OpenXR::View& view, float widthInMeters, float aspectRatio, const float (&transformMatrix)[3][4], float alpha)
 {
     float eyeMatrix[4][4];
     float projectionMatrix[4][4];
@@ -90,6 +92,7 @@ void WindowRenderer::renderFlat(OpenGL::Texture* texture, const float (&textureB
     this->flatShaderProgram->bindUniform("u_ratio", aspectRatio);
     this->flatShaderProgram->bindUniform("u_texture", 0);
     this->flatShaderProgram->bindUniform("u_texture_bounds", textureBounds);
+    this->flatShaderProgram->bindUniform("u_alpha", alpha);
 
     glBindVertexArray(this->flatVAO->id);
     glActiveTexture(GL_TEXTURE0);

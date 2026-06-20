@@ -698,7 +698,7 @@ std::vector<OpenXR::Layer> Backend::render(XrTime displayTime)
     //
 
     this->windowManager->lock();
-    const std::list<windows::Window*>& windows = this->windowManager->getWindows();
+    const std::list<windows::Window*>& windows = this->windowManager->getWindowsForRender(frame.head, false);
     for (auto& it: windows)
     {
         windows::Window* window = it;
@@ -729,7 +729,6 @@ std::vector<OpenXR::Layer> Backend::render(XrTime displayTime)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         ABORT_ON_OPENGL_ERROR();
 
-        // TODO: deal with draw order, visibility, etc.
         for (auto& it: windows)
         {
             windows::Window* window = it;

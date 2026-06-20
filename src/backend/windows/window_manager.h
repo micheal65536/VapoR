@@ -5,6 +5,8 @@
 
 #include "window.h"
 
+#include "backend/pose_set.h"
+
 #include <mutex>
 
 namespace vapor
@@ -20,6 +22,8 @@ namespace vapor
                 void addWindow(Window* window);
                 void removeWindow(Window* window);
                 const std::list<Window*>& getWindows();
+
+                std::list<Window*> getWindowsForRender(const PoseSet& head, bool dashboardIsOpen);
 
                 //
 
