@@ -35,15 +35,17 @@ WindowRenderer::WindowRenderer()
         "   f_color.a *= u_alpha;\n"
         "}"
     );
-    this->flatVertices = new OpenGL::AttributeBuffer();
-    this->flatVertices->data(sizeof(float) * 20, (float[]) {
+    float flatVerticesData[] = {
         -0.5f, -0.5f, 0.0f, 0.0f,
         0.5f, -0.5f, 1.0f, 0.0f,
         0.5f, 0.5f, 1.0f, 1.0f,
         -0.5f, 0.5f, 0.0f, 1.0f
-    });
+    };
+    this->flatVertices = new OpenGL::AttributeBuffer();
+    this->flatVertices->data(sizeof(flatVerticesData), flatVerticesData);
+    uint32_t flatIndicesData[] = {0, 1, 2, 0, 2, 3};
     this->flatIndices = new OpenGL::AttributeBuffer();
-    this->flatIndices->data(sizeof(uint32_t) * 6, (uint32_t[]) {0, 1, 2, 0, 2, 3});
+    this->flatIndices->data(sizeof(flatIndicesData), flatIndicesData);
     this->flatVAO = new OpenGL::VertexAttributeArray();
     this->flatVAO->attributePointer(0, 2, *this->flatVertices, sizeof(float) * 4, sizeof(float) * 0);
     this->flatVAO->attributePointer(1, 2, *this->flatVertices, sizeof(float) * 4, sizeof(float) * 2);

@@ -257,11 +257,13 @@ void VertexAttributeArray::elementArrayBuffer(const AttributeBuffer& buffer)
 ShaderProgram::ShaderProgram(const std::string& vertex, const std::string& fragment)
 {
     this->vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(this->vertexShaderId, 1, (const char*[]) {vertex.c_str()}, nullptr);
+    const char* vertexShaderSourceList[] = {vertex.c_str()};
+    glShaderSource(this->vertexShaderId, 1, vertexShaderSourceList, nullptr);
     glCompileShader(this->vertexShaderId);
     ABORT_ON_OPENGL_ERROR();
     this->fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(this->fragmentShaderId, 1, (const char*[]) {fragment.c_str()}, nullptr);
+    const char* fragmentShaderSourceList[] = {fragment.c_str()};
+    glShaderSource(this->fragmentShaderId, 1, fragmentShaderSourceList, nullptr);
     glCompileShader(this->fragmentShaderId);
     ABORT_ON_OPENGL_ERROR();
     this->id = glCreateProgram();
