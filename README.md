@@ -93,3 +93,7 @@ Ask/ping `@micheal65536` on Discord for support or issues.
 # License
 
 See `LICENSE.md`.
+
+# Contributing
+
+All contributions are subject to the Contributor License Agreement published at `CONTRIBUTING.md` effective at the time of the contribution unless otherwise stated or agreed upon.
