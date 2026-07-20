@@ -10,7 +10,8 @@ namespace openvr
         INIT_ERROR_UNKNOWN = 1,
 
         INIT_ERROR_INTERFACE_NOT_FOUND = 105,
-        INIT_ERROR_INVALID_INTERFACE = 106
+        INIT_ERROR_INVALID_INTERFACE = 106,
+        INIT_ERROR_HMD_NOT_FOUND = 108
     };
 
     enum ApplicationType

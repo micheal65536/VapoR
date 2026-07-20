@@ -12,12 +12,27 @@ using namespace openvr;
 static void run(std::promise<vapor::Backend*>* promise, std::promise<bool>* finishPromise, const char* startupInfo)
 {
     TRACE_F("starting backend");
-    vapor::Backend* backend = new vapor::Backend(startupInfo != nullptr ? startupInfo : "");
+    vapor::Backend* backend;
+    try
+    {
+        backend = new vapor::Backend(startupInfo != nullptr ? startupInfo : "");
+    }
+    catch (const vapor::Backend::InitialisationException& exception)
+    {
+        backend = nullptr;
+    }
     promise->set_value(backend);
-    backend->loop();
-    delete backend;
+    if (backend != nullptr)
+    {
+        backend->loop();
+        delete backend;
+        TRACE_F("finished backend");
+    }
+    else
+    {
+        LOG("Failed to create backend");
+    }
     finishPromise->set_value(true);
-    TRACE_F("finished backend");
 }
 
 InitError ClientCoreImpl::init(ApplicationType applicationType, const char* startupInfo)
@@ -31,15 +46,19 @@ InitError ClientCoreImpl::init(ApplicationType applicationType, const char* star
 
     if (!this->initialised)
     {
-        this->initialised = true;
-
         std::promise<vapor::Backend*> promise;
         this->backendFinishedPromise = std::promise<bool>();
         std::thread thread = std::thread(run, &promise, &this->backendFinishedPromise, startupInfo);
         thread.detach();
         vapor::Backend* backend = promise.get_future().get();
+        if (backend == nullptr)
+        {
+            return InitError::INIT_ERROR_HMD_NOT_FOUND;
+        }
         backend->waitForFirstFrame();
         this->backend = backend;
+
+        this->initialised = true;
 
         openvr::systemImpl = new SystemImpl(*openvr::clientCoreImpl);
         openvr::compositorImpl = new CompositorImpl(*openvr::clientCoreImpl);

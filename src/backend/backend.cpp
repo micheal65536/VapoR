@@ -31,7 +31,14 @@ Backend::Backend(const std::string& startupParamsString)
     config::paths::setDataDirs();
     config::config::loadConfig();
 
-    this->instance = new OpenXR::Instance("VapoR", {"XR_KHR_convert_timespec_time", "XR_FB_display_refresh_rate"});
+    try
+    {
+        this->instance = new OpenXR::Instance("VapoR", {"XR_KHR_convert_timespec_time", "XR_FB_display_refresh_rate"});
+    }
+    catch (const OpenXR::Instance::UnavailableException& exception)
+    {
+        throw InitialisationException();
+    }
     this->session = new OpenXR::Session(*this->instance, this->instance->getSystem());
     xrGetInstanceProcAddr(this->instance->handle, "xrConvertTimespecTimeToTimeKHR", (PFN_xrVoidFunction*) &this->xrConvertTimespecTimeToTimeKHR);
     xrGetInstanceProcAddr(this->instance->handle, "xrGetDisplayRefreshRateFB", (PFN_xrVoidFunction*) &this->xrGetDisplayRefreshRateFB);

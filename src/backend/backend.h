@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 #include <ctime>
+#include <stdexcept>
 
 namespace vapor
 {
@@ -57,6 +58,12 @@ namespace vapor
                 this->xrConvertTimespecTimeToTimeKHR(this->instance->handle, &timespec, &xrTime);
                 return xrTime;
             }
+
+            class InitialisationException: public std::runtime_error
+            {
+                public:
+                    InitialisationException(): std::runtime_error("Backend failed to initialise") {}
+            };
 
         private:
             OpenXR::Instance* instance;

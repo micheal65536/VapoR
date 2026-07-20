@@ -40,7 +40,12 @@ Instance::Instance(const std::string& applicationName, const std::vector<std::st
     };
     std::strcpy(instanceCreateInfo.applicationInfo.applicationName, applicationName.c_str());
 
-    ABORT_ON_OPENXR_ERROR(xrCreateInstance(&instanceCreateInfo, &this->handle));
+    XrResult result = xrCreateInstance(&instanceCreateInfo, &this->handle);
+    if (result == XR_ERROR_RUNTIME_UNAVAILABLE || result == XR_ERROR_LIMIT_REACHED || result == XR_ERROR_RUNTIME_FAILURE) // TODO: remove XR_ERROR_RUNTIME_FAILURE from list when Monado developers become actually competent and return the correct result code
+    {
+        throw UnavailableException();
+    }
+    ABORT_ON_OPENXR_ERROR(result);
 }
 
 Instance::~Instance()

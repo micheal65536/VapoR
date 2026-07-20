@@ -18,6 +18,7 @@
 
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 #define ABORT_ON_OPENXR_ERROR(x) \
     { \
@@ -114,6 +115,12 @@ namespace OpenXR
             bool pollEvent(XrEventDataBuffer* event) const;
 
             XrInstance handle;
+
+            class UnavailableException: public std::runtime_error
+            {
+                public:
+                    UnavailableException(): std::runtime_error("OpenXR is unavailable") {}
+            };
     };
 
     class Session
