@@ -190,7 +190,10 @@ InputError InputImpl::getPoseActionDataRelativeToNow(uint64_t action, TrackingUn
     // TODO: support secondsFromNow
 
     TRACE_F("%d %d %f %d", action, restrictToDevice, secondsFromNow, actionDataSize);
-    STUB_F("secondsFromNow not supported %f", secondsFromNow);
+    if (secondsFromNow != 0.0f)
+    {
+        STUB_F("secondsFromNow not supported %f", secondsFromNow);
+    }
 
     vapor::input::ActionManager* actionManager = this->clientCore.backend->inputManager->getSceneActionManager();
     if (actionManager == nullptr)
