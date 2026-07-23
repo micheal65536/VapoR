@@ -399,6 +399,17 @@ static inline OpenXR::PoseAndVelocity offsetPose(OpenXR::PoseAndVelocity pose, c
     return pose;
 }
 
+static inline Backend::ZeroPose invertPose(Backend::ZeroPose zeroPose)
+{
+    float x = zeroPose.position.x * std::cos(zeroPose.yaw) + zeroPose.position.z * std::sin(zeroPose.yaw);
+    float z = zeroPose.position.z * std::cos(zeroPose.yaw) - zeroPose.position.x * std::sin(zeroPose.yaw);
+    zeroPose.position.x = -x;
+    zeroPose.position.z = -z;
+    zeroPose.position.y = -zeroPose.position.y;
+    zeroPose.yaw = -zeroPose.yaw;
+    return zeroPose;
+}
+
 void Backend::step(XrTime displayTime, XrDuration displayDuration)
 {
     if (this->localReferenceSpaceChangeTime != 0 && displayTime >= this->localReferenceSpaceChangeTime)
@@ -545,7 +556,9 @@ void Backend::step(XrTime displayTime, XrDuration displayDuration)
         .controllerPoses = {
             this->inputProfile->getOpenVRControllerPose(0, openVRInputStates.data()).data.pose,
             this->inputProfile->getOpenVRControllerPose(1, openVRInputStates.data()).data.pose
-        }
+        },
+
+        .seatedToStandingOffset = offsetPose(offsetPose(this->localSpace->locateWithVelocity(*this->localFloorSpace, displayTime), invertPose(this->seatedZeroPose)), this->standingZeroPose).pose
     });
 
     this->inputManager->putCurrentInputStates(openVRInputStates);

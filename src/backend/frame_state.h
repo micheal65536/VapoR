@@ -21,6 +21,8 @@ namespace vapor
 
         PoseSet head;
         PoseSet controllerPoses[2];
+
+        XrPosef seatedToStandingOffset;
     };
 
     class FrameStateStore

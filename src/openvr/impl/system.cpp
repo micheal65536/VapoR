@@ -68,8 +68,26 @@ void SystemImpl::getOutputDevice(uint64_t* device, TextureType textureType, VkIn
 
 void SystemImpl::getDeviceToAbsoluteTrackingPose(TrackingUniverseOrigin origin, float predictedSecondsToPhotonsFromNow, TrackedDevicePose* trackedDevicePoses, uint32_t trackedDevicePosesCount)
 {
-    // TODO
-    STUB();
+   // TODO: support predictedSecondsToPhotonsFromNow
+
+    TRACE_F("%d %f %d", origin, predictedSecondsToPhotonsFromNow, trackedDevicePosesCount);
+    if (predictedSecondsToPhotonsFromNow != 0.0f)
+    {
+        STUB_F("predictedSecondsToPhotonsFromNow not supported %f", predictedSecondsToPhotonsFromNow);
+    }
+
+    vapor::FrameState frame = this->clientCore.backend->frameStates.getFrame(0);
+    if (trackedDevicePosesCount >= 1)
+    {
+        utils::selectTrackedDevicePose(frame.head, origin, false, &trackedDevicePoses[0]);
+    }
+    for (int i = 1; i < trackedDevicePosesCount; i++)
+    {
+        if (i < 3)
+        {
+            utils::selectTrackedDevicePose(frame.controllerPoses[i - 1], origin, false, &trackedDevicePoses[i]);
+        }
+    }
 }
 
 void SystemImpl::resetSeatedZeroPose()
@@ -80,12 +98,20 @@ void SystemImpl::resetSeatedZeroPose()
 
 Matrix34 SystemImpl::getSeatedZeroPoseToStandingAbsoluteTrackingPose()
 {
-    STUB();
+    TRACE();
+    vapor::FrameState frame = this->clientCore.backend->frameStates.getFrame(0);
+    Matrix34 matrix;
+    ::utils::poseToMatrix(frame.seatedToStandingOffset, &matrix.m);
+    return matrix;
 }
 
 Matrix34 SystemImpl::getRawZeroPoseToStandingAbsoluteTrackingPose()
 {
-    STUB();
+    TRACE();
+    // we don't (currently) have a separate concept of "raw" tracking space
+    return {
+        .m = {{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 0.0f}}
+    };
 }
 
 uint32_t SystemImpl::getSortedTrackedDeviceIndicesOfClass(TrackedDeviceClass trackedDeviceClass, uint32_t* indexes, uint32_t indexesCount, uint32_t relativeToIndex)
