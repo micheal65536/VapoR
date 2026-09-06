@@ -49,6 +49,7 @@ VapoR includes various "fixes" that can be manually set for specific games if ne
 * Derail Valley (except loading screen background)
 * Vivecraft
 * Blade & Sorcery
+* Rec Room
 
 **Current status/supported features:**
 * Submitting frames
