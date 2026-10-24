@@ -418,7 +418,7 @@ ButtonMode::ButtonMode(const nlohmann::json::object_t& parameters)
 
 std::vector<std::string> ButtonMode::getProvidedOutputNames()
 {
-    static const std::vector<std::string> names = (std::vector<std::string>) {"click", "touch", "long", "held", "double", "position"};
+    static const std::vector<std::string> names = (std::vector<std::string>) {"click", "touch", "long", "held", "double", "value", "position"};
     return names;
 }
 
@@ -426,7 +426,7 @@ std::vector<int> ButtonMode::connect(const std::vector<Mode::ComponentDescriptio
 {
     std::vector<int> indexes;
 
-    bool clickConnectedOutput = connectedOutputs[0] || connectedOutputs[2] || connectedOutputs[3] || connectedOutputs[4] || connectedOutputs[5];
+    bool clickConnectedOutput = connectedOutputs[0] || connectedOutputs[2] || connectedOutputs[3] || connectedOutputs[4] || connectedOutputs[5] || connectedOutputs[6];
     advancedOutput = connectedOutputs[2] || connectedOutputs[4];
     if (clickConnectedOutput)
     {
@@ -556,7 +556,8 @@ std::vector<InputState> ButtonMode::getInitialStates(const uint64_t* inputSource
        .type = InputType::EMPTY,
        .inputSourceHandle = clickInitialState.inputSourceHandle
     };
-    return std::vector<InputState> {clickInitialState, touchInitialState, clickInitialState, clickInitialState, clickInitialState, advancedOutput ? emptyInitialState : clickInitialState};
+    InputState valuePositionInitialState = advancedOutput ? emptyInitialState : clickInitialState;
+    return std::vector<InputState> {clickInitialState, touchInitialState, clickInitialState, clickInitialState, clickInitialState, valuePositionInitialState, valuePositionInitialState};
 }
 
 std::vector<InputState> ButtonMode::update(const InputState* inputStates, long currentTime)
@@ -569,7 +570,7 @@ std::vector<InputState> ButtonMode::update(const InputState* inputStates, long c
 
     if (!advancedOutput)
     {
-        return std::vector<InputState> {clickInputState, touchInputState, emptyInputState, clickInputState, emptyInputState, clickInputState};
+        return std::vector<InputState> {clickInputState, touchInputState, emptyInputState, clickInputState, emptyInputState, clickInputState, clickInputState};
     }
     else
     {
@@ -704,7 +705,7 @@ std::vector<InputState> ButtonMode::update(const InputState* inputStates, long c
             } : emptyInputState;
         }
 
-        return std::vector<InputState> {clickInputState, touchInputState, longPressInputState, heldInputState, doublePressInputState, emptyInputState};
+        return std::vector<InputState> {clickInputState, touchInputState, longPressInputState, heldInputState, doublePressInputState, emptyInputState, emptyInputState};
     }
 }
 
