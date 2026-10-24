@@ -3055,92 +3055,103 @@ ScreenshotType Compositor_015::getCurrentScreenshotType()
 
 CompositorError Compositor_015::getMirrorTextureD3D11(Eye eye, void* deviceOrResource, void** shaderResourceView)
 {
-    STUB();
+    TRACE();
+    return CompositorError::COMPOSITOR_ERROR_INVALID_TEXTURE;
 }
 
 CompositorError Compositor_016::getMirrorTextureD3D11(Eye eye, void* deviceOrResource, void** shaderResourceView)
 {
-    STUB();
+    TRACE();
+    return CompositorError::COMPOSITOR_ERROR_INVALID_TEXTURE;
 }
 
 CompositorError Compositor_018::getMirrorTextureD3D11(Eye eye, void* deviceOrResource, void** shaderResourceView)
 {
-    STUB();
+    TRACE();
+    return CompositorError::COMPOSITOR_ERROR_INVALID_TEXTURE;
 }
 
 CompositorError Compositor_019::getMirrorTextureD3D11(Eye eye, void* deviceOrResource, void** shaderResourceView)
 {
-    STUB();
+    TRACE();
+    return CompositorError::COMPOSITOR_ERROR_INVALID_TEXTURE;
 }
 
 CompositorError Compositor_020::getMirrorTextureD3D11(Eye eye, void* deviceOrResource, void** shaderResourceView)
 {
-    STUB();
+    TRACE();
+    return CompositorError::COMPOSITOR_ERROR_INVALID_TEXTURE;
 }
 
 CompositorError Compositor_021::getMirrorTextureD3D11(Eye eye, void* deviceOrResource, void** shaderResourceView)
 {
-    STUB();
+    TRACE();
+    return CompositorError::COMPOSITOR_ERROR_INVALID_TEXTURE;
 }
 
 CompositorError Compositor_022::getMirrorTextureD3D11(Eye eye, void* deviceOrResource, void** shaderResourceView)
 {
-    STUB();
+    TRACE();
+    return CompositorError::COMPOSITOR_ERROR_INVALID_TEXTURE;
 }
 
 CompositorError Compositor_024::getMirrorTextureD3D11(Eye eye, void* deviceOrResource, void** shaderResourceView)
 {
-    STUB();
+    TRACE();
+    return CompositorError::COMPOSITOR_ERROR_INVALID_TEXTURE;
 }
 
 CompositorError Compositor_026::getMirrorTextureD3D11(Eye eye, void* deviceOrResource, void** shaderResourceView)
 {
-    STUB();
+    TRACE();
+    return CompositorError::COMPOSITOR_ERROR_INVALID_TEXTURE;
 }
 
 CompositorError Compositor_028::getMirrorTextureD3D11(Eye eye, void* deviceOrResource, void** shaderResourceView)
 {
-    STUB();
+    TRACE();
+    return CompositorError::COMPOSITOR_ERROR_INVALID_TEXTURE;
 }
 
 CompositorError Compositor_029::getMirrorTextureD3D11(Eye eye, void* deviceOrResource, void** shaderResourceView)
 {
-    STUB();
+    TRACE();
+    return CompositorError::COMPOSITOR_ERROR_INVALID_TEXTURE;
 }
 
 void Compositor_020::releaseMirrorTextureD3D11(void* shaderResourceView)
 {
-    STUB();
+    TRACE();
 }
 
 void Compositor_021::releaseMirrorTextureD3D11(void* shaderResourceView)
 {
-    STUB();
+    TRACE();
 }
 
 void Compositor_022::releaseMirrorTextureD3D11(void* shaderResourceView)
 {
-    STUB();
+    TRACE();
 }
 
 void Compositor_024::releaseMirrorTextureD3D11(void* shaderResourceView)
 {
-    STUB();
+    TRACE();
 }
 
 void Compositor_026::releaseMirrorTextureD3D11(void* shaderResourceView)
 {
-    STUB();
+    TRACE();
 }
 
 void Compositor_028::releaseMirrorTextureD3D11(void* shaderResourceView)
 {
-    STUB();
+    TRACE();
 }
 
 void Compositor_029::releaseMirrorTextureD3D11(void* shaderResourceView)
 {
-    STUB();
+    TRACE();
 }
 
 CompositorError Compositor_015::getMirrorTextureGL(Eye eye, GLuint* textureId, GLSharedTextureHandle** sharedTextureHandle)
