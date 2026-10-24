@@ -376,8 +376,10 @@ namespace vapor
             private:
                 float onX;
                 float onY;
+                float onZ;
                 float offX;
                 float offY;
+                float offZ;
 
                 BasicButtonFilter button;
                 bool currentState = false;

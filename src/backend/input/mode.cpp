@@ -1696,8 +1696,10 @@ ScalarConstantMode::ScalarConstantMode(const nlohmann::json::object_t& parameter
 {
     onX = parameters.contains("on/x") ? parameters.at("on/x").get<float>() : 1.0f;
     onY = parameters.contains("on/y") ? parameters.at("on/y").get<float>() : 1.0f;
+    onZ = parameters.contains("on/z") ? parameters.at("on/z").get<float>() : 1.0f;
     offX = parameters.contains("off/x") ? parameters.at("off/x").get<float>() : 0.0f;
     offY = parameters.contains("off/y") ? parameters.at("off/y").get<float>() : 0.0f;
+    offZ = parameters.contains("off/z") ? parameters.at("off/z").get<float>() : 0.0f;
 
     button.readParameters(parameters);
 }
@@ -1762,7 +1764,7 @@ std::vector<InputState> ScalarConstantMode::getInitialStates(const uint64_t* inp
 {
     InputState initialState = InputState {
         .type = InputType::ANALOG,
-        .data = {.analog = {currentState ? onX : offX, currentState ? onY : offY, 0.0f}},
+        .data = {.analog = {currentState ? onX : offX, currentState ? onY : offY, currentState ? onZ : offZ}},
         .inputSourceHandle = button.getInitialClickState(inputSourceHandles).inputSourceHandle,
         .changeTime = currentStateChangeTime
     };
@@ -1779,7 +1781,7 @@ std::vector<InputState> ScalarConstantMode::update(const InputState* inputStates
     }
     InputState inputState = InputState {
         .type = InputType::ANALOG,
-        .data = {.analog = {currentState ? onX : offX, currentState ? onY : offY, 0.0f}},
+        .data = {.analog = {currentState ? onX : offX, currentState ? onY : offY, currentState ? onZ : offZ}},
         .inputSourceHandle = clickState.inputSourceHandle,
         .changeTime = currentStateChangeTime
     };
