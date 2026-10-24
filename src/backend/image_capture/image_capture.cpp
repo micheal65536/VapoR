@@ -262,9 +262,27 @@ openvr::CompositorError GLImageCaptureBuffer::capture(GLuint srcTextureId, int x
 
 VulkanImageCaptureBuffer::VulkanImageCaptureBuffer(int width, int height, VkFormat format, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue queue, uint32_t queueFamilyIndex): ImageCaptureBuffer(width, height), common(instance, physicalDevice, device, queue, queueFamilyIndex), format(format)
 {
+    // TODO: we really need to do proper testing with a bunch of different Vulkan formats across different OpenGL drivers and get to the bottom of how external memory texture format conversions are handled on the OpenGL side (e.g. SRGB)
+    VkFormat dstFormat = VK_FORMAT_UNDEFINED;
+    switch (format)
+    {
+        case VK_FORMAT_R8G8B8A8_UNORM:
+        case VK_FORMAT_B8G8R8A8_UNORM:
+            dstFormat = VK_FORMAT_R8G8B8A8_UNORM;
+            break;
+        case VK_FORMAT_R8G8B8A8_SRGB:
+        case VK_FORMAT_B8G8R8A8_SRGB:
+            dstFormat = VK_FORMAT_R8G8B8A8_SRGB;
+            break;
+        default:
+            LOG("Unsupported Vulkan texture format %d", format);
+            dstFormat = format;
+            break;
+    }
+
     for (int i = 0; i < 2; i++)
     {
-        dstImages[i] = common.createImage(width, height, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_LAYOUT_UNDEFINED, true);
+        dstImages[i] = common.createImage(width, height, dstFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_LAYOUT_UNDEFINED, true);
         VkMemoryRequirements memoryRequirements;
         vkGetImageMemoryRequirements(common.device, dstImages[i], &memoryRequirements);
         uint32_t memoryTypeIndex = common.selectMemoryType(0, memoryRequirements.memoryTypeBits);
