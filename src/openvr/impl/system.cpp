@@ -134,6 +134,10 @@ DeviceActivityLevel SystemImpl::getTrackedDeviceActivityLevel(uint32_t index)
 void SystemImpl::applyTransform(TrackedDevicePose* outputPose, const TrackedDevicePose* trackedDevicePose, const Matrix34* transform)
 {
     STUB();
+    /*// TODO: I have no idea what SteamVR is trying to do with the velocities here
+    TRACE();
+    *outputPose = *trackedDevicePose;
+    utils::applyOffset(outputPose, transform->m);*/
 }
 
 uint32_t SystemImpl::getTrackedDeviceIndexForControllerRole(TrackedControllerRole controllerRole)
@@ -551,6 +555,7 @@ bool SystemImpl::pollNextEvent(Event_0_9_15* event, uint32_t bufferSize)
 
 bool SystemImpl::pollNextEventWithPose(TrackingUniverseOrigin origin, Event_0_9_15* event, uint32_t bufferSize, TrackedDevicePose* trackedDevicePoseOut)
 {
+    // TODO: properly figure out how ageSeconds is actually supposed to work
     TRACE();
     bool haveEvent;
     vapor::PoseSet poseSet;
@@ -591,7 +596,6 @@ const char* SystemImpl::getEventTypeNameFromEnum(EventType type)
 
 HiddenAreaMesh SystemImpl::getHiddenAreaMesh(Eye eye, HiddenAreaMeshType type)
 {
-    // CHECK: check if returning null vertices is acceptable here (OpenVR header says that this is acceptable, actually check what SteamVR does when no hidden area mesh is provided)
     TRACE_F("%d %d", eye, type);
     return HiddenAreaMesh {
         .vertices = nullptr,
@@ -747,3 +751,6 @@ const char* SystemImpl::getRuntimeVersion()
     STUB();
     return "";
 }
+
+// TODO: determine whether we set each SDK version flag separately here on the relevant impl instances or whether we set them globally under the openvr namespace
+// TODO: this depends on whether flag settings should persist between cleanup and a second call to init (test this)
