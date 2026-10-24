@@ -10,6 +10,25 @@ const Mode::Hysteresis::Thresholds Mode::Hysteresis::Thresholds::CLICK_DEFAULT =
 const Mode::Hysteresis::Thresholds Mode::Hysteresis::Thresholds::TOUCH_DEFAULT = {.on = 0.06f, .off = 0.04f};
 const Mode::Hysteresis::Thresholds Mode::Hysteresis::Thresholds::STICKY_DEFAULT = {.on = 0.4f, .off = 0.3f};
 
+static inline bool isConnectionCompatible(const InputType& connectedType, const InputType outputType)
+{
+    if (connectedType == InputType::EMPTY)
+    {
+        return false;
+    }
+    if (connectedType == outputType)
+    {
+        return true;
+    }
+    switch (outputType)
+    {
+        case InputType::DIGITAL:
+            return connectedType == InputType::DIGITAL || connectedType == InputType::VECTOR1;
+        default:
+            return false;
+    }
+}
+
 static int findComponent(const std::string& subpath, OpenVRInputType type, const std::vector<Mode::ComponentDescription>& availableComponents)
 {
     for (int i = 0; i < availableComponents.size(); i++)
@@ -422,12 +441,12 @@ std::vector<std::string> ButtonMode::getProvidedOutputNames()
     return names;
 }
 
-std::vector<int> ButtonMode::connect(const std::vector<Mode::ComponentDescription>& availableComponents, const bool* connectedOutputs)
+std::vector<int> ButtonMode::connect(const std::vector<Mode::ComponentDescription>& availableComponents, const InputType* connectedOutputs)
 {
     std::vector<int> indexes;
 
-    bool clickConnectedOutput = connectedOutputs[0] || connectedOutputs[2] || connectedOutputs[3] || connectedOutputs[4] || connectedOutputs[5] || connectedOutputs[6];
-    advancedOutput = connectedOutputs[2] || connectedOutputs[4];
+    bool clickConnectedOutput = isConnectionCompatible(connectedOutputs[0], InputType::DIGITAL) || isConnectionCompatible(connectedOutputs[2], InputType::DIGITAL) || isConnectionCompatible(connectedOutputs[3], InputType::DIGITAL) || isConnectionCompatible(connectedOutputs[4], InputType::DIGITAL) || isConnectionCompatible(connectedOutputs[5], InputType::DIGITAL) || isConnectionCompatible(connectedOutputs[6], InputType::DIGITAL);
+    advancedOutput = isConnectionCompatible(connectedOutputs[2], InputType::DIGITAL) || isConnectionCompatible(connectedOutputs[4], InputType::DIGITAL);
     if (clickConnectedOutput)
     {
         if (advancedOutput)
@@ -521,7 +540,7 @@ std::vector<int> ButtonMode::connect(const std::vector<Mode::ComponentDescriptio
         button.grabClickNone(indexes);
     }
 
-    bool touchConnectedOutput = connectedOutputs[1];
+    bool touchConnectedOutput = isConnectionCompatible(connectedOutputs[1], InputType::DIGITAL);
     if (touchConnectedOutput)
     {
         switch (button.forceInput)
@@ -722,11 +741,11 @@ std::vector<std::string> TriggerMode::getProvidedOutputNames()
     return names;
 }
 
-std::vector<int> TriggerMode::connect(const std::vector<Mode::ComponentDescription>& availableComponents, const bool* connectedOutputs)
+std::vector<int> TriggerMode::connect(const std::vector<Mode::ComponentDescription>& availableComponents, const InputType* connectedOutputs)
 {
     std::vector<int> indexes;
 
-    if (connectedOutputs[0])
+    if (isConnectionCompatible(connectedOutputs[0], InputType::VECTOR1))
     {
         int index = findComponent("value", OpenVRInputType::FLOAT, availableComponents);
         if (index == -1)
@@ -740,7 +759,7 @@ std::vector<int> TriggerMode::connect(const std::vector<Mode::ComponentDescripti
         indexes.push_back(-1);
     }
 
-    if (connectedOutputs[1])
+    if (isConnectionCompatible(connectedOutputs[1], InputType::DIGITAL))
     {
         switch (button.forceInput)
         {
@@ -782,7 +801,7 @@ std::vector<int> TriggerMode::connect(const std::vector<Mode::ComponentDescripti
         button.grabClickNone(indexes);
     }
 
-    if (connectedOutputs[2])
+    if (isConnectionCompatible(connectedOutputs[2], InputType::DIGITAL))
     {
         switch (button.forceInput)
         {
@@ -865,11 +884,11 @@ std::vector<std::string> JoystickMode::getProvidedOutputNames()
     return names;
 }
 
-std::vector<int> JoystickMode::connect(const std::vector<Mode::ComponentDescription>& availableComponents, const bool* connectedOutputs)
+std::vector<int> JoystickMode::connect(const std::vector<Mode::ComponentDescription>& availableComponents, const InputType* connectedOutputs)
 {
     std::vector<int> indexes;
 
-    if (connectedOutputs[0])
+    if (isConnectionCompatible(connectedOutputs[0], InputType::VECTOR2))
     {
         int index1 = findComponent("x", OpenVRInputType::FLOAT, availableComponents);
         int index2 = findComponent("y", OpenVRInputType::FLOAT, availableComponents);
@@ -890,7 +909,7 @@ std::vector<int> JoystickMode::connect(const std::vector<Mode::ComponentDescript
         indexes.push_back(-1);
     }
 
-    if (connectedOutputs[1])
+    if (isConnectionCompatible(connectedOutputs[1], InputType::DIGITAL))
     {
         switch (button.forceInput)
         {
@@ -937,7 +956,7 @@ std::vector<int> JoystickMode::connect(const std::vector<Mode::ComponentDescript
         button.grabClickNone(indexes);
     }
 
-    if (connectedOutputs[2])
+    if (isConnectionCompatible(connectedOutputs[2], InputType::DIGITAL))
     {
         switch (button.forceInput)
         {
@@ -1004,7 +1023,7 @@ std::vector<InputState> JoystickMode::update(const InputState* inputStates, long
             y = -y;
         }
         positionInputState = InputState {
-            .type = InputType::ANALOG,
+            .type = InputType::VECTOR2,
             .data = {.analog = {x, y, 0.0f}},
             .inputSourceHandle = inputStates[0].inputSourceHandle,
             .changeTime = std::max(inputStates[0].changeTime, inputStates[1].changeTime)
@@ -1053,13 +1072,13 @@ std::vector<std::string> DpadMode::getProvidedOutputNames()
     return names;
 }
 
-std::vector<int> DpadMode::connect(const std::vector<Mode::ComponentDescription>& availableComponents, const bool* connectedOutputs)
+std::vector<int> DpadMode::connect(const std::vector<Mode::ComponentDescription>& availableComponents, const InputType* connectedOutputs)
 {
     std::vector<int> indexes;
 
     forceInactive = false;
 
-    if (!connectedOutputs[0] && !connectedOutputs[1] && !connectedOutputs[2] && !connectedOutputs[3] && !connectedOutputs[4])
+    if (!isConnectionCompatible(connectedOutputs[0], InputType::DIGITAL) && !isConnectionCompatible(connectedOutputs[1], InputType::DIGITAL) && !isConnectionCompatible(connectedOutputs[2], InputType::DIGITAL) && !isConnectionCompatible(connectedOutputs[3], InputType::DIGITAL) && !isConnectionCompatible(connectedOutputs[4], InputType::DIGITAL))
     {
         forceInactive = true;
         return indexes;
@@ -1358,7 +1377,7 @@ std::vector<std::string> ScrollMode::getProvidedOutputNames()
     return names;
 }
 
-std::vector<int> ScrollMode::connect(const std::vector<Mode::ComponentDescription>& availableComponents, const bool* connectedOutputs)
+std::vector<int> ScrollMode::connect(const std::vector<Mode::ComponentDescription>& availableComponents, const InputType* connectedOutputs)
 {
     std::vector<int> indexes;
 
@@ -1367,7 +1386,7 @@ std::vector<int> ScrollMode::connect(const std::vector<Mode::ComponentDescriptio
         return indexes;
     }
 
-    if (!connectedOutputs[0])
+    if (!isConnectionCompatible(connectedOutputs[0], InputType::VECTOR2))
     {
         delete scrollBehavior;
         scrollBehavior = nullptr;
@@ -1411,7 +1430,7 @@ std::vector<InputState> ScrollMode::getInitialStates(const uint64_t* inputSource
     }
 
     InputState initialState = InputState {
-        .type = InputType::ANALOG,
+        .type = InputType::VECTOR2,
         .data = {.analog = {0.0f, 0.0f, 0.0f}},
         .inputSourceHandle = outputInputSourceHandle,
         .changeTime = 0
@@ -1439,7 +1458,7 @@ std::vector<InputState> ScrollMode::update(const InputState* inputStates, long c
     }
 
     InputState inputState = InputState {
-        .type = InputType::ANALOG,
+        .type = InputType::VECTOR2,
         .data = {.analog = {scrollBehavior->x, scrollBehavior->y, 0.0f}},
         .inputSourceHandle = outputInputSourceHandle,
         .changeTime = lastUpdateTime
@@ -1524,13 +1543,15 @@ std::vector<std::string> ToggleButtonMode::getProvidedOutputNames()
     return names;
 }
 
-std::vector<int> ToggleButtonMode::connect(const std::vector<Mode::ComponentDescription>& availableComponents, const bool* connectedOutputs)
+std::vector<int> ToggleButtonMode::connect(const std::vector<Mode::ComponentDescription>& availableComponents, const InputType* connectedOutputs)
 {
+    // NOTE: SteamVR appears to have a lot of what I presume are bugs with grabbing the input source components when either click or touch output are connected to a vector1 action
+
     std::vector<int> indexes;
 
     enableTouchOutput = findComponent("touch", OpenVRInputType::BOOLEAN, availableComponents) != -1 || findComponent("value", OpenVRInputType::FLOAT, availableComponents) != -1 || (button.forceInput == ForceInput::POSITION && findComponent("x", OpenVRInputType::FLOAT, availableComponents) != -1 && findComponent("y", OpenVRInputType::FLOAT, availableComponents) != -1);
 
-    if (connectedOutputs[0])
+    if (isConnectionCompatible(connectedOutputs[0], InputType::DIGITAL))
     {
         touchOutputIsClick = true;
 
@@ -1580,7 +1601,7 @@ std::vector<int> ToggleButtonMode::connect(const std::vector<Mode::ComponentDesc
         touchOutputIsClick = false;
 
         button.grabClickNone(indexes);
-        if (connectedOutputs[1])
+        if (isConnectionCompatible(connectedOutputs[1], InputType::DIGITAL))
         {
             switch (button.forceInput)
             {
@@ -1711,11 +1732,11 @@ std::vector<std::string> ScalarConstantMode::getProvidedOutputNames()
     return names;
 }
 
-std::vector<int> ScalarConstantMode::connect(const std::vector<Mode::ComponentDescription>& availableComponents, const bool* connectedOutputs)
+std::vector<int> ScalarConstantMode::connect(const std::vector<Mode::ComponentDescription>& availableComponents, const InputType* connectedOutputs)
 {
     std::vector<int> indexes;
 
-    if (connectedOutputs[0])
+    if (connectedOutputs[0] == InputType::VECTOR1 || connectedOutputs[0] == InputType::VECTOR2 || connectedOutputs[0] == InputType::VECTOR3)
     {
         switch (button.forceInput)
         {
@@ -1752,10 +1773,13 @@ std::vector<int> ScalarConstantMode::connect(const std::vector<Mode::ComponentDe
                 if (button.tryGrabClick(ClickFilter::Source::CLICK, availableComponents, indexes)) break;
                 button.grabClickNone(indexes); break;
         }
+
+        type = connectedOutputs[0];
     }
     else
     {
         button.grabClickNone(indexes);
+        type = InputType::EMPTY;
     }
 
     return indexes;
@@ -1764,8 +1788,8 @@ std::vector<int> ScalarConstantMode::connect(const std::vector<Mode::ComponentDe
 std::vector<InputState> ScalarConstantMode::getInitialStates(const uint64_t* inputSourceHandles)
 {
     InputState initialState = InputState {
-        .type = InputType::ANALOG,
-        .data = {.analog = {currentState ? onX : offX, currentState ? onY : offY, currentState ? onZ : offZ}},
+        .type = type,
+        .data = {.analog = {currentState ? onX : offX, (type == InputType::VECTOR2 || type == InputType::VECTOR3) ? (currentState ? onY : offY) : 0.0f, type == InputType::VECTOR3 ? (currentState ? onZ : offZ) : 0.0f}},
         .inputSourceHandle = button.getInitialClickState(inputSourceHandles).inputSourceHandle,
         .changeTime = currentStateChangeTime
     };
@@ -1781,8 +1805,8 @@ std::vector<InputState> ScalarConstantMode::update(const InputState* inputStates
         currentStateChangeTime = clickState.changeTime;
     }
     InputState inputState = InputState {
-        .type = InputType::ANALOG,
-        .data = {.analog = {currentState ? onX : offX, currentState ? onY : offY, currentState ? onZ : offZ}},
+        .type = type,
+        .data = {.analog = {currentState ? onX : offX, (type == InputType::VECTOR2 || type == InputType::VECTOR3) ? (currentState ? onY : offY) : 0.0f, type == InputType::VECTOR3 ? (currentState ? onZ : offZ) : 0.0f}},
         .inputSourceHandle = clickState.inputSourceHandle,
         .changeTime = currentStateChangeTime
     };
@@ -1802,7 +1826,7 @@ std::vector<std::string> ForceSensorMode::getProvidedOutputNames()
     return names;
 }
 
-std::vector<int> ForceSensorMode::connect(const std::vector<Mode::ComponentDescription>& availableComponents, const bool* connectedOutputs)
+std::vector<int> ForceSensorMode::connect(const std::vector<Mode::ComponentDescription>& availableComponents, const InputType* connectedOutputs)
 {
     std::vector<int> indexes;
     indexes.push_back(findComponent("force", OpenVRInputType::FLOAT, availableComponents));

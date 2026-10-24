@@ -23,7 +23,7 @@ namespace vapor
                 };
 
                 virtual std::vector<std::string> getProvidedOutputNames() = 0;
-                virtual std::vector<int> connect(const std::vector<ComponentDescription>& availableComponents, const bool* connectedOutputs) = 0;
+                virtual std::vector<int> connect(const std::vector<ComponentDescription>& availableComponents, const InputType* connectedOutputs) = 0;
                 virtual std::vector<InputState> getInitialStates(const uint64_t* inputSourceHandles) = 0;
                 virtual std::vector<InputState> update(const InputState* inputStates, long currentTime) = 0;
 
@@ -151,7 +151,7 @@ namespace vapor
             public:
                 ButtonMode(const nlohmann::json::object_t& parameters);
                 virtual std::vector<std::string> getProvidedOutputNames();
-                virtual std::vector<int> connect(const std::vector<ComponentDescription>& availableComponents, const bool* connectedOutputs);
+                virtual std::vector<int> connect(const std::vector<ComponentDescription>& availableComponents, const InputType* connectedOutputs);
                 virtual std::vector<InputState> getInitialStates(const uint64_t* inputSourceHandles);
                 virtual std::vector<InputState> update(const InputState* inputStates, long currentTime);
 
@@ -180,7 +180,7 @@ namespace vapor
             public:
                 TriggerMode(const nlohmann::json::object_t& parameters);
                 virtual std::vector<std::string> getProvidedOutputNames();
-                virtual std::vector<int> connect(const std::vector<ComponentDescription>& availableComponents, const bool* connectedOutputs);
+                virtual std::vector<int> connect(const std::vector<ComponentDescription>& availableComponents, const InputType* connectedOutputs);
                 virtual std::vector<InputState> getInitialStates(const uint64_t* inputSourceHandles);
                 virtual std::vector<InputState> update(const InputState* inputStates, long currentTime);
 
@@ -193,7 +193,7 @@ namespace vapor
             public:
                 JoystickMode(const nlohmann::json::object_t& parameters);
                 virtual std::vector<std::string> getProvidedOutputNames();
-                virtual std::vector<int> connect(const std::vector<ComponentDescription>& availableComponents, const bool* connectedOutputs);
+                virtual std::vector<int> connect(const std::vector<ComponentDescription>& availableComponents, const InputType* connectedOutputs);
                 virtual std::vector<InputState> getInitialStates(const uint64_t* inputSourceHandles);
                 virtual std::vector<InputState> update(const InputState* inputStates, long currentTime);
 
@@ -220,7 +220,7 @@ namespace vapor
             public:
                 DpadMode(const nlohmann::json::object_t& parameters, input_profile::OpenVRProfileInputType profileInputType);
                 virtual std::vector<std::string> getProvidedOutputNames();
-                virtual std::vector<int> connect(const std::vector<ComponentDescription>& availableComponents, const bool* connectedOutputs);
+                virtual std::vector<int> connect(const std::vector<ComponentDescription>& availableComponents, const InputType* connectedOutputs);
                 virtual std::vector<InputState> getInitialStates(const uint64_t* inputSourceHandles);
                 virtual std::vector<InputState> update(const InputState* inputStates, long currentTime);
 
@@ -273,7 +273,7 @@ namespace vapor
                 ScrollMode(const nlohmann::json::object_t& parameters, input_profile::OpenVRProfileInputType profileInputType);
                 ~ScrollMode();
                 virtual std::vector<std::string> getProvidedOutputNames();
-                virtual std::vector<int> connect(const std::vector<ComponentDescription>& availableComponents, const bool* connectedOutputs);
+                virtual std::vector<int> connect(const std::vector<ComponentDescription>& availableComponents, const InputType* connectedOutputs);
                 virtual std::vector<InputState> getInitialStates(const uint64_t* inputSourceHandles);
                 virtual std::vector<InputState> update(const InputState* inputStates, long currentTime);
 
@@ -344,7 +344,7 @@ namespace vapor
             public:
                 ToggleButtonMode(const nlohmann::json::object_t& parameters);
                 virtual std::vector<std::string> getProvidedOutputNames();
-                virtual std::vector<int> connect(const std::vector<ComponentDescription>& availableComponents, const bool* connectedOutputs);
+                virtual std::vector<int> connect(const std::vector<ComponentDescription>& availableComponents, const InputType* connectedOutputs);
                 virtual std::vector<InputState> getInitialStates(const uint64_t* inputSourceHandles);
                 virtual std::vector<InputState> update(const InputState* inputStates, long currentTime);
 
@@ -369,7 +369,7 @@ namespace vapor
             public:
                 ScalarConstantMode(const nlohmann::json::object_t& parameters);
                 virtual std::vector<std::string> getProvidedOutputNames();
-                virtual std::vector<int> connect(const std::vector<ComponentDescription>& availableComponents, const bool* connectedOutputs);
+                virtual std::vector<int> connect(const std::vector<ComponentDescription>& availableComponents, const InputType* connectedOutputs);
                 virtual std::vector<InputState> getInitialStates(const uint64_t* inputSourceHandles);
                 virtual std::vector<InputState> update(const InputState* inputStates, long currentTime);
 
@@ -382,6 +382,8 @@ namespace vapor
                 float offZ;
 
                 BasicButtonFilter button;
+                InputType type;
+
                 bool currentState = false;
                 long currentStateChangeTime = 0;
         };
@@ -391,7 +393,7 @@ namespace vapor
             public:
                 ForceSensorMode(const nlohmann::json::object_t& parameters);
                 virtual std::vector<std::string> getProvidedOutputNames();
-                virtual std::vector<int> connect(const std::vector<ComponentDescription>& availableComponents, const bool* connectedOutputs);
+                virtual std::vector<int> connect(const std::vector<ComponentDescription>& availableComponents, const InputType* connectedOutputs);
                 virtual std::vector<InputState> getInitialStates(const uint64_t* inputSourceHandles);
                 virtual std::vector<InputState> update(const InputState* inputStates, long currentTime);
         };

@@ -126,6 +126,19 @@ InputError InputImpl::getDigitalActionData(uint64_t action, InputDigitalActionDa
     return InputError::INPUT_ERROR_NONE;
 }
 
+static inline bool isAnalog(const vapor::input::InputType& inputType)
+{
+    switch (inputType)
+    {
+        case vapor::input::InputType::VECTOR1:
+        case vapor::input::InputType::VECTOR2:
+        case vapor::input::InputType::VECTOR3:
+            return true;
+        default:
+            return false;
+    }
+}
+
 InputError InputImpl::getAnalogActionData(uint64_t action, InputAnalogActionData* actionData, uint32_t actionDataSize, uint64_t restrictToDevice)
 {
     TRACE_F("%d %d", action, restrictToDevice);
@@ -140,7 +153,7 @@ InputError InputImpl::getAnalogActionData(uint64_t action, InputAnalogActionData
     {
         return InputError::INPUT_ERROR_INVALID_HANDLE;
     }
-    if (action_->type != vapor::input::InputType::ANALOG)
+    if (!isAnalog(action_->type))
     {
         return InputError::INPUT_ERROR_WRONG_TYPE;
     }
@@ -152,14 +165,14 @@ InputError InputImpl::getAnalogActionData(uint64_t action, InputAnalogActionData
     {
         if (restrictToDevice == 0 || source.device == device)
         {
-            if (source.inputState.type == vapor::input::InputType::ANALOG)
+            if (isAnalog(source.inputState.type))
             {
                 if (inputState == nullptr || (source.inputState.data.analog > inputState->data.analog))
                 {
                     inputState = &source.inputState;
                 }
             }
-            if (source.inputStatePrevious.type == vapor::input::InputType::ANALOG)
+            if (isAnalog(source.inputStatePrevious.type))
             {
                 if (inputStatePrevious == nullptr || (source.inputStatePrevious.data.analog > inputStatePrevious->data.analog))
                 {

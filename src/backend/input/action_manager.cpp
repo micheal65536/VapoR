@@ -48,12 +48,12 @@ static inline InputState convertInputType(const InputState& inputState, const In
     }
     switch (inputType)
     {
-        case InputType::ANALOG:
+        case InputType::VECTOR1:
             switch (inputState.type)
             {
                 case InputType::DIGITAL:
                     return InputState {
-                        .type = InputType::ANALOG,
+                        .type = InputType::VECTOR1,
                         .data = {.analog = {inputState.data.digital ? 1.0f : 0.0f, 0.0f, 0.0f}},
                         .inputSourceHandle = inputState.inputSourceHandle,
                         .changeTime = inputState.changeTime
@@ -105,15 +105,15 @@ bool ActionManager::populateFromJSON(const std::string& filePath)
             }
             else if (type == "vector1")
             {
-                inputType = InputType::ANALOG;
+                inputType = InputType::VECTOR1;
             }
             else if (type == "vector2")
             {
-                inputType = InputType::ANALOG;
+                inputType = InputType::VECTOR2;
             }
             else if (type == "vector3")
             {
-                inputType = InputType::ANALOG;
+                inputType = InputType::VECTOR3;
             }
             else if (type == "pose")
             {
@@ -297,10 +297,10 @@ bool ActionManager::loadBinding(const std::string& filePath, InputProfile* input
                     }
 
                     const std::vector<std::string>& modeOutputs = mode->getProvidedOutputNames();
-                    bool connectedOutputs[modeOutputs.size()];
+                    InputType connectedOutputs[modeOutputs.size()];
                     for (int i = 0; i < modeOutputs.size(); i++)
                     {
-                        connectedOutputs[i] = connectedModeOutputs.contains(modeOutputs[i]);
+                        connectedOutputs[i] = connectedModeOutputs.contains(modeOutputs[i]) ? connectedModeOutputs[modeOutputs[i]]->type : InputType::EMPTY;
                     }
                     std::vector<int> modeGrabbedComponentIndexes = mode->connect(components, connectedOutputs);
 
@@ -340,7 +340,7 @@ bool ActionManager::loadBinding(const std::string& filePath, InputProfile* input
                     for (int i = 0; i < modeOutputs.size(); i++)
                     {
                         const std::string& name = modeOutputs[i];
-                        if (connectedOutputs[i] && connectedModeOutputs.contains(name))
+                        if (connectedModeOutputs.contains(name))
                         {
                             Action* action = connectedModeOutputs[name];
                             if (action != nullptr)
@@ -516,7 +516,7 @@ static inline InputState convertOpenVRInputState(const OpenVRInputState& inputSt
             };
         case OpenVRInputType::FLOAT:
             return InputState {
-                .type = InputType::ANALOG,
+                .type = InputType::VECTOR1,
                 .data = {.analog = {inputState.data.f, 0.0f, 0.0f}},
                 .inputSourceHandle = inputSourceHandle,
                 .changeTime = inputState.changeTime

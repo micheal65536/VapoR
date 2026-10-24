@@ -10,9 +10,11 @@ namespace vapor
     {
         enum class InputType
         {
-            EMPTY, // for input state which is currently inactive/blocked
+            EMPTY,
             DIGITAL,
-            ANALOG,
+            VECTOR1,
+            VECTOR2,
+            VECTOR3,
             POSE,
             SKELETON,
             HAPTIC
