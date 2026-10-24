@@ -4,6 +4,8 @@
 
 #include "log/log.h"
 
+#include "utils/string.h"
+
 namespace vapor
 {
     PathHandleRegistry pathHandleRegistry;
@@ -15,18 +17,20 @@ using namespace vapor;
 
 uint64_t PathHandleRegistry::getHandle(const std::string& path)
 {
+    std::string pathLowercase = utils::stringToLowercase(path);
+
     mutex.lock();
     uint64_t handle;
-    if (pathToHandleMap.contains(path))
+    if (pathToHandleMap.contains(pathLowercase))
     {
-        handle = pathToHandleMap[path];
+        handle = pathToHandleMap[pathLowercase];
     }
     else
     {
         handle = nextHandle++;
-        pathToHandleMap[path] = handle;
-        handleToPathMap[handle] = path;
-        TRACE_F("new handle %d %s", handle, path.c_str());
+        pathToHandleMap[pathLowercase] = handle;
+        handleToPathMap[handle] = pathLowercase;
+        TRACE_F("new handle %d %s", handle, pathLowercase.c_str());
     }
     mutex.unlock();
     return handle;

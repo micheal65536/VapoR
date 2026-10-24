@@ -6,6 +6,8 @@
 
 #include "backend/path_handle_registry.h"
 
+#include "utils/string.h"
+
 #include <algorithm>
 #include <unordered_set>
 #include <cctype>
@@ -32,13 +34,6 @@ ActionManager::~ActionManager()
 Action::Action(InputType type): type(type)
 {
     // empty
-}
-
-static inline std::string stringToLowercase(const std::string& in)
-{
-    std::string out = in;
-    std::transform(out.begin(), out.end(), out.begin(), [](char c){ return std::tolower(c); });
-    return out;
 }
 
 static inline InputState convertInputType(const InputState& inputState, const InputType& inputType)
@@ -93,8 +88,8 @@ bool ActionManager::populateFromJSON(const std::string& filePath)
         json& actions = j.at("actions");
         for (auto it: actions)
         {
-            const std::string& name = stringToLowercase(it.at("name"));
-            const std::string& type = stringToLowercase(it.at("type"));
+            const std::string& name = utils::stringToLowercase(it.at("name"));
+            const std::string& type = utils::stringToLowercase(it.at("type"));
 
             if (!name.starts_with("/actions/"))
             {
@@ -148,7 +143,7 @@ bool ActionManager::populateFromJSON(const std::string& filePath)
             json& defaultBindings = j.at("default_bindings");
             for (auto it: defaultBindings)
             {
-                const std::string& controllerType = stringToLowercase(it.at("controller_type"));
+                const std::string& controllerType = it.at("controller_type");
                 const std::string& bindingUrl = it.at("binding_url");
                 this->defaultBindingFilePaths[controllerType] = (std::filesystem::path(filePath).parent_path() / bindingUrl).string();
             }
@@ -198,7 +193,7 @@ bool ActionManager::loadBinding(const std::string& filePath, InputProfile* input
 
         for (const auto& it: j.at("bindings").items())
         {
-            const std::string& actionSetName = stringToLowercase(it.key());
+            const std::string& actionSetName = utils::stringToLowercase(it.key());
             ActionSet* actionSet = this->findActionSet(actionSetName);
             if (actionSet == nullptr)
             {
@@ -212,7 +207,7 @@ bool ActionManager::loadBinding(const std::string& filePath, InputProfile* input
 
                 for (const auto& source: it.value().at("sources"))
                 {
-                    const std::string& basePath = stringToLowercase(source.at("path"));
+                    const std::string& basePath = utils::stringToLowercase(source.at("path"));
                     std::vector<Mode::ComponentDescription> components;
                     std::vector<int> componentInputIndexes;
                     for (int i = 0; i < inputProfile->getOpenVRInputsCount(); i++)
@@ -237,7 +232,7 @@ bool ActionManager::loadBinding(const std::string& filePath, InputProfile* input
                     }
 
                     Mode* mode;
-                    const std::string& modeName = stringToLowercase(source.at("mode"));
+                    const std::string& modeName = source.at("mode");
                     json::object_t parameters = source.contains("parameters") ? source.at("parameters") : json::object();
                     if (modeName == "button")
                     {
@@ -284,7 +279,7 @@ bool ActionManager::loadBinding(const std::string& filePath, InputProfile* input
                     std::map<std::string, Action*> connectedModeOutputs;
                     for (const auto& input: source.at("inputs").items())
                     {
-                        const std::string& actionName = stringToLowercase(input.value().at("output"));
+                        const std::string& actionName = utils::stringToLowercase(input.value().at("output"));
                         if (!actionName.starts_with(actionSetName + "/"))
                         {
                             LOG("Action name %s is not valid for action set %s", actionName.c_str(), actionSetName.c_str());
@@ -297,7 +292,7 @@ bool ActionManager::loadBinding(const std::string& filePath, InputProfile* input
                             continue;
                         }
 
-                        const std::string& inputName = stringToLowercase(input.key());
+                        const std::string& inputName = utils::stringToLowercase(input.key());
                         connectedModeOutputs[inputName] = action;
                     }
 
@@ -369,7 +364,7 @@ bool ActionManager::loadBinding(const std::string& filePath, InputProfile* input
             {
                 for (const auto& source: it.value().at("poses"))
                 {
-                    const std::string& path = stringToLowercase(source.at("path"));
+                    const std::string& path = utils::stringToLowercase(source.at("path"));
                     int openVRInputIndex = -1;
                     for (int i = 0; i < inputProfile->getOpenVRInputsCount(); i++)
                     {
@@ -385,7 +380,7 @@ bool ActionManager::loadBinding(const std::string& filePath, InputProfile* input
                         continue;
                     }
 
-                    const std::string& actionName = stringToLowercase(source.at("output"));
+                    const std::string& actionName = utils::stringToLowercase(source.at("output"));
                     if (!actionName.starts_with(actionSetName + "/"))
                     {
                         LOG("Action name %s is not valid for action set %s", actionName.c_str(), actionSetName.c_str());
@@ -418,7 +413,7 @@ bool ActionManager::loadBinding(const std::string& filePath, InputProfile* input
             {
                 for (const auto& haptic: it.value().at("haptics"))
                 {
-                    const std::string& path = stringToLowercase(haptic.at("path"));
+                    const std::string& path = utils::stringToLowercase(haptic.at("path"));
                     int openVRInputIndex = -1;
                     for (int i = 0; i < inputProfile->getOpenVRInputsCount(); i++)
                     {
@@ -434,7 +429,7 @@ bool ActionManager::loadBinding(const std::string& filePath, InputProfile* input
                         continue;
                     }
 
-                    const std::string& actionName = stringToLowercase(haptic.at("output"));
+                    const std::string& actionName = utils::stringToLowercase(haptic.at("output"));
                     if (!actionName.starts_with(actionSetName + "/"))
                     {
                         LOG("Action name %s is not valid for action set %s", actionName.c_str(), actionSetName.c_str());
@@ -694,7 +689,7 @@ void ActionManager::update(const openvr::ActiveActionSet* activeActionSets, int 
 
 ActionSet* ActionManager::findActionSet(const std::string& name)
 {
-    auto it = this->actionSets.find(stringToLowercase(name));
+    auto it = this->actionSets.find(utils::stringToLowercase(name));
     if (it == this->actionSets.end())
     {
         return nullptr;
@@ -704,7 +699,7 @@ ActionSet* ActionManager::findActionSet(const std::string& name)
 
 Action* ActionManager::findAction(const std::string& name)
 {
-    auto it = this->actions.find(stringToLowercase(name));
+    auto it = this->actions.find(utils::stringToLowercase(name));
     if (it == this->actions.end())
     {
         return nullptr;
